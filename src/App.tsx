@@ -7,7 +7,7 @@ function App() {
   return (
     <div className="App snap-x">
       <Landing />
-      <About />
+      {/*<About />*/}
     </div>
   )
 }

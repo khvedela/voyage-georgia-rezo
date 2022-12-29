@@ -25,12 +25,12 @@ function Landing() {
     }, []);
 
     return (
-        <div className="snap-center flex items-center justify-center h-screen w-screen bg-landing bg-fixed bg-center bg-cover from-indigo-500 backdrop-blur-md" ref={comp}>
-            <div className='flex flex-col gap-10'>
-                <h1 className="main-text text-8xl antialiased font-bold text-white">Explore Georgia <br /> With Me</h1>
-                <button className='learn-more focus:outline-none text-white bg-green-900 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800'>Learn more</button>
+        <div className="flex items-center justify-center w-screen h-screen bg-landing bg-center snap-center bg-cover" ref={comp}>
+            <div className="flex flex-col items-center desktop:text-left desktop:items-start text-center gap-10">
+                <h1 className="main-text text-8xl antialiased font-bold text-white">Explore Georgia <br/> With Me</h1>
+                <button className="learn-more w-1/2 focus:outline-none text-white bg-green-900 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800'">Learn More</button>
             </div>
-            <img src={logo} className="logo w-1/3 h-1/3 tablet:hidden desktop:block tablet:text-center" />
+            <img src={logo} className="logo w-1/3 h-1/3 hidden desktop:block tablet:block" alt=""/>
         </div>
     )
 }
