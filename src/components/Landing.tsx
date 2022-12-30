@@ -27,7 +27,7 @@ function Landing() {
     return (
         <div className="flex items-center justify-center w-screen h-screen bg-landing bg-center snap-center bg-cover" ref={comp}>
             <div className="flex flex-col items-center desktop:text-left desktop:items-start text-center gap-10">
-                <h1 className="main-text text-8xl antialiased font-bold text-white">Explore Georgia <br/> With Me</h1>
+                <h1 className="main-text text-6xl desktop:text-8xl antialiased font-bold text-white">Explore Georgia <br/> With Me</h1>
                 <button className="learn-more w-1/2 focus:outline-none text-white bg-green-900 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800'">Learn More</button>
             </div>
             <img src={logo} className="logo w-1/3 h-1/3 hidden desktop:block tablet:block" alt=""/>
