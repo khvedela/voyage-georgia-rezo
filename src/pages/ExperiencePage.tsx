@@ -12,6 +12,11 @@ export default function ExperiencePage() {
 
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const currentIndex = EXPERIENCES.findIndex((e) => e.id === id);
+  const nextExperience = EXPERIENCES[(currentIndex + 1) % EXPERIENCES.length];
+  const prevExperience =
+    EXPERIENCES[(currentIndex - 1 + EXPERIENCES.length) % EXPERIENCES.length];
+
   useEffect(() => {
     // Scroll to top when component mounts
     window.scrollTo(0, 0);
@@ -20,30 +25,44 @@ export default function ExperiencePage() {
       setScrollY(window.scrollY);
     };
 
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Arrow key navigation
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        e.preventDefault();
+        navigate(`/experience/${prevExperience.id}`);
+      } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        e.preventDefault();
+        navigate(`/experience/${nextExperience.id}`);
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        navigate("/");
+      }
+    };
+
     window.addEventListener("scroll", handleScroll);
+    window.addEventListener("keydown", handleKeyDown);
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("keydown", handleKeyDown);
     };
-  }, []);
+  }, [navigate, prevExperience.id, nextExperience.id]);
 
   if (!experience) {
     return <div>Experience not found</div>;
   }
 
-  const currentIndex = EXPERIENCES.findIndex((e) => e.id === id);
-  const nextExperience = EXPERIENCES[(currentIndex + 1) % EXPERIENCES.length];
-  const prevExperience =
-    EXPERIENCES[(currentIndex - 1 + EXPERIENCES.length) % EXPERIENCES.length];
-
   return (
     <motion.div
       ref={containerRef}
       className="experience-page-container"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+      initial={{ scale: 0.98, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.4 }}
+      transition={{
+        duration: 0.5,
+        ease: [0.6, 0.01, 0.05, 0.95],
+      }}
     >
       {/* Animated background with layoutId */}
       <motion.div
@@ -53,7 +72,10 @@ export default function ExperiencePage() {
           backgroundColor: experience.color,
         }}
         transition={{
-          layout: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+          layout: {
+            duration: 0.5,
+            ease: [0.6, 0.01, 0.05, 0.95],
+          },
         }}
       >
         <motion.div
@@ -93,6 +115,7 @@ export default function ExperiencePage() {
         transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
         whileHover={{ scale: 1.1, rotate: 90 }}
         whileTap={{ scale: 0.9 }}
+        aria-label="Close and return to home (Press Escape)"
       >
         <svg
           width="24"
@@ -113,24 +136,25 @@ export default function ExperiencePage() {
         <div className="experience-hero">
           <motion.div
             className="experience-number-display"
-            initial={{ opacity: 0, rotateY: -90 }}
-            animate={{ opacity: 1, rotateY: 0 }}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
             transition={{
-              duration: 0.8,
-              delay: 0.2,
-              ease: [0.22, 1, 0.36, 1],
+              duration: 0.5,
+              delay: 0.15,
+              ease: [0.6, 0.01, 0.05, 0.95],
             }}
           >
             {String(currentIndex + 1).padStart(2, "0")}
           </motion.div>
 
           <motion.h1
-            initial={{ opacity: 0, y: 40 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
             transition={{
-              duration: 0.7,
-              delay: 0.3,
-              ease: [0.22, 1, 0.36, 1],
+              duration: 0.6,
+              delay: 0.2,
+              ease: [0.6, 0.01, 0.05, 0.95],
             }}
           >
             {experience.title.split("").map((char, i) => (
@@ -140,8 +164,8 @@ export default function ExperiencePage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
                   duration: 0.4,
-                  delay: 0.4 + i * 0.02,
-                  ease: [0.22, 1, 0.36, 1],
+                  delay: 0.25 + i * 0.01,
+                  ease: [0.6, 0.01, 0.05, 0.95],
                 }}
                 style={{ display: "inline-block" }}
               >
@@ -155,8 +179,8 @@ export default function ExperiencePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{
               duration: 0.6,
-              delay: 0.6,
-              ease: [0.22, 1, 0.36, 1],
+              delay: 0.35,
+              ease: [0.6, 0.01, 0.05, 0.95],
             }}
           >
             {experience.subtitle}
@@ -181,12 +205,13 @@ export default function ExperiencePage() {
         {/* Right side - Content */}
         <motion.div
           className="experience-content-panel"
-          initial={{ opacity: 0, x: 100 }}
+          initial={{ opacity: 0, x: 30 }}
           animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0 }}
           transition={{
-            duration: 0.8,
-            delay: 0.5,
-            ease: [0.22, 1, 0.36, 1],
+            duration: 0.6,
+            delay: 0.2,
+            ease: [0.6, 0.01, 0.05, 0.95],
           }}
         >
           <div className="content-inner">
@@ -276,12 +301,20 @@ export default function ExperiencePage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.8, duration: 0.6 }}
       >
-        <Link to={`/experience/${prevExperience.id}`} className="nav-card prev">
-          <div className="nav-label">Previous</div>
+        <Link
+          to={`/experience/${prevExperience.id}`}
+          className="nav-card prev"
+          aria-label={`Previous experience: ${prevExperience.subtitle}`}
+        >
+          <div className="nav-label">Previous · ←</div>
           <div className="nav-title">{prevExperience.subtitle}</div>
         </Link>
-        <Link to={`/experience/${nextExperience.id}`} className="nav-card next">
-          <div className="nav-label">Next</div>
+        <Link
+          to={`/experience/${nextExperience.id}`}
+          className="nav-card next"
+          aria-label={`Next experience: ${nextExperience.subtitle}`}
+        >
+          <div className="nav-label">Next · →</div>
           <div className="nav-title">{nextExperience.subtitle}</div>
         </Link>
       </motion.div>

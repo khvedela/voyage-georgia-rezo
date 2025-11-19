@@ -10,7 +10,7 @@ import ExperiencePage from "./pages/ExperiencePage.tsx";
 function AppRoutes() {
   const location = useLocation();
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence mode="wait" initial={false}>
       <Routes location={location} key={location.pathname}>
         <Route index element={<App />} />
         <Route path="/experience/:id" element={<ExperiencePage />} />

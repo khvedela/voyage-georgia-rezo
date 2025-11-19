@@ -79,7 +79,10 @@ export default function ExperienceCard({
           }}
           layoutId={`card-container-${experience.id}`}
           transition={{
-            layout: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+            layout: {
+              duration: 0.5,
+              ease: [0.6, 0.01, 0.05, 0.95],
+            },
             default: { duration: 0.3 },
           }}
         >

@@ -9,11 +9,20 @@ import { EXPERIENCES } from "./shared/constants";
 import "./App.css";
 
 const pageVariants = {
-  initial: { opacity: 1 },
+  initial: {
+    opacity: 0,
+  },
+  animate: {
+    opacity: 1,
+  },
   exit: {
     opacity: 0,
-    transition: { duration: 0.3 },
   },
+};
+
+const pageTransition = {
+  duration: 0.6,
+  ease: [0.6, 0.01, 0.05, 0.95] as const,
 };
 
 function App() {
@@ -58,7 +67,9 @@ function App() {
       className="voyage-container"
       variants={pageVariants}
       initial="initial"
+      animate="animate"
       exit="exit"
+      transition={pageTransition}
     >
       {/* Hero Section */}
       <Hero />
