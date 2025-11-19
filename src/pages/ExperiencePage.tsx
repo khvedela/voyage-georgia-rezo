@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
+import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { EXPERIENCES } from "../shared/constants";
 import "./ExperiencePage.css";
@@ -11,36 +11,21 @@ export default function ExperiencePage() {
   const [scrollY, setScrollY] = useState(0);
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const mouseX = useMotionValue(0.5);
-  const mouseY = useMotionValue(0.5);
-
-  const smoothMouseX = useSpring(mouseX, { damping: 50, stiffness: 400 });
-  const smoothMouseY = useSpring(mouseY, { damping: 50, stiffness: 400 });
-
-  const parallaxY = useTransform(smoothMouseY, [0, 1], [-20, 20]);
-  const parallaxX = useTransform(smoothMouseX, [0, 1], [-20, 20]);
 
   useEffect(() => {
     // Scroll to top when component mounts
     window.scrollTo(0, 0);
 
-    const handleMouseMove = (e: MouseEvent) => {
-      mouseX.set(e.clientX / window.innerWidth);
-      mouseY.set(e.clientY / window.innerHeight);
-    };
-
     const handleScroll = () => {
       setScrollY(window.scrollY);
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("scroll", handleScroll);
 
     return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [mouseX, mouseY]);
+  }, []);
 
   if (!experience) {
     return <div>Experience not found</div>;
@@ -66,7 +51,6 @@ export default function ExperiencePage() {
         layoutId={`card-container-${experience.id}`}
         style={{
           backgroundColor: experience.color,
-          y: parallaxY,
         }}
         transition={{
           layout: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
@@ -126,7 +110,7 @@ export default function ExperiencePage() {
       {/* Main content - split layout */}
       <div className="experience-split-layout">
         {/* Left side - Hero */}
-        <motion.div className="experience-hero" style={{ x: parallaxX }}>
+        <div className="experience-hero">
           <motion.div
             className="experience-number-display"
             initial={{ opacity: 0, rotateY: -90 }}
@@ -192,7 +176,7 @@ export default function ExperiencePage() {
             </motion.div>
             <span>Scroll to explore</span>
           </motion.div>
-        </motion.div>
+        </div>
 
         {/* Right side - Content */}
         <motion.div
@@ -205,10 +189,7 @@ export default function ExperiencePage() {
             ease: [0.22, 1, 0.36, 1],
           }}
         >
-          <motion.div
-            className="content-inner"
-            style={{ y: useTransform(() => -scrollY * 0.3) }}
-          >
+          <div className="content-inner">
             {/* Main description */}
             <motion.div
               className="content-section"
@@ -284,7 +265,7 @@ export default function ExperiencePage() {
                 </a>
               </p>
             </motion.div>
-          </motion.div>
+          </div>
         </motion.div>
       </div>
 

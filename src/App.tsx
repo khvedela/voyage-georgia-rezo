@@ -10,10 +10,10 @@ import "./App.css";
 
 const pageVariants = {
   initial: { opacity: 1 },
-  exit: { 
+  exit: {
     opacity: 0,
-    transition: { duration: 0.3 }
-  }
+    transition: { duration: 0.3 },
+  },
 };
 
 function App() {
@@ -41,7 +41,7 @@ function App() {
 
       const rect = experiencesContainerRef.current.getBoundingClientRect();
       const viewHeight = window.innerHeight;
-      
+
       const start = rect.top + lenis.scroll;
       const progress = (lenis.scroll - start) / (rect.height - viewHeight);
       const clampedProgress = Math.max(0, Math.min(1, progress));
@@ -54,7 +54,7 @@ function App() {
   );
 
   return (
-    <motion.div 
+    <motion.div
       className="voyage-container"
       variants={pageVariants}
       initial="initial"
