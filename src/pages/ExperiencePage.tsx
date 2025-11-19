@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { motion, useMotionValue, useTransform, useSpring, AnimatePresence } from "framer-motion";
+import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { EXPERIENCES } from "../shared/constants";
 import "./ExperiencePage.css";
@@ -9,7 +9,7 @@ export default function ExperiencePage() {
   const navigate = useNavigate();
   const experience = EXPERIENCES.find((exp) => exp.id === id);
   const [scrollY, setScrollY] = useState(0);
-  
+
   const containerRef = useRef<HTMLDivElement>(null);
   const mouseX = useMotionValue(0.5);
   const mouseY = useMotionValue(0.5);
@@ -21,6 +21,9 @@ export default function ExperiencePage() {
   const parallaxX = useTransform(smoothMouseX, [0, 1], [-20, 20]);
 
   useEffect(() => {
+    // Scroll to top when component mounts
+    window.scrollTo(0, 0);
+
     const handleMouseMove = (e: MouseEvent) => {
       mouseX.set(e.clientX / window.innerWidth);
       mouseY.set(e.clientY / window.innerHeight);
@@ -32,7 +35,7 @@ export default function ExperiencePage() {
 
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("scroll", handleScroll);
-    
+
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("scroll", handleScroll);
@@ -43,12 +46,13 @@ export default function ExperiencePage() {
     return <div>Experience not found</div>;
   }
 
-  const currentIndex = EXPERIENCES.findIndex(e => e.id === id);
+  const currentIndex = EXPERIENCES.findIndex((e) => e.id === id);
   const nextExperience = EXPERIENCES[(currentIndex + 1) % EXPERIENCES.length];
-  const prevExperience = EXPERIENCES[(currentIndex - 1 + EXPERIENCES.length) % EXPERIENCES.length];
+  const prevExperience =
+    EXPERIENCES[(currentIndex - 1 + EXPERIENCES.length) % EXPERIENCES.length];
 
   return (
-    <motion.div 
+    <motion.div
       ref={containerRef}
       className="experience-page-container"
       initial={{ opacity: 0 }}
@@ -60,38 +64,38 @@ export default function ExperiencePage() {
       <motion.div
         className="experience-page-background"
         layoutId={`card-container-${experience.id}`}
-        style={{ 
+        style={{
           backgroundColor: experience.color,
           y: parallaxY,
         }}
         transition={{
-          layout: { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
+          layout: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
         }}
       >
-        <motion.div 
+        <motion.div
           className="bg-gradient-orb orb-1"
-          animate={{ 
+          animate={{
             x: [0, 100, 0],
             y: [0, -80, 0],
             scale: [1, 1.2, 1],
           }}
-          transition={{ 
+          transition={{
             duration: 20,
             repeat: Infinity,
-            ease: "easeInOut"
+            ease: "easeInOut",
           }}
         />
-        <motion.div 
+        <motion.div
           className="bg-gradient-orb orb-2"
-          animate={{ 
+          animate={{
             x: [0, -120, 0],
             y: [0, 100, 0],
             scale: [1.2, 1, 1.2],
           }}
-          transition={{ 
+          transition={{
             duration: 25,
             repeat: Infinity,
-            ease: "easeInOut"
+            ease: "easeInOut",
           }}
         />
       </motion.div>
@@ -99,14 +103,21 @@ export default function ExperiencePage() {
       {/* Close button */}
       <motion.button
         className="close-button"
-        onClick={() => navigate('/')}
+        onClick={() => navigate("/")}
         initial={{ opacity: 0, scale: 0 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
         whileHover={{ scale: 1.1, rotate: 90 }}
         whileTap={{ scale: 0.9 }}
       >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
           <line x1="18" y1="6" x2="6" y2="18" />
           <line x1="6" y1="6" x2="18" y2="18" />
         </svg>
@@ -115,43 +126,40 @@ export default function ExperiencePage() {
       {/* Main content - split layout */}
       <div className="experience-split-layout">
         {/* Left side - Hero */}
-        <motion.div 
-          className="experience-hero"
-          style={{ x: parallaxX }}
-        >
+        <motion.div className="experience-hero" style={{ x: parallaxX }}>
           <motion.div
             className="experience-number-display"
             initial={{ opacity: 0, rotateY: -90 }}
             animate={{ opacity: 1, rotateY: 0 }}
-            transition={{ 
+            transition={{
               duration: 0.8,
               delay: 0.2,
-              ease: [0.22, 1, 0.36, 1]
+              ease: [0.22, 1, 0.36, 1],
             }}
           >
-            {String(currentIndex + 1).padStart(2, '0')}
+            {String(currentIndex + 1).padStart(2, "0")}
           </motion.div>
 
           <motion.h1
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ 
+            transition={{
               duration: 0.7,
               delay: 0.3,
-              ease: [0.22, 1, 0.36, 1]
+              ease: [0.22, 1, 0.36, 1],
             }}
           >
-            {experience.title.split('').map((char, i) => (
+            {experience.title.split("").map((char, i) => (
               <motion.span
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ 
+                transition={{
                   duration: 0.4,
                   delay: 0.4 + i * 0.02,
-                  ease: [0.22, 1, 0.36, 1]
+                  ease: [0.22, 1, 0.36, 1],
                 }}
-                style={{ display: 'inline-block' }}
+                style={{ display: "inline-block" }}
               >
                 {char}
               </motion.span>
@@ -161,16 +169,16 @@ export default function ExperiencePage() {
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ 
+            transition={{
               duration: 0.6,
               delay: 0.6,
-              ease: [0.22, 1, 0.36, 1]
+              ease: [0.22, 1, 0.36, 1],
             }}
           >
             {experience.subtitle}
           </motion.h2>
 
-          <motion.div 
+          <motion.div
             className="scroll-indicator"
             initial={{ opacity: 0 }}
             animate={{ opacity: scrollY < 100 ? 1 : 0 }}
@@ -187,17 +195,17 @@ export default function ExperiencePage() {
         </motion.div>
 
         {/* Right side - Content */}
-        <motion.div 
+        <motion.div
           className="experience-content-panel"
           initial={{ opacity: 0, x: 100 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ 
+          transition={{
             duration: 0.8,
             delay: 0.5,
-            ease: [0.22, 1, 0.36, 1]
+            ease: [0.22, 1, 0.36, 1],
           }}
         >
-          <motion.div 
+          <motion.div
             className="content-inner"
             style={{ y: useTransform(() => -scrollY * 0.3) }}
           >
@@ -223,14 +231,16 @@ export default function ExperiencePage() {
             >
               <h3>What Awaits</h3>
               <p>
-                Journey through landscapes that have witnessed millennia of history. 
-                Every corner reveals stories passed down through generations, where 
-                tradition and modernity dance in perfect harmony.
+                Journey through landscapes that have witnessed millennia of
+                history. Every corner reveals stories passed down through
+                generations, where tradition and modernity dance in perfect
+                harmony.
               </p>
               <p>
-                This isn't tourism—it's transformation. Connect with local artisans, 
-                share meals with families who've lived here for centuries, and discover 
-                the Georgia that exists beyond postcards.
+                This isn't tourism—it's transformation. Connect with local
+                artisans, share meals with families who've lived here for
+                centuries, and discover the Georgia that exists beyond
+                postcards.
               </p>
             </motion.div>
 
@@ -268,7 +278,10 @@ export default function ExperiencePage() {
                 Book This Experience
               </motion.button>
               <p className="contact-text">
-                Questions? Contact Rezo: <a href="mailto:voyage@georgiarezo.com">voyage@georgiarezo.com</a>
+                Questions? Contact Rezo:{" "}
+                <a href="mailto:voyage@georgiarezo.com">
+                  voyage@georgiarezo.com
+                </a>
               </p>
             </motion.div>
           </motion.div>
@@ -276,7 +289,7 @@ export default function ExperiencePage() {
       </div>
 
       {/* Navigation to other experiences */}
-      <motion.div 
+      <motion.div
         className="experience-navigation"
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}

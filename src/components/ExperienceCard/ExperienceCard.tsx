@@ -25,16 +25,16 @@ export default function ExperienceCard({
   const distance = useTransform(scrollProgress, (p) => p - snapPoint);
   const x = useTransform(distance, [-1, 1], [50, -50]);
 
-  // Magnetic effect
+  // Smoother magnetic effect
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
-  const springConfig = { damping: 20, stiffness: 300 };
+  const springConfig = { damping: 40, stiffness: 200 };
   const magneticX = useSpring(mouseX, springConfig);
   const magneticY = useSpring(mouseY, springConfig);
 
-  const rotateX = useTransform(magneticY, [-0.5, 0.5], [8, -8]);
-  const rotateY = useTransform(magneticX, [-0.5, 0.5], [-8, 8]);
+  const rotateX = useTransform(magneticY, [-0.5, 0.5], [3, -3]);
+  const rotateY = useTransform(magneticX, [-0.5, 0.5], [-3, 3]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current) return;
@@ -45,8 +45,8 @@ export default function ExperienceCard({
     const deltaX = (e.clientX - centerX) / (rect.width / 2);
     const deltaY = (e.clientY - centerY) / (rect.height / 2);
     
-    mouseX.set(deltaX);
-    mouseY.set(deltaY);
+    mouseX.set(deltaX * 0.5);
+    mouseY.set(deltaY * 0.5);
   };
 
   const handleMouseLeave = () => {
@@ -70,64 +70,50 @@ export default function ExperienceCard({
             backgroundColor: experience.color,
             rotateX,
             rotateY,
-            transformPerspective: 1000
           }}
           layoutId={`card-container-${experience.id}`}
           transition={{
-            duration: 0.6,
-            ease: [0.22, 1, 0.36, 1]
+            layout: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+            default: { duration: 0.3 }
           }}
-          whileHover={{ scale: 1.02 }}
         >
-          {/* Spotlight effect that follows cursor */}
-          <motion.div 
-            className="card-spotlight"
-            style={{
-              background: `radial-gradient(circle 400px at ${mouseX.get() * 50 + 50}% ${mouseY.get() * 50 + 50}%, rgba(255,255,255,0.12), transparent)`,
-            }}
-          />
+          {/* Subtle gradient overlay */}
+          <div className="card-gradient-overlay" />
 
           <motion.div style={{ x }}>
             <motion.div 
               className="experience-number"
-              animate={isHovered ? { scale: 1.1, opacity: 0.15 } : { scale: 1, opacity: 0.1 }}
-              transition={{ duration: 0.3 }}
+              animate={isHovered ? { scale: 1.05 } : { scale: 1 }}
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
             >
               0{index + 1}
             </motion.div>
             
-            <motion.h3 
-              className="experience-title-geo"
-              animate={isHovered ? { x: 10 } : { x: 0 }}
-              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            >
+            <h3 className="experience-title-geo">
               {experience.title}
-            </motion.h3>
+            </h3>
             
             <motion.h4 
               className="experience-title-eng"
-              animate={isHovered ? { x: 10, letterSpacing: "0.15em" } : { x: 0, letterSpacing: "0.1em" }}
-              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              animate={isHovered ? { opacity: 1 } : { opacity: 0.9 }}
+              transition={{ duration: 0.4 }}
             >
               {experience.subtitle}
             </motion.h4>
             
-            <motion.p 
-              className="experience-description"
-              animate={isHovered ? { opacity: 1 } : { opacity: 0.85 }}
-            >
+            <p className="experience-description">
               {experience.description}
-            </motion.p>
+            </p>
             
             <motion.div 
               className="experience-cta"
-              animate={isHovered ? { x: 10 } : { x: 0 }}
+              animate={isHovered ? { gap: "0.75rem" } : { gap: "0.5rem" }}
               transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             >
               <span>Explore</span>
               <motion.span
                 className="cta-arrow"
-                animate={isHovered ? { x: 5 } : { x: 0 }}
+                animate={isHovered ? { x: 3 } : { x: 0 }}
                 transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
               >
                 →

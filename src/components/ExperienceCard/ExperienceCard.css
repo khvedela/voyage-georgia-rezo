@@ -3,7 +3,7 @@
   width: 60vw;
   flex-shrink: 0;
   height: 70vh;
-  perspective: 1000px;
+  perspective: 2000px;
 }
 
 .experience-link {
@@ -22,52 +22,51 @@
   position: relative;
   overflow: hidden;
   cursor: pointer;
-  transition: all 0.3s ease;
   height: 100%;
   transform-style: preserve-3d;
   box-shadow: 
-    0 20px 60px rgba(0, 0, 0, 0.3),
-    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    0 20px 60px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+  transition: box-shadow 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.experience-content::before {
-  content: '';
+.experience-content:hover {
+  box-shadow: 
+    0 30px 80px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+}
+
+/* Subtle gradient overlay */
+.card-gradient-overlay {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at 30% 50%, rgba(255, 255, 255, 0.08) 0%, transparent 60%);
+  background: radial-gradient(
+    circle at 30% 40%, 
+    rgba(255, 255, 255, 0.08) 0%, 
+    transparent 50%
+  );
   pointer-events: none;
-  transition: opacity 0.5s ease;
+  opacity: 0;
+  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.experience-content:hover::before {
-  opacity: 0.5;
-}
-
-/* Cursor spotlight on card */
-.card-spotlight {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-  transition: background 0.1s ease;
-  z-index: 1;
+.experience-content:hover .card-gradient-overlay {
+  opacity: 1;
 }
 
 .experience-number {
   font-size: clamp(3rem, 10vw, 8rem);
   font-weight: 900;
-  color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.08);
   line-height: 1;
   margin-bottom: 1rem;
   font-family: 'Georgia', serif;
   position: relative;
   z-index: 2;
-  transition: all 0.3s ease;
+  transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .experience-title-geo {
@@ -81,18 +80,19 @@
   position: relative;
   z-index: 2;
   letter-spacing: -0.02em;
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .experience-title-eng {
   font-size: clamp(1rem, 3vw, 2rem);
   font-weight: 300;
-  color: rgba(255, 255, 255, 0.95);
+  color: rgba(255, 255, 255, 0.9);
   margin-bottom: 2rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   position: relative;
   z-index: 2;
-  transition: letter-spacing 0.4s ease;
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .experience-description {
@@ -105,7 +105,11 @@
   position: relative;
   z-index: 2;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-  transition: opacity 0.3s ease;
+  transition: color 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.experience-content:hover .experience-description {
+  color: rgba(255, 255, 255, 0.95);
 }
 
 .experience-cta {
@@ -119,34 +123,15 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 0;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.4);
-  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+  transition: border-color 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .experience-content:hover .experience-cta {
-  border-bottom-color: rgba(255, 255, 255, 0.8);
-  gap: 0.75rem;
+  border-bottom-color: rgba(255, 255, 255, 0.7);
 }
 
 .cta-arrow {
   font-size: 1.2em;
   transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-/* Add a subtle glow on hover */
-.experience-content::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-  opacity: 0;
-  transition: opacity 0.6s ease;
-  pointer-events: none;
-}
-
-.experience-content:hover::after {
-  opacity: 1;
 }
