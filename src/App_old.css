@@ -1,0 +1,770 @@
+/* Voyage Georgia Rezo - Custom Styles */
+/* Mobile-first design with scroll-driven experience */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.voyage-container {
+  width: 100%;
+  overflow-x: hidden;
+  background: #0a0a0a;
+  color: #f5f5f5;
+}
+
+/* Hero Section */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d1810 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 50%, rgba(139, 79, 57, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(45, 90, 74, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.hero-content {
+  text-align: center;
+  z-index: 1;
+  max-width: 90%;
+}
+
+.hero-title {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.georgian {
+  font-size: clamp(3rem, 12vw, 8rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  background: linear-gradient(135deg, #d4a574 0%, #8b6f47 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+  font-family: 'Georgia', serif;
+}
+
+.english {
+  font-size: clamp(1.5rem, 5vw, 3rem);
+  font-weight: 300;
+  letter-spacing: 0.3em;
+  color: #b8956a;
+  text-transform: uppercase;
+}
+
+.hero-subtitle {
+  font-size: clamp(1rem, 3vw, 1.5rem);
+  color: #d4a574;
+  font-weight: 300;
+  margin-bottom: 3rem;
+  letter-spacing: 0.05em;
+  line-height: 1.6;
+}
+
+.hero-brand {
+  margin-bottom: 4rem;
+}
+
+.brand-name {
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-weight: 600;
+  color: #f5f5f5;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.05em;
+}
+
+.brand-tagline {
+  font-size: clamp(0.875rem, 2vw, 1.125rem);
+  color: #b8956a;
+  font-weight: 300;
+  font-style: italic;
+}
+
+.scroll-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: #8b6f47;
+  font-size: 0.875rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.scroll-arrow {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+/* Introduction Section */
+.intro-section {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  background: #0f0f0f;
+}
+
+.intro-content {
+  max-width: 800px;
+  text-align: center;
+}
+
+.intro-content h2 {
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  margin-bottom: 2rem;
+  color: #d4a574;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.intro-text {
+  font-size: clamp(1rem, 2.5vw, 1.375rem);
+  line-height: 1.8;
+  color: #cccccc;
+  margin-bottom: 2rem;
+  font-weight: 300;
+}
+
+.intro-signature {
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  color: #b8956a;
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* Experience Cards */
+.experiences {
+  padding: 2rem 0;
+}
+
+.experience-card {
+  padding: 2rem 1rem;
+}
+
+.experience-content {
+  padding: 3rem 2rem;
+  border-radius: 1.5rem;
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.experience-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 30% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.experience-number {
+  font-size: clamp(4rem, 15vw, 10rem);
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.1);
+  line-height: 1;
+  margin-bottom: 1rem;
+  font-family: 'Georgia', serif;
+}
+
+.experience-title-geo {
+  font-size: clamp(2.5rem, 8vw, 5rem);
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+  line-height: 1;
+  font-family: 'Georgia', serif;
+}
+
+.experience-title-eng {
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 2rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.experience-description {
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 2rem;
+  max-width: 600px;
+  font-weight: 300;
+}
+
+.experience-cta {
+  font-size: clamp(1rem, 2.5vw, 1.125rem);
+  color: #ffffff;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* Testimonial Section */
+.testimonial-section {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  background: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%);
+}
+
+.testimonial {
+  max-width: 900px;
+  text-align: center;
+  position: relative;
+  padding: 2rem;
+}
+
+.quote-mark {
+  font-size: clamp(6rem, 15vw, 12rem);
+  color: rgba(212, 165, 116, 0.2);
+  line-height: 1;
+  position: absolute;
+  top: -2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Georgia', serif;
+}
+
+.testimonial-text {
+  font-size: clamp(1.25rem, 3vw, 2rem);
+  line-height: 1.6;
+  color: #e5e5e5;
+  margin-bottom: 2rem;
+  font-weight: 300;
+  font-style: italic;
+  position: relative;
+  z-index: 1;
+}
+
+.testimonial-author {
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  color: #b8956a;
+  font-weight: 400;
+}
+
+/* Journey Section */
+.journey-section {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  background: #0a0a0a;
+}
+
+.journey-content {
+  max-width: 700px;
+  text-align: center;
+}
+
+.journey-title {
+  font-size: clamp(2.5rem, 7vw, 4rem);
+  color: #d4a574;
+  margin-bottom: 2rem;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.journey-text {
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  line-height: 1.8;
+  color: #cccccc;
+  margin-bottom: 3rem;
+  font-weight: 300;
+}
+
+.cta-button {
+  padding: 1.25rem 3rem;
+  font-size: clamp(1rem, 2.5vw, 1.125rem);
+  font-weight: 600;
+  color: #0a0a0a;
+  background: linear-gradient(135deg, #d4a574 0%, #b8956a 100%);
+  border: none;
+  border-radius: 3rem;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 2rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 24px rgba(212, 165, 116, 0.3);
+}
+
+.cta-button:hover {
+  box-shadow: 0 12px 32px rgba(212, 165, 116, 0.4);
+  transform: translateY(-2px);
+}
+
+.contact-info {
+  font-size: clamp(0.875rem, 2vw, 1rem);
+  color: #8b6f47;
+  font-weight: 300;
+}
+
+/* Footer */
+.footer {
+  padding: 4rem 2rem 2rem;
+  background: #050505;
+  border-top: 1px solid rgba(212, 165, 116, 0.1);
+}
+
+.footer-content {
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.footer-brand {
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 600;
+  color: #d4a574;
+  margin-bottom: 0.5rem;
+}
+
+.footer-tagline {
+  font-size: clamp(0.875rem, 2vw, 1rem);
+  color: #8b6f47;
+  margin-bottom: 1rem;
+  font-weight: 300;
+}
+
+.footer-georgian {
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+  color: #b8956a;
+  font-family: 'Georgia', serif;
+  margin-top: 1rem;
+}
+
+/* Tablet and Desktop Enhancements */
+@media (min-width: 768px) {
+  .hero-content {
+    max-width: 80%;
+  }
+  
+  .experience-card {
+    padding: 2rem;
+  }
+  
+  .experience-content {
+    padding: 4rem 3rem;
+    border-radius: 2rem;
+  }
+  
+  .experience-description {
+    max-width: 700px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero {
+    padding: 3rem;
+  }
+  
+  .experience-content {
+    padding: 5rem 4rem;
+  }
+  
+  .intro-section,
+  .testimonial-section,
+  .journey-section {
+    padding: 6rem 3rem;
+  }
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Scroll-Driven Map Journey */
+/* Map Journey - Split Screen Layout */
+.map-journey-split {
+  position: relative;
+  width: 100%;
+  display: flex;
+  background: #0a0a0a;
+}
+
+/* Story sections column (left side) */
+.map-journey-stories {
+  width: 50%;
+  padding: 2rem;
+  z-index: 1;
+}
+
+/* Map container (right side, sticky) */
+.map-journey-map-container {
+  width: 50%;
+  height: 100vh;
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  right: 0;
+  z-index: 2;
+}
+
+.map-journey-map {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Individual story sections */
+/* story icons removed — kept styles in case of SVG icons later */
+.story-icon {
+  display: none;
+}
+
+.story-section:hover {
+  border-left-width: 4px;
+  border-left-color: #d4a574;
+  background: linear-gradient(to right, rgba(212, 165, 116, 0.06), transparent);
+  transform: translateX(4px);
+}
+
+.story-number {
+  font-family: "Georgia", serif;
+  font-size: 0.85rem;
+  color: #d4a574;
+  opacity: 0.6;
+  margin-bottom: 1.25rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.story-icon {
+  font-size: 3.5rem;
+  margin-bottom: 1.25rem;
+  filter: drop-shadow(0 4px 16px rgba(212, 165, 116, 0.4));
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.story-section:hover .story-icon {
+  transform: scale(1.1);
+}
+
+.story-title-geo {
+  font-family: "Georgia", serif;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  color: #d4a574;
+  margin-bottom: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+  text-shadow: 0 2px 20px rgba(212, 165, 116, 0.2);
+}
+
+.story-title-en {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 2rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.story-text {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: clamp(1rem, 2vw, 1.15rem);
+  line-height: 1.9;
+  color: rgba(255, 255, 255, 0.8);
+  max-width: 480px;
+  font-weight: 300;
+}
+
+.story-progress-mobile {
+  display: none;
+  margin-top: 2rem;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Progress dots overlay on map */
+.map-progress-dots {
+  position: absolute;
+  top: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.6rem;
+  z-index: 10;
+  padding: 0.85rem 1.5rem;
+  background: rgba(10, 10, 10, 0.8);
+  backdrop-filter: blur(12px);
+  border-radius: 50px;
+  border: 1px solid rgba(212, 165, 116, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.map-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 0 0 rgba(212, 165, 116, 0);
+}
+
+.map-dot:nth-child(1) { transition-delay: 0s; }
+.map-dot:nth-child(2) { transition-delay: 0.05s; }
+.map-dot:nth-child(3) { transition-delay: 0.1s; }
+.map-dot:nth-child(4) { transition-delay: 0.15s; }
+.map-dot:nth-child(5) { transition-delay: 0.2s; }
+
+/* Custom Markers */
+.custom-marker {
+  cursor: pointer;
+  transition: all 0.5s ease;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .map-journey-split {
+    flex-direction: column;
+  }
+
+  .map-journey-stories {
+    flex: none;
+    width: 100%;
+    padding: 2rem 1rem;
+  }
+
+  .map-journey-map-container {
+    flex: none;
+    position: sticky;
+    top: 0;
+    height: 60vh;
+    order: -1; /* Put map first on mobile */
+  }
+
+  .story-section {
+    min-height: 80vh;
+    padding: 2rem 1rem;
+  }
+
+  .story-title-geo {
+    font-size: 2rem;
+  }
+
+  .story-title-en {
+    font-size: 1.2rem;
+  }
+
+  .story-text {
+    font-size: 1rem;
+  }
+
+  .story-progress-mobile {
+    display: block;
+  }
+
+  .map-progress-dots {
+    top: auto;
+    bottom: 1rem;
+  }
+}
+
+/* Mapbox Control Customization */
+.map-journey-container .mapboxgl-ctrl-bottom-right {
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 20;
+}
+
+.map-journey-container .mapboxgl-ctrl-group {
+  background: rgba(10, 10, 10, 0.95);
+  border-radius: 0.75rem;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(212, 165, 116, 0.3);
+}
+
+.map-journey-container .mapboxgl-ctrl-group button {
+  background-color: transparent;
+  border-color: rgba(212, 165, 116, 0.2);
+  width: 36px;
+  height: 36px;
+}
+
+.map-journey-container .mapboxgl-ctrl-group button:hover {
+  background-color: rgba(212, 165, 116, 0.2);
+}
+
+.map-journey-container .mapboxgl-ctrl-group button + button {
+  border-top: 1px solid rgba(212, 165, 116, 0.2);
+}
+
+.map-journey-container .mapboxgl-ctrl-icon {
+  filter: invert(1) sepia(1) saturate(2) hue-rotate(10deg) brightness(1.1);
+}
+
+.map-journey-container .mapboxgl-ctrl-compass {
+  filter: invert(1) sepia(1) saturate(2) hue-rotate(10deg);
+}
+
+/* Mapbox attribution - make it blend */
+.map-journey-container .mapboxgl-ctrl-attrib {
+  background: rgba(10, 10, 10, 0.7);
+  backdrop-filter: blur(10px);
+}
+
+.map-journey-container .mapboxgl-ctrl-attrib a {
+  color: rgba(212, 165, 116, 0.7);
+}
+
+/* Tablet and Desktop Enhancements */
+@media (min-width: 768px) {
+  .map-narrative-content {
+    padding: 4rem 3rem;
+  }
+  
+  .map-story-progress {
+    bottom: 4rem;
+  }
+}
+
+/* Map Placeholder (when no token) */
+.map-journey-placeholder {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d1810 20%, #1a1a1a 100%);
+  margin: 4rem 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.map-journey-placeholder::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    linear-gradient(45deg, rgba(212, 165, 116, 0.05) 0%, transparent 100%),
+    radial-gradient(circle at 50% 50%, rgba(139, 79, 57, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.map-placeholder-content {
+  text-align: center;
+  max-width: 600px;
+  position: relative;
+  z-index: 1;
+}
+
+.map-placeholder-content h3 {
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  color: #d4a574;
+  margin-bottom: 2rem;
+  font-weight: 400;
+}
+
+.map-placeholder-content p {
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  color: #cccccc;
+  margin-bottom: 1rem;
+  font-weight: 300;
+}
+
+.map-placeholder-content code {
+  display: block;
+  background: rgba(212, 165, 116, 0.1);
+  color: #d4a574;
+  padding: 1rem 1.5rem;
+  border-radius: 0.5rem;
+  font-family: 'Courier New', monospace;
+  font-size: clamp(0.875rem, 2vw, 1rem);
+  margin: 1.5rem 0;
+  word-break: break-all;
+  border: 1px solid rgba(212, 165, 116, 0.2);
+}
+
+.map-placeholder-note {
+  font-size: clamp(0.875rem, 2vw, 1rem);
+  color: #8b6f47;
+  margin-top: 1.5rem;
+}
+
+.map-placeholder-note a {
+  color: #d4a574;
+  text-decoration: underline;
+  transition: color 0.3s ease;
+}
+
+.map-placeholder-note a:hover {
+  color: #b8956a;
+}
+
+/* Tablet and Desktop Map Enhancements */
+@media (min-width: 768px) {
+  .map-journey-container {
+    height: 100vh;
+    min-height: 700px;
+    margin: 6rem 0;
+  }
+  
+  .map-overlay {
+    top: 4rem;
+  }
+  
+  .location-badge {
+    padding: 1rem 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .map-journey-container {
+    border-radius: 0;
+  }
+}
+
+/* Accessibility - Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
