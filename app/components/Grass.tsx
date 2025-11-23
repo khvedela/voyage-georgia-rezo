@@ -4,7 +4,7 @@ import * as THREE from "three";
 import React, { useMemo, useRef } from "react";
 import { useFrame, useLoader } from "@react-three/fiber";
 import { TextureLoader } from "three";
-import "./GrassMaterial"; // Import to register the shader material
+import "./grass/GrassMaterial";
 import { createGrassGeometry } from "./grass/GrassGeometry";
 
 type GrassProps = {
