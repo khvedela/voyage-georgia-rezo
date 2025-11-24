@@ -93,7 +93,7 @@ function SceneContent({ children }: SceneProps) {
         color="#ffb97a"
       />
 
-      <ScrollControls pages={8} damping={0.3}>
+      <ScrollControls pages={5} damping={0.3}>
         <Scroll>
           {/* <SoundscapeEngine enabled={audioEnabled} /> */}
           <Grass count={150000} />
