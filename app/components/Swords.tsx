@@ -29,10 +29,10 @@ function Sword({ scene, position, delay, rotation = [0, 0, 0] }: SwordProps) {
   const clonedScene = useMemo(() => scene.clone(), [scene]);
 
   // Start high up
-  const dropHeight = 35;
+  const dropHeight = 60;
   const targetY = position[1];
   const startY = targetY + dropHeight;
-  const gravity = 60; // Visual gravity constant
+  const gravity = 40; // Slower, heavier visual gravity
 
   useFrame((state) => {
     if (!groupRef.current) return;
@@ -64,8 +64,8 @@ function Sword({ scene, position, delay, rotation = [0, 0, 0] }: SwordProps) {
       // Post-impact wobble (damped sine wave)
       const timeSinceImpact = t - impactTime.current;
       if (timeSinceImpact < 1.5) {
-        const frequency = 20;
-        const damping = 4.0;
+        const frequency = 15;
+        const damping = 3.0;
         const amplitude = 0.1 * Math.exp(-damping * timeSinceImpact) * Math.sin(frequency * timeSinceImpact);
         
         // Apply wobble around the random axis
@@ -79,7 +79,7 @@ function Sword({ scene, position, delay, rotation = [0, 0, 0] }: SwordProps) {
         ref={groupRef} 
         position={position} 
         rotation={rotation} 
-        scale={3}
+        scale={4} // Reduced scale
         dispose={null}
     >
       <primitive object={clonedScene} />
@@ -90,13 +90,14 @@ function Sword({ scene, position, delay, rotation = [0, 0, 0] }: SwordProps) {
 export function Swords() {
   const { scene } = useGLTF("/sword.glb");
 
-  // Spread increased by ~15%
+  // Spread increased for monumental feel
+  // Y positions raised to ensure only tip is buried
   const targets: { pos: [number, number, number]; rot: [number, number, number] }[] = [
-    { pos: [0, 0.5, 0], rot: [0, 0, 0] },
-    { pos: [-2.3, 0.2, 1.15], rot: [0.2, 0.5, 0] },
-    { pos: [2.3, -0.5, -1.15], rot: [-0.1, -0.2, 0] },
-    { pos: [-1.75, 0.0, -2.3], rot: [0, 0, -0.3] },
-    { pos: [2.1, -0.8, 2.3], rot: [0.1, 1.0, 0.1] },
+    { pos: [0, 5.0, 0], rot: [0, 0, 0] }, 
+    { pos: [-12, 4.5, 8], rot: [0.1, 0.5, 0] },
+    { pos: [10, 2.5, -10], rot: [-0.1, -0.2, 0] },
+    { pos: [-8, 3.5, -12], rot: [0, 0, -0.1] },
+    { pos: [14, 2.0, 12], rot: [0.05, 1.0, 0.05] },
   ];
 
   return (
@@ -107,7 +108,7 @@ export function Swords() {
           scene={scene}
           position={target.pos}
           rotation={target.rot as [number, number, number]}
-          delay={1.0 + i * 0.2} // Slightly faster sequence
+          delay={1.0 + i * 0.4} // Slower sequence
         />
       ))}
     </>
