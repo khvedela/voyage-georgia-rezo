@@ -7,6 +7,14 @@ import { CustomCursor } from "./components/ui/CustomCursor";
 import { GravityScroll } from "./components/ui/GravityScrollPhysics";
 import { WineGradientFlow } from "./components/ui/WineGradientFlow";
 import { TimeOfDayAtmosphere } from "./components/ui/TimeOfDayAtmosphere";
+import { GeorgianPatternOverlay } from "./components/ui/GeorgianPatternOverlay";
+import {
+  GeorgianCrossPattern,
+  SwordGlint,
+  WinePourEffect,
+  GeorgianOrnamentBorder,
+  DepthLift
+} from "./components/ui/GeorgianAnimations";
 
 // Dynamically import the Scene component
 const Scene = dynamic(() => import("./components/Scene"), {
@@ -40,12 +48,14 @@ function Content() {
       {/* Page 1: Hero Section */}
       <section className="h-screen relative flex flex-col justify-center px-4 md:px-12 pointer-events-none">
         <div className="max-w-[90vw] mx-auto w-full">
-          <GravityScroll mode="spiral" intensity={0.15} speed={1}>
-            <h1 className="text-[12vw] leading-[0.8] font-black tracking-tighter text-white/90 mix-blend-overlay break-words mb-8">
-              UNLOCK <br />
-              THE <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-white">CAUCASUS</span>
-            </h1>
-          </GravityScroll>
+          <GeorgianCrossPattern>
+            <GravityScroll mode="spiral" intensity={0.15} speed={1}>
+              <h1 className="text-[12vw] leading-[0.8] font-black tracking-tighter text-white/90 mix-blend-overlay break-words mb-8">
+                UNLOCK <br />
+                THE <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-white">CAUCASUS</span>
+              </h1>
+            </GravityScroll>
+          </GeorgianCrossPattern>
 
           {/* Fixed positioning to prevent overlap */}
           <div className="mt-8 md:mt-12 pointer-events-auto max-w-md">
@@ -112,72 +122,83 @@ function Content() {
               },
             ].map((tour, i) => (
               <GravityScroll key={tour.id} mode="orbital" intensity={0.05 * (i + 1)} speed={1}>
-                <motion.div
-                  className="group relative h-full"
-                  whileHover={{ y: -8 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                >
-                  {/* Card */}
-                  <div className="relative h-full p-8 bg-gradient-to-br from-neutral-900/90 to-neutral-950/90 border-2 border-emerald-500/20 hover:border-emerald-500/50 transition-all duration-500 backdrop-blur-sm">
-                    {/* Number Badge */}
-                    <div className="absolute -top-4 -right-4 w-16 h-16 bg-emerald-500 text-black font-black text-2xl flex items-center justify-center">
-                      {tour.id}
-                    </div>
+                <DepthLift className="h-full">
+                  <SwordGlint>
+                    <WinePourEffect>
+                      <GeorgianOrnamentBorder className="h-full p-8 bg-gradient-to-br from-neutral-900/90 to-neutral-950/90 border-2 border-emerald-500/20 hover:border-emerald-500/50 transition-all duration-500 backdrop-blur-sm">
+                        {/* Number Badge */}
+                        <div className="absolute -top-4 -right-4 w-16 h-16 bg-emerald-500 text-black font-black text-2xl flex items-center justify-center">
+                          {tour.id}
+                        </div>
 
-                    {/* Icon */}
-                    <div className="text-emerald-400 mb-6 group-hover:scale-110 transition-transform duration-300">
-                      {tour.icon}
-                    </div>
+                        {/* Icon */}
+                        <motion.div
+                          className="text-emerald-400 mb-6"
+                          whileHover={{
+                            scale: 1.15,
+                            rotate: [0, -10, 10, -10, 0],
+                            transition: { duration: 0.5 }
+                          }}
+                        >
+                          {tour.icon}
+                        </motion.div>
 
-                    {/* Content */}
-                    <h3 className="text-2xl md:text-3xl font-black text-white mb-2 tracking-tight">
-                      {tour.title}
-                    </h3>
-                    <p className="text-sm font-mono text-emerald-400 mb-4 tracking-wider">
-                      {tour.subtitle}
-                    </p>
-                    <p className="text-base text-white/70 mb-6 leading-relaxed">
-                      {tour.desc}
-                    </p>
+                        {/* Content */}
+                        <h3 className="text-2xl md:text-3xl font-black text-white mb-2 tracking-tight">
+                          {tour.title}
+                        </h3>
+                        <p className="text-sm font-mono text-emerald-400 mb-4 tracking-wider">
+                          {tour.subtitle}
+                        </p>
+                        <p className="text-base text-white/70 mb-6 leading-relaxed">
+                          {tour.desc}
+                        </p>
 
-                    {/* Highlight */}
-                    <div className="pt-4 border-t border-white/10">
-                      <p className="font-mono text-xs text-white/50 tracking-widest">
-                        {tour.highlight}
-                      </p>
-                    </div>
-                  </div>
-                </motion.div>
+                        {/* Highlight */}
+                        <div className="pt-4 border-t border-white/10">
+                          <p className="font-mono text-xs text-white/50 tracking-widest">
+                            {tour.highlight}
+                          </p>
+                        </div>
+                      </GeorgianOrnamentBorder>
+                    </WinePourEffect>
+                  </SwordGlint>
+                </DepthLift>
               </GravityScroll>
             ))}
           </div>
 
           {/* CTA */}
           <div className="mt-16">
-            <motion.div
-              className="relative p-10 bg-gradient-to-r from-emerald-500/10 to-transparent border-l-4 border-emerald-500 hover:from-emerald-500/20 transition-all duration-500 cursor-pointer group"
-              whileHover={{ x: 8 }}
-            >
-              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                <div>
-                  <h3 className="text-2xl md:text-3xl font-black text-white mb-2 tracking-tight">
-                    BEGIN YOUR ODYSSEY
-                  </h3>
-                  <p className="font-mono text-sm text-white/60">
-                    Custom itineraries · Private guides · Authentic experiences
-                  </p>
+            <SwordGlint>
+              <motion.div
+                className="relative p-10 bg-gradient-to-r from-emerald-500/10 to-transparent border-l-4 border-emerald-500 hover:from-emerald-500/20 transition-all duration-500 cursor-pointer group"
+                whileHover={{ x: 8 }}
+              >
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                  <div>
+                    <h3 className="text-2xl md:text-3xl font-black text-white mb-2 tracking-tight">
+                      BEGIN YOUR ODYSSEY
+                    </h3>
+                    <p className="font-mono text-sm text-white/60">
+                      Custom itineraries · Private guides · Authentic experiences
+                    </p>
+                  </div>
+                  <motion.div
+                    className="px-8 py-4 bg-emerald-500 text-black font-bold text-sm tracking-widest hover:bg-white transition-colors flex items-center gap-2"
+                    whileHover={{ gap: "1rem" }}
+                  >
+                    INITIATE <ArrowRight className="w-4 h-4" />
+                  </motion.div>
                 </div>
-                <div className="px-8 py-4 bg-emerald-500 text-black font-bold text-sm tracking-widest hover:bg-white transition-colors flex items-center gap-2 group-hover:gap-4 transition-all">
-                  INITIATE <ArrowRight className="w-4 h-4" />
-                </div>
-              </div>
-            </motion.div>
+              </motion.div>
+            </SwordGlint>
           </div>
 
           {/* Georgian Footer */}
           <div className="mt-12 text-center">
             <p className="font-mono text-sm text-white/40">
-              EST. 2024 · TBILISI, GEORGIA · <span className="text-white/60">საქართველო</span>
+              EST. 2024 · TBILISI, GEORGIA · <span className="text-emerald-400/80 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]">საქართველო</span>
             </p>
           </div>
         </div>
@@ -192,6 +213,7 @@ export default function HomePage() {
       <CustomCursor />
       <WineGradientFlow />
       <TimeOfDayAtmosphere />
+      <GeorgianPatternOverlay />
       <Scene>
         <Content />
       </Scene>

@@ -54,28 +54,31 @@ export function GravityScroll({
 
             switch (mode) {
                 case "orbital":
-                    // Elements orbit around their position
+                    // Subtle orbital motion without heavy rotation
                     const angle = normalizedDistance * Math.PI * intensity;
-                    const radius = 50 * intensity + velocity * 10;
-                    newX = Math.cos(angle) * radius;
-                    newY = Math.sin(angle) * radius * 0.5; // Elliptical
-                    newRotate = angle * 15; // Slight rotation
+                    const radius = 30 * intensity + velocity * 5;
+                    newX = Math.cos(angle) * radius * 0.5;
+                    newY = Math.sin(angle) * radius * 0.3;
+                    // Clamp rotation to max ±3 degrees for professionalism
+                    newRotate = Math.max(-3, Math.min(3, angle * 2));
                     break;
 
                 case "spiral":
-                    // Elements spiral into view
-                    const spiralAngle = normalizedDistance * Math.PI * 2 * intensity;
-                    const spiralRadius = Math.abs(normalizedDistance) * 100 * intensity;
-                    newX = Math.cos(spiralAngle) * spiralRadius;
-                    newY = Math.sin(spiralAngle) * spiralRadius;
-                    newRotate = spiralAngle * 30;
+                    // Gentle spiral with minimal rotation
+                    const spiralAngle = normalizedDistance * Math.PI * intensity;
+                    const spiralRadius = Math.abs(normalizedDistance) * 40 * intensity;
+                    newX = Math.cos(spiralAngle) * spiralRadius * 0.3;
+                    newY = Math.sin(spiralAngle) * spiralRadius * 0.2;
+                    // Clamp rotation to max ±2 degrees
+                    newRotate = Math.max(-2, Math.min(2, spiralAngle * 1.5));
                     break;
 
                 case "wave":
-                    // Wave motion (sine wave)
-                    newX = Math.sin(normalizedDistance * Math.PI * 2) * 30 * intensity;
+                    // Subtle wave motion
+                    newX = Math.sin(normalizedDistance * Math.PI * 2) * 15 * intensity;
                     newY = 0;
-                    newRotate = normalizedDistance * 10 * intensity;
+                    // Clamp rotation to max ±5 degrees
+                    newRotate = Math.max(-5, Math.min(5, normalizedDistance * 3 * intensity));
                     break;
 
                 case "none":
