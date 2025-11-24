@@ -7,6 +7,18 @@ export const GrassMaterial = shaderMaterial(
   {
     uTime: 0,
     uCloud: null,
+    uMirror: 0,
+    // up to 6 simultaneous impacts: (x, z, startMs, strength)
+    uImpacts: [
+      new THREE.Vector4(0, 0, 0, 0),
+      new THREE.Vector4(0, 0, 0, 0),
+      new THREE.Vector4(0, 0, 0, 0),
+      new THREE.Vector4(0, 0, 0, 0),
+      new THREE.Vector4(0, 0, 0, 0),
+      new THREE.Vector4(0, 0, 0, 0),
+    ],
+    uImpactLife: 2.5,
+    uSunColor: new THREE.Color(0xffb86b),
   },
   vertexShader,
   fragmentShader

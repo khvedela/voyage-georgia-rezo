@@ -52,28 +52,19 @@ function computeBlade(center: THREE.Vector3, normal: THREE.Vector3, index: numbe
     new THREE.Vector3(0, h, bendAmount)                      
   ];
 
-  const vIndex = index * BLADE_VERTEX_COUNT;
   const positions: number[] = [];
 
   localVerts.forEach(v => {
-    v.applyQuaternion(quaternion); 
-    v.add(center); 
+    v.applyQuaternion(quaternion);
+    v.add(center);
     positions.push(v.x, v.y, v.z);
   });
 
+  // Return indices relative to the blade's first vertex (0..4). The caller
+  // will add the appropriate base offset when composing the full geometry.
   return {
     positions,
-    indices: [
-      vIndex,
-      vIndex + 1,
-      vIndex + 2,
-      vIndex + 2,
-      vIndex + 4,
-      vIndex + 3,
-      vIndex + 3,
-      vIndex,
-      vIndex + 2,
-    ],
+    indices: [0, 1, 2, 2, 4, 3, 3, 0, 2],
   };
 }
 
@@ -82,6 +73,7 @@ export function createGrassGeometry(count: number, size: number) {
   const uvs: number[] = [];
   const indices: number[] = [];
   const vertIndices: number[] = [];
+  const bladeCenterYs: number[] = [];
 
   for (let i = 0; i < count; i++) {
     const surfaceMin = (size / 2) * -1;
@@ -102,12 +94,22 @@ export function createGrassGeometry(count: number, size: number) {
 
     for (let j = 0; j < BLADE_VERTEX_COUNT; j++) {
       uvs.push(u, v);
-      vertIndices.push(j); 
+      vertIndices.push(j);
+      // store the blade center Y for every vertex — used by the mirrored draw
+      bladeCenterYs.push(pos.y);
     }
 
     const blade = computeBlade(pos, normal, i);
+    // push the original blade (top-facing) and use the current base index
+    // so indices map to the correct global vertex offsets.
+    const baseIndex = positions.length / 3;
     positions.push(...blade.positions);
-    indices.push(...blade.indices);
+    indices.push(...blade.indices.map((id) => id + baseIndex));
+
+    // NOTE: we do NOT duplicate blade vertices anymore — a memory-efficient
+    // approach will render this geometry twice (normal + mirrored) from the
+    // same buffers. The shader will use `bladeCenterY` to mirror vertices at
+    // draw time. This keeps memory usage lower while producing the same visual.
   }
 
   const geo = new THREE.BufferGeometry();
@@ -119,6 +121,10 @@ export function createGrassGeometry(count: number, size: number) {
   geo.setAttribute(
     "vertIndex",
     new THREE.Float32BufferAttribute(vertIndices, 1)
+  );
+  geo.setAttribute(
+    "bladeCenterY",
+    new THREE.Float32BufferAttribute(bladeCenterYs, 1)
   );
   geo.setIndex(indices);
   geo.computeVertexNormals();

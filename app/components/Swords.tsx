@@ -4,29 +4,45 @@ import * as THREE from "three";
 import React, { useRef, useMemo, useState, useEffect } from "react";
 import { useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
+import { emitImpact } from "@/app/lib/impact";
 
 type SwordProps = {
-  scene: THREE.Group;
   position: [number, number, number];
   delay: number;
   rotation?: [number, number, number];
 };
 
-function Sword({ scene, position, delay, rotation = [0, 0, 0] }: SwordProps) {
-  const groupRef = useRef<THREE.Group>(null);
+function Sword({ position, delay, rotation = [0, 0, 0] }: SwordProps) {
+  const groupRef = useRef<THREE.Group | null>(null);
   const [landed, setLanded] = useState(false);
-  
+
   // Animation state for impact wobble
   const impactTime = useRef(0);
-  // Initialize with stable value, random is applied in useEffect
   const wobbleAxis = useRef(new THREE.Vector3(0, 1, 0));
 
   useEffect(() => {
-    wobbleAxis.current = new THREE.Vector3(Math.random() - 0.5, 0, Math.random() - 0.5).normalize();
+    wobbleAxis.current = new THREE.Vector3(
+      Math.random() - 0.5,
+      0,
+      Math.random() - 0.5
+    ).normalize();
   }, []);
 
-  // Clone the scene for this specific instance
-  const clonedScene = useMemo(() => scene.clone(), [scene]);
+  // Load and clone GLTF inside the component so we don't pass circular objects through props
+  const { scene: swordScene } = useGLTF("/sword.glb");
+  const clonedScene = useMemo(() => swordScene.clone(true), [swordScene]);
+
+  // Attach the cloned scene to the group without passing the object directly as a JSX prop
+  useEffect(() => {
+    const g = groupRef.current;
+    if (g && clonedScene) {
+      g.add(clonedScene);
+      return () => {
+        g.remove(clonedScene);
+      };
+    }
+    return undefined;
+  }, [clonedScene]);
 
   // Start high up
   const dropHeight = 60;
@@ -50,10 +66,13 @@ function Sword({ scene, position, delay, rotation = [0, 0, 0] }: SwordProps) {
       if (currentY <= targetY) {
         setLanded(true);
         impactTime.current = t;
-        
+
         // Snap to ground
         groupRef.current.position.set(position[0], targetY, position[2]);
-        
+
+        // Emit a ground impact event so the terrain and grass can react
+        emitImpact(position[0], position[2], 1.0);
+
         // Add initial random tilt for variety (permanent)
         groupRef.current.rotation.x += (Math.random() - 0.5) * 0.1;
         groupRef.current.rotation.z += (Math.random() - 0.5) * 0.1;
@@ -66,8 +85,11 @@ function Sword({ scene, position, delay, rotation = [0, 0, 0] }: SwordProps) {
       if (timeSinceImpact < 1.5) {
         const frequency = 15;
         const damping = 3.0;
-        const amplitude = 0.1 * Math.exp(-damping * timeSinceImpact) * Math.sin(frequency * timeSinceImpact);
-        
+        const amplitude =
+          0.1 *
+          Math.exp(-damping * timeSinceImpact) *
+          Math.sin(frequency * timeSinceImpact);
+
         // Apply wobble around the random axis
         groupRef.current.rotateOnWorldAxis(wobbleAxis.current, amplitude * 0.1);
       }
@@ -75,25 +97,24 @@ function Sword({ scene, position, delay, rotation = [0, 0, 0] }: SwordProps) {
   });
 
   return (
-    <group 
-        ref={groupRef} 
-        position={position} 
-        rotation={rotation} 
-        scale={4} // Reduced scale
-        dispose={null}
-    >
-      <primitive object={clonedScene} />
-    </group>
+    <group
+      ref={groupRef}
+      position={position}
+      rotation={rotation}
+      scale={4}
+      dispose={null}
+    />
   );
 }
 
 export function Swords() {
-  const { scene } = useGLTF("/sword.glb");
-
   // Spread increased for monumental feel
   // Y positions raised to ensure only tip is buried
-  const targets: { pos: [number, number, number]; rot: [number, number, number] }[] = [
-    { pos: [0, 5.0, 0], rot: [0, 0, 0] }, 
+  const targets: {
+    pos: [number, number, number];
+    rot: [number, number, number];
+  }[] = [
+    { pos: [0, 5.0, 0], rot: [0, 0, 0] },
     { pos: [-12, 4.5, 8], rot: [0.1, 0.5, 0] },
     { pos: [10, 2.5, -10], rot: [-0.1, -0.2, 0] },
     { pos: [-8, 3.5, -12], rot: [0, 0, -0.1] },
@@ -105,10 +126,9 @@ export function Swords() {
       {targets.map((target, i) => (
         <Sword
           key={i}
-          scene={scene}
           position={target.pos}
           rotation={target.rot as [number, number, number]}
-          delay={1.0 + i * 0.4} // Slower sequence
+          delay={1.0 + i * 0.4}
         />
       ))}
     </>
