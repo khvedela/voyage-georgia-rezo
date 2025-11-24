@@ -1,10 +1,12 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Compass, Map as MapIcon, Mountain, ArrowRight } from "lucide-react";
+import { Mountain, Compass, Users, MapIcon, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { CustomCursor } from "./components/ui/CustomCursor";
 import { GravityScroll } from "./components/ui/GravityScrollPhysics";
+import { WineGradientFlow } from "./components/ui/WineGradientFlow";
+import { TimeOfDayAtmosphere } from "./components/ui/TimeOfDayAtmosphere";
 
 // Dynamically import the Scene component
 const Scene = dynamic(() => import("./components/Scene"), {
@@ -37,136 +39,146 @@ function Content() {
 
       {/* Page 1: Hero Section */}
       <section className="h-screen relative flex flex-col justify-center px-4 md:px-12 pointer-events-none">
-        <div className="max-w-[90vw] mx-auto w-full relative">
+        <div className="max-w-[90vw] mx-auto w-full">
           <GravityScroll mode="spiral" intensity={0.15} speed={1}>
-            <h1 className="text-[12vw] leading-[0.8] font-black tracking-tighter text-white/90 mix-blend-overlay break-words">
+            <h1 className="text-[12vw] leading-[0.8] font-black tracking-tighter text-white/90 mix-blend-overlay break-words mb-8">
               UNLOCK <br />
               THE <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-white">CAUCASUS</span>
             </h1>
           </GravityScroll>
-          <div className="absolute right-0 bottom-0 md:bottom-[20%] md:right-[10%] text-right pointer-events-auto">
+
+          {/* Fixed positioning to prevent overlap */}
+          <div className="mt-8 md:mt-12 pointer-events-auto max-w-md">
             <GravityScroll mode="wave" intensity={0.2}>
-              <p className="font-mono text-xs md:text-sm tracking-[0.2em] mb-2 text-emerald-400">
-                /// BEYOND THE MAP
+              <p className="font-mono text-sm md:text-base tracking-[0.15em] mb-4 text-emerald-400">
+                /// WHERE LEGENDS ARE BORN
               </p>
             </GravityScroll>
-            <p className="max-w-xs text-sm md:text-base font-light text-neutral-400 leading-relaxed hidden md:block mb-6">
-              A curated expedition into the ancient heart of Georgia.
-              Forget tourism. This is a pilgrimage.
+            <p className="text-base md:text-lg font-light text-white/80 leading-relaxed">
+              Journey through the birthplace of wine, where 8,000-year-old traditions meet untamed wilderness.
             </p>
           </div>
         </div>
-        <div className="absolute bottom-8 left-8 font-mono text-[10px] tracking-widest opacity-50 animate-bounce">
-          ↓ DESCEND
+        <div className="absolute bottom-8 left-8 font-mono text-xs tracking-widest text-white/60 animate-bounce">
+          ↓ DESCEND INTO HISTORY
         </div>
       </section>
 
-      {/* Page 2: Details Section */}
-      <section id="details" className="min-h-screen flex items-center px-4 md:px-12 py-24 pointer-events-auto">
-        <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-8">
-          <div className="md:col-span-4 flex flex-col justify-between h-full space-y-12">
-            <div>
-              <h2 className="text-6xl font-black tracking-tighter mb-4">THE<br />OFFERING</h2>
-              <div className="w-12 h-1 bg-emerald-500" />
-            </div>
-            <div className="hidden md:block font-mono text-xs text-neutral-500">
-              EST. 2024<br />TBILISI, GEORGIA
-            </div>
+      {/* Page 2: Immersive Tour Section - Redesigned */}
+      <section id="details" className="min-h-screen relative px-4 md:px-12 py-24 pointer-events-auto">
+        {/* Background gradient overlay for depth */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-emerald-950/10 to-transparent pointer-events-none" />
+
+        <div className="relative z-10 max-w-7xl mx-auto">
+          {/* Section Header */}
+          <div className="mb-16">
+            <GravityScroll mode="spiral" intensity={0.1}>
+              <h2 className="text-5xl md:text-7xl font-black tracking-tighter mb-6 leading-none text-white">
+                THE OFFERING
+              </h2>
+            </GravityScroll>
+            <div className="w-24 h-1 bg-emerald-500 mb-6" />
+            <p className="text-lg md:text-xl text-white/70 leading-relaxed max-w-2xl">
+              Curated expeditions into Georgia's soul. Each journey honors the warriors of Didgori, who defended these mountains in 1121 AD.
+            </p>
           </div>
-          <div className="md:col-span-8 grid grid-cols-1 gap-4">
+
+          {/* Tour Grid - Horizontal Scroll on Mobile, Grid on Desktop */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
             {[
               {
                 id: "01",
-                title: "SECRETS OF THE HIGH PASS",
-                desc: "Off-road expeditions to Ushguli and Omalo.",
-                coords: "42.9°N / 43.0°E",
-                icon: <Mountain className="w-5 h-5" />
+                title: "HIGH CAUCASUS",
+                subtitle: "Mountain Expedition",
+                desc: "Trek to Ushguli and Omalo at 2,200 meters. Europe's highest villages where time stands still.",
+                highlight: "3 DAYS · SVANETI REGION",
+                icon: <Mountain className="w-8 h-8" />
               },
               {
                 id: "02",
-                title: "ANCIENT VINES",
-                desc: "Exclusive access to private qvevri wine cellars.",
-                coords: "41.9°N / 45.8°E",
-                icon: <Compass className="w-5 h-5" />
+                title: "QVEVRI WINE",
+                subtitle: "Ancestral Cellars",
+                desc: "8,000 years of wine-making in buried clay vessels. Taste amber wines unchanged since antiquity.",
+                highlight: "2 DAYS · KAKHETI VALLEY",
+                icon: <Compass className="w-8 h-8" />
               },
               {
                 id: "03",
                 title: "LOST CHRONICLES",
-                desc: "Guided historical deep-dives into forgotten fortresses.",
-                coords: "41.7°N / 44.8°E",
-                icon: <MapIcon className="w-5 h-5" />
-              }
-            ].map((item, i) => (
-              <GravityScroll
-                key={i}
-                mode="orbital"
-                intensity={0.3 + i * 0.1}
-                speed={1}
-              >
+                subtitle: "Medieval Legacy",
+                desc: "Monasteries, fortresses, and the battlefield of Didgori. Walk where King David changed history.",
+                highlight: "4 DAYS · CENTRAL GEORGIA",
+                icon: <MapIcon className="w-8 h-8" />
+              },
+            ].map((tour, i) => (
+              <GravityScroll key={tour.id} mode="orbital" intensity={0.05 * (i + 1)} speed={1}>
                 <motion.div
-                  className="hover-trigger group relative bg-neutral-900/40 border border-white/10 p-8 overflow-hidden cursor-none"
-                  initial="rest"
-                  whileHover="hover"
-                  animate="rest"
+                  className="group relative h-full"
+                  whileHover={{ y: -8 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 >
-                  <motion.div
-                    className="absolute inset-0 bg-emerald-900/20 z-0"
-                    variants={{
-                      rest: { scaleY: 0, originY: 1 },
-                      hover: { scaleY: 1, originY: 1 }
-                    }}
-                    transition={{ duration: 0.4, ease: "circOut" }}
-                  />
-                  <div className="relative z-10">
-                    <div className="absolute top-0 right-0 font-mono text-xs text-emerald-500/50 flex flex-col items-end">
-                      <span>{item.id}</span>
-                      <motion.span
-                        className="text-emerald-400"
-                        variants={{
-                          rest: { opacity: 0, x: 10 },
-                          hover: { opacity: 1, x: 0 }
-                        }}
-                      >
-                        {item.coords}
-                      </motion.span>
+                  {/* Card */}
+                  <div className="relative h-full p-8 bg-gradient-to-br from-neutral-900/90 to-neutral-950/90 border-2 border-emerald-500/20 hover:border-emerald-500/50 transition-all duration-500 backdrop-blur-sm">
+                    {/* Number Badge */}
+                    <div className="absolute -top-4 -right-4 w-16 h-16 bg-emerald-500 text-black font-black text-2xl flex items-center justify-center">
+                      {tour.id}
                     </div>
-                    <div className="flex items-start gap-6">
-                      <motion.div
-                        className="p-3 bg-white/5 rounded-none text-white border border-transparent"
-                        variants={{
-                          rest: { borderColor: "rgba(255,255,255,0)" },
-                          hover: { borderColor: "rgba(52, 211, 153, 0.5)", color: "#34d399" }
-                        }}
-                      >
-                        {item.icon}
-                      </motion.div>
-                      <div>
-                        <h3 className="text-2xl font-bold tracking-tight mb-2 group-hover:text-emerald-400 transition-colors duration-300">{item.title}</h3>
-                        <p className="font-mono text-sm text-neutral-400 max-w-md">{item.desc}</p>
-                        <motion.div
-                          className="mt-4 flex items-center gap-2 text-xs tracking-widest text-emerald-400 uppercase"
-                          variants={{
-                            rest: { opacity: 0, y: 10 },
-                            hover: { opacity: 1, y: 0 }
-                          }}
-                        >
-                          Initialize Route <ArrowRight className="w-3 h-3" />
-                        </motion.div>
-                      </div>
+
+                    {/* Icon */}
+                    <div className="text-emerald-400 mb-6 group-hover:scale-110 transition-transform duration-300">
+                      {tour.icon}
+                    </div>
+
+                    {/* Content */}
+                    <h3 className="text-2xl md:text-3xl font-black text-white mb-2 tracking-tight">
+                      {tour.title}
+                    </h3>
+                    <p className="text-sm font-mono text-emerald-400 mb-4 tracking-wider">
+                      {tour.subtitle}
+                    </p>
+                    <p className="text-base text-white/70 mb-6 leading-relaxed">
+                      {tour.desc}
+                    </p>
+
+                    {/* Highlight */}
+                    <div className="pt-4 border-t border-white/10">
+                      <p className="font-mono text-xs text-white/50 tracking-widest">
+                        {tour.highlight}
+                      </p>
                     </div>
                   </div>
                 </motion.div>
               </GravityScroll>
             ))}
-            <div className="mt-8 p-8 border border-emerald-500/30 bg-emerald-900/10 flex flex-col md:flex-row items-center justify-between gap-6 hover:border-emerald-500/60 transition-all cursor-pointer group hover-trigger">
-              <div className="text-center md:text-left">
-                <h3 className="text-xl font-bold tracking-widest uppercase">Begin Your Odyssey</h3>
-                <p className="font-mono text-xs text-emerald-400 mt-1">CUSTOM_ITINERARY_BUILDER_V1.0</p>
+          </div>
+
+          {/* CTA */}
+          <div className="mt-16">
+            <motion.div
+              className="relative p-10 bg-gradient-to-r from-emerald-500/10 to-transparent border-l-4 border-emerald-500 hover:from-emerald-500/20 transition-all duration-500 cursor-pointer group"
+              whileHover={{ x: 8 }}
+            >
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                <div>
+                  <h3 className="text-2xl md:text-3xl font-black text-white mb-2 tracking-tight">
+                    BEGIN YOUR ODYSSEY
+                  </h3>
+                  <p className="font-mono text-sm text-white/60">
+                    Custom itineraries · Private guides · Authentic experiences
+                  </p>
+                </div>
+                <div className="px-8 py-4 bg-emerald-500 text-black font-bold text-sm tracking-widest hover:bg-white transition-colors flex items-center gap-2 group-hover:gap-4 transition-all">
+                  INITIATE <ArrowRight className="w-4 h-4" />
+                </div>
               </div>
-              <div className="px-8 py-3 bg-white text-black font-bold text-sm tracking-widest hover:bg-emerald-400 transition-colors">
-                INITIATE
-              </div>
-            </div>
+            </motion.div>
+          </div>
+
+          {/* Georgian Footer */}
+          <div className="mt-12 text-center">
+            <p className="font-mono text-sm text-white/40">
+              EST. 2024 · TBILISI, GEORGIA · <span className="text-white/60">საქართველო</span>
+            </p>
           </div>
         </div>
       </section>
@@ -178,6 +190,8 @@ export default function HomePage() {
   return (
     <main className="w-full h-screen bg-neutral-950">
       <CustomCursor />
+      <WineGradientFlow />
+      <TimeOfDayAtmosphere />
       <Scene>
         <Content />
       </Scene>

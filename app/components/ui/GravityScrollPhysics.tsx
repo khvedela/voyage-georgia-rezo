@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, ReactNode } from "react";
-import { useSpring, animated } from "@react-spring/web";
+import { useSpring, animated, to } from "@react-spring/web";
 
 type GravityScrollMode = "orbital" | "spiral" | "wave" | "none";
 
@@ -118,9 +118,9 @@ export function GravityScroll({
             ref={elementRef}
             className={className}
             style={{
-                transform: x.to((xVal, yVal, rotateVal) =>
+                transform: to([x, y, rotate], (xVal, yVal, rotateVal) =>
                     `translate3d(${xVal}px, ${yVal}px, 0) rotate(${rotateVal}deg)`
-                    , y, rotate),
+                ),
             }}
         >
             {children}

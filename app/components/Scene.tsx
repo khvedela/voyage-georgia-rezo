@@ -58,7 +58,7 @@ function SceneContent({ children }: SceneProps) {
       <ScrollControls pages={2} damping={0.3}>
         <Scroll>
           {/* <SoundscapeEngine enabled={audioEnabled} /> */}
-          <Grass count={300000} />
+          <Grass count={150000} />
           <Swords />
           <SwordReflections />
           <CameraRig />
