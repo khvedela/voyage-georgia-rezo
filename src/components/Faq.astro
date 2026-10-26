@@ -1,0 +1,13 @@
+---
+interface Props { items: { q: string; a: string }[]; open?: number }
+const { items, open } = Astro.props;
+---
+<div class="faq-list">
+  {items.map((f, i) => (
+    <details class="faq" open={open === i}>
+      <summary>{f.q} <span aria-hidden="true" class="pm">+</span></summary>
+      <p>{f.a}</p>
+    </details>
+  ))}
+  <div style="border-top:1px solid var(--line-2)"></div>
+</div>

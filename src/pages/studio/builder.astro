@@ -1,0 +1,62 @@
+---
+import Dash from '../../layouts/Dash.astro';
+const icons = {
+  drive: 'M3 14l2-6h14l2 6v4H3z M7 18v2 M17 18v2',
+  visit: 'M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z M12 12a2.2 2.2 0 1 0 0-4.4 2.2 2.2 0 0 0 0 4.4',
+  stay: 'M3 18V8 M3 14h18v4 M21 14v-2a3 3 0 0 0-3-3h-7v5',
+};
+const stops = [
+  { t: '09:00', icon: icons.drive, h: 'Leave Tbilisi', s: 'Hotel pickup', gap: '≈ 30 min · estimate' },
+  { t: '09:30', icon: icons.visit, h: 'Mtskheta — Jvari & Svetitskhoveli', s: '2 h on site', sel: true, gap: '≈ 1 h · estimate' },
+  { t: '12:30', icon: icons.visit, h: 'Ananuri fortress', s: '45 min', gap: '≈ 1 h 45 m · estimate' },
+  { t: '15:30', icon: icons.stay, h: 'Stepantsminda — check in', s: '[guesthouse]' },
+];
+---
+<Dash title="Itinerary builder" path="/studio/builder">
+  <header class="d-hd">
+    <a href="/studio/inquiry" class="d-back" aria-label="Back to inquiry"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg></a>
+    <div style="flex:1;min-width:0"><h1 class="d-title">Leila H. · 10 days</h1><p class="d-sub">Draft v1 · not shared · sample data</p></div>
+  </header>
+  <div role="tablist" aria-label="Days" style="display:flex;gap:8px;padding:4px 16px 12px;overflow-x:auto">
+    {['D1', 'D2'].map((d) => <span class="d-chip">{d}</span>)}
+    <span role="tab" aria-selected="true" class="d-chip d-chip--on">D3</span>
+    {['D4', 'D5', 'D6'].map((d) => <span class="d-chip">{d}</span>)}
+    <span class="d-chip d-chip--add">+ Day</span>
+  </div>
+  <div class="d-main" style="padding:0 16px 16px;gap:12px">
+    <div class="d-offline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M2 8.8a15 15 0 0 1 20 0 M5 12.5a10 10 0 0 1 14 0 M8.5 16a5 5 0 0 1 7 0 M12 20h.01" /><path d="M3 3l18 18" /></svg>No signal — saved on this phone. 1 change will sync later.</div>
+    <div>
+      <p class="d-eyebrow" style="margin:0">Day 3</p>
+      <h2 class="disp" style="margin:0;font-weight:400;font-size:28px;line-height:1.1">Tbilisi → Kazbegi</h2>
+    </div>
+    <ol class="d-timeline">
+      {stops.map((s) => (
+        <>
+          <li>
+            <div class="d-time">{s.t}</div>
+            <div class:list={['d-stop', s.sel && 'd-stop--sel']}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#D62839" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d={s.icon} /></svg>
+              <div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:600">{s.h}</div><div style="font-size:13.5px;color:var(--slate)">{s.s}</div></div>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="#A1A1AA" aria-hidden="true" style="flex:none"><circle cx="9" cy="6" r="1.6" /><circle cx="15" cy="6" r="1.6" /><circle cx="9" cy="12" r="1.6" /><circle cx="15" cy="12" r="1.6" /><circle cx="9" cy="18" r="1.6" /><circle cx="15" cy="18" r="1.6" /></svg>
+            </div>
+          </li>
+          {s.gap && <li class="d-gap" aria-hidden="true"><div style="width:46px;flex:none;margin:0"></div><div><i></i>{s.gap}</div></li>}
+        </>
+      ))}
+    </ol>
+    <button type="button" style="min-height:52px;border-radius:12px;border:1.5px dashed var(--line-3);background:transparent;color:var(--ink);font-size:16px;font-weight:600;cursor:pointer;font-family:inherit">+ Add a stop</button>
+    <div style="display:flex;flex-wrap:wrap;gap:8px">{['Visit', 'Meal', 'Drive', 'From library'].map((l) => <button type="button" class="d-pill" style="font-family:inherit">{l}</button>)}</div>
+    <div style="padding:14px 16px;border-radius:12px;background:var(--mist);font-size:14.5px;display:flex;flex-direction:column;gap:4px">
+      <div style="display:flex;justify-content:space-between"><span>Driving today</span><strong>≈ 3 h 15 m</strong></div>
+      <div style="display:flex;justify-content:space-between"><span>Day length</span><strong>≈ 8 h</strong></div>
+      <div style="display:flex;justify-content:space-between"><span>Pace check · slow</span><strong>Within your usual limit</strong></div>
+      <p style="margin:6px 0 0;font-size:13px;color:var(--slate)">Drive times are estimates. You confirm them before anything is published.</p>
+    </div>
+    <label for="note" style="font-size:14px;font-weight:600">Note to the traveller (shown on this day)</label>
+    <textarea id="note" rows="2" placeholder="Why this day works, what to bring…" class="field" style="padding:12px 14px;min-height:0;background:var(--paper);resize:none"></textarea>
+  </div>
+  <footer class="d-foot" style="flex-direction:row;align-items:center;gap:12px;padding-top:10px">
+    <div style="flex:1;min-width:0"><div style="font-size:12.5px;color:var(--slate)">Quote so far</div><div class="disp" style="font-size:24px;line-height:1.1">€3,950 <span style="font-size:13px;font-family:var(--font-body);color:var(--slate)">draft</span></div></div>
+    <a href="/studio/quote" class="d-btn" style="min-height:52px;padding:0 24px;font-size:16px">Open quotation</a>
+  </footer>
+</Dash>

@@ -1,0 +1,12 @@
+---
+import Base from '../../layouts/Base.astro';
+import TripStudio from '../../components/studio/TripStudio';
+import { MAP } from '../../data/routes';
+import { site } from '../../config/site';
+import '../../styles/builder.css';
+import '../../styles/studio.css';
+---
+<!-- Private by design: real trips live at /trip/<long-unguessable-token>. This demo shows what a traveller receives. -->
+<Base title="Your Personal Georgian Journey (sample)" description="A sample of the private itinerary page Rezo sends to each traveller." path="/trip/demo" noindex bare>
+  <TripStudio client:load mapSrc={MAP.srcWide} whatsapp={site.contact.whatsapp} />
+</Base>

@@ -1,0 +1,60 @@
+---
+import Base from '../layouts/Base.astro';
+import PageIntro from '../components/PageIntro.astro';
+import Faq from '../components/Faq.astro';
+import Todo from '../components/Todo.astro';
+import PhotoSlot from '../components/PhotoSlot.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { pageByPath } from '../data/pages';
+import { webPage, faqPage, breadcrumbWithId } from '../lib/schema';
+
+const page = pageByPath('/accessible-travel');
+const crumbs = [{ name: 'Home', path: '/' }, { name: 'Accessible travel', path: '/accessible-travel' }];
+const faqs = [
+  { q: 'Do you have a wheelchair-accessible vehicle in Georgia?', a: 'Yes. One of our Mercedes Sprinters is wheelchair-accessible. Rezo confirms access at every stop before you commit.' },
+  { q: 'What if a place is not accessible?', a: 'Rezo tells you plainly and suggests what is possible instead. He checks every stop before it goes into your itinerary, so you are not surprised on the day.' },
+  { q: 'Is the trip priced differently?', a: 'Every trip is priced by Rezo for the route, group and vehicle, and you see a clear quotation with what is included. Access needs are part of that plan, not a surcharge added afterwards.' },
+  { q: 'How do I tell you about access needs?', a: 'In the trip builder, choose “Someone uses a wheelchair” or “Limited walking or stairs” and add details in the last step, or simply write to Rezo. He talks through your needs before planning anything.' },
+];
+const graph = [
+  webPage({ path: page.path, name: page.title, description: page.description, type: 'WebPage', crumbs, dateModified: page.updated }),
+  breadcrumbWithId(page.path, crumbs),
+  faqPage(page.path, faqs),
+];
+---
+<Base title={page.title} description={page.description} path={page.path} ogSlug={page.slug} graph={graph} modified={page.updated}>
+  <PageIntro eyebrow="Accessible travel" title="Accessible travel, planned honestly." summary="One of our Mercedes Sprinters is wheelchair-accessible. For every request, Rezo talks through your needs first, then checks each stop before it goes into your itinerary. If something isn’t possible, he’ll say so and suggest what is." crumbs={crumbs} updated={page.updated} />
+
+  <section class="section" style="padding-top:0">
+    <div class="wrap dgrid">
+      <div class="prose">
+        <h2 style="margin-top:0">What Rezo does differently</h2>
+        <p>Georgia’s old towns, mountain villages and monasteries were not built with wheelchairs in mind, and a brochure cannot tell you which stops will work for you. So there is no standard accessible package. Instead:</p>
+        <ol>
+          <li><strong>He listens first.</strong> Before a route is drawn, Rezo talks through your needs: how you travel, what helps and what does not.</li>
+          <li><strong>He checks each stop.</strong> Every place is confirmed before it goes into your itinerary, day by day.</li>
+          <li><strong>He tells you the truth.</strong> If something isn’t possible, he’ll say so and suggest what is.</li>
+        </ol>
+        <h2>The vehicle</h2>
+        <p>The accessible vehicle is a short-wheelbase Mercedes Sprinter. Rezo confirms access at every stop before you commit.
+          {' '}<Todo>Adaptation details (ramp or lift, securing points, seating) — to be verified and listed here.</Todo></p>
+        <h2>Tell him early</h2>
+        <p>In the <a href="/design-my-trip">trip builder</a>, choose <em>Someone uses a wheelchair</em> or <em>Limited walking or stairs</em>, then add details in the last step. You can also <a href="/contact">write to Rezo directly</a>. Nothing is booked and nothing is charged until you both agree on the plan.</p>
+        <p>Also useful: slower days and fewer hotel changes make a big difference when travelling with older parents or small children, whether or not a wheelchair is involved.</p>
+      </div>
+      <div><PhotoSlot label="Photo of the accessible Sprinter goes here" ratio="4 / 3" size={40} /></div>
+    </div>
+  </section>
+
+  <section class="section section--mist" aria-labelledby="faq-h">
+    <div class="wrap--narrow">
+      <h2 id="faq-h" class="h-sm" style="margin-bottom:28px">Questions about accessible travel</h2>
+      <Faq items={faqs} />
+    </div>
+  </section>
+  <CtaBand title="Tell Rezo what you need." text="He talks through your needs first, then plans around them. Free, and nothing is booked until you both agree." />
+</Base>
+<style>
+  .dgrid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px; }
+  @media (min-width: 1000px) { .dgrid { grid-template-columns: minmax(0, 1fr) 460px; gap: 64px; align-items: start; } }
+</style>

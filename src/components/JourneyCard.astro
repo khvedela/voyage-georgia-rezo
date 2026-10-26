@@ -1,0 +1,18 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import RouteMap from './RouteMap.astro';
+interface Props { entry: CollectionEntry<'journeys'>; level?: 2 | 3 }
+const { entry, level = 3 } = Astro.props;
+const H = `h${level}` as 'h2' | 'h3';
+const d = entry.data;
+---
+<article class="card card--stretched">
+  <RouteMap id={d.map} class="jmapthumb" />
+  <p class="card-eyebrow">{d.meta}</p>
+  <H class="card-title card-title--sm disp"><a href={`/journeys/${entry.id}`} class="stretch" style="text-decoration:none">{d.title}</a></H>
+  <p class="card-text" style="flex:1;margin-bottom:14px">{d.cardText}</p>
+  <span class="lnk">Read this idea <span aria-hidden="true" class="red">→</span></span>
+</article>
+<style>
+  .jmapthumb { width: 100%; height: auto; display: block; border-radius: 8px; background: var(--mist); aspect-ratio: 880 / 490; }
+</style>

@@ -1,0 +1,37 @@
+---
+/**
+ * A stop's photograph as a matted print. On the desktop stage the prints pile up as the van travels
+ * (see JourneyScene); on phones each one sits at the top of its stop. The caption carries the credit the
+ * licence requires.
+ */
+import { getImage } from 'astro:assets';
+import { photos, type PhotoId } from '../../data/photos';
+
+interface Props { id: PhotoId; index: number; n: string; place: string; variant: 'stage' | 'mobile'; tilt?: number }
+const { id, index, n, place, variant, tilt = 0 } = Astro.props;
+const p = photos[id];
+const title = p.credit.replace(/^Photo:\s*/, '').split(' · ')[0];
+const ratio = variant === 'stage' ? 4 / 5 : 4 / 3;
+const widths = variant === 'stage' ? [400, 640, 900] : [400, 640, 900];
+const imgs = await Promise.all(
+  widths.map((w) => getImage({ src: p.src, width: w, height: Math.round(w / ratio), fit: 'cover', format: 'webp', quality: 72 })),
+);
+const src = imgs[1].src;
+const srcset = imgs.map((im, k) => `${im.src} ${widths[k]}w`).join(', ');
+const sizes = variant === 'stage' ? 'clamp(240px, 20.5vw, 460px)' : 'min(100vw - 40px, 460px)';
+---
+<figure class:list={['jprint', variant === 'stage' ? 'jprint--stage' : 'jprint--inline']} data-ph={index} style={`--tilt:${tilt}deg`}>
+  <div class="jprint-mat">
+    <div class="jprint-img">
+      {variant === 'stage' ? (
+        <img data-src={src} data-srcset={srcset} sizes={sizes} alt={p.alt} width={widths[1]} height={Math.round(widths[1] / ratio)} decoding="async" />
+      ) : (
+        <img src={src} srcset={srcset} sizes={sizes} alt={p.alt} width={widths[1]} height={Math.round(widths[1] / ratio)} loading="lazy" decoding="async" />
+      )}
+    </div>
+    <figcaption class="jprint-cap">
+      <span class="jprint-title"><span class="jprint-n">{n}</span>{title}<span class="jprint-place"> · {place}</span></span>
+      <a class="jprint-credit" href={p.creditUrl} target="_blank" rel="noopener">{p.author} · {p.licence}</a>
+    </figcaption>
+  </div>
+</figure>

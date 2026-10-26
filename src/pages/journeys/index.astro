@@ -1,0 +1,29 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageIntro from '../../components/PageIntro.astro';
+import JourneyCard from '../../components/JourneyCard.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { pageByPath } from '../../data/pages';
+import { webPage, itemList, breadcrumbWithId } from '../../lib/schema';
+
+const page = pageByPath('/journeys');
+const items = (await getCollection('journeys')).sort((a, b) => a.data.order - b.data.order);
+const crumbs = [{ name: 'Home', path: '/' }, { name: 'Example journeys', path: '/journeys' }];
+const graph = [
+  webPage({ path: page.path, name: page.title, description: page.description, type: 'CollectionPage', crumbs, dateModified: page.updated }),
+  breadcrumbWithId(page.path, crumbs),
+  itemList('Example Georgia journeys', items.map((j) => ({ name: j.data.title, path: `/journeys/${j.id}` }))),
+];
+---
+<Base title={page.title} description={page.description} path={page.path} ogSlug={page.slug} graph={graph} modified={page.updated}>
+  <PageIntro eyebrow="Example journeys" title="Journeys Rezo might plan" summary="Three starting points for a private trip to Georgia: six, eight and ten days. They are ideas, never fixed packages. Route, length, pace and price are always set for you, and no price is shown until Rezo has planned your trip." crumbs={crumbs} updated={page.updated} />
+  <section class="section" style="padding-top:0">
+    <div class="wrap">
+      <div class="grid-auto" style="--min:330px">
+        {items.map((j) => <JourneyCard entry={j} level={2} />)}
+      </div>
+    </div>
+  </section>
+  <CtaBand title="None of these quite right?" text="Describe your own trip in a sentence or answer a few easy questions. Rezo plans from a blank map and your own words." />
+</Base>

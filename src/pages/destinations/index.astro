@@ -1,0 +1,52 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageIntro from '../../components/PageIntro.astro';
+import DestinationCard from '../../components/DestinationCard.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { pageByPath } from '../../data/pages';
+import { webPage, itemList, breadcrumbWithId } from '../../lib/schema';
+
+const page = pageByPath('/destinations');
+const items = (await getCollection('destinations')).sort((a, b) => a.data.order - b.data.order);
+const crumbs = [{ name: 'Home', path: '/' }, { name: 'Destinations', path: '/destinations' }];
+const graph = [
+  webPage({ path: page.path, name: page.title, description: page.description, type: 'CollectionPage', crumbs, dateModified: page.updated }),
+  breadcrumbWithId(page.path, crumbs),
+  itemList('Georgia destinations', items.map((d) => ({ name: d.data.name, path: `/destinations/${d.id}` }))),
+];
+const legs = [
+  ['Tbilisi → Kakheti (Telavi)', '≈ 85 km', 'about 2 h over the Gombori pass'],
+  ['Tbilisi → Kazbegi (Stepantsminda)', 'Military Highway', 'about 3 h, without stops'],
+  ['Tbilisi → Kutaisi', '≈ 230 km', 'about 3½ h'],
+  ['Kutaisi → Mestia (Svaneti)', '≈ 225 km', 'about 4½ h via Zugdidi'],
+  ['Mestia → Batumi', '≈ 260 km', 'about 5 h'],
+  ['Telavi → Omalo (Tusheti)', '≈ 100 km', '4–5 h by 4×4, June to October'],
+];
+---
+<Base title={page.title} description={page.description} path={page.path} ogSlug={page.slug} graph={graph} modified={page.updated}>
+  <PageIntro eyebrow="Destinations" title="Where to go in Georgia" summary="Georgia is small enough that most regions are a half-day’s drive apart, and varied enough that each one feels like a different country. These seven are where Rezo’s journeys usually go; pick what moves you and he connects the dots." crumbs={crumbs} updated={page.updated} />
+
+  <section class="section" style="padding-top:0">
+    <div class="wrap">
+      <div class="grid-auto" style="--min:250px;gap:32px 24px">
+        {items.map((d) => <DestinationCard entry={d} level={2} />)}
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--mist" aria-labelledby="legs-h">
+    <div class="wrap--narrow">
+      <h2 id="legs-h" class="h-sm" style="margin-bottom:12px">How far apart are they?</h2>
+      <p class="body-lg" style="margin:0 0 28px">Typical distances and times, without stops. Your pace sets the real day, and Rezo splits the long legs with a night in between.</p>
+      <div class="prose" style="overflow-x:auto">
+        <table>
+          <thead><tr><th scope="col">Leg</th><th scope="col">Distance</th><th scope="col">Typical time</th></tr></thead>
+          <tbody>{legs.map(([a, b, c]) => <tr><th scope="row" style="font-size:16px;letter-spacing:0;text-transform:none;color:var(--ink);border-top:1px solid var(--line);border-bottom:0">{a}</th><td>{b}</td><td>{c}</td></tr>)}</tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <CtaBand />
+</Base>

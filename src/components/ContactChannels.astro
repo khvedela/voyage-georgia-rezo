@@ -1,0 +1,19 @@
+---
+import { site, whatsappLink, mailtoLink } from '../config/site';
+interface Props { dark?: boolean }
+const { dark = false } = Astro.props;
+const wa = whatsappLink();
+const mail = mailtoLink('Trip to Georgia');
+const items = [
+  wa && { href: wa, label: 'WhatsApp' },
+  site.contact.messenger && { href: site.contact.messenger, label: 'Messenger' },
+  mail && { href: mail, label: `Email ${site.contact.email}` },
+].filter(Boolean) as { href: string; label: string }[];
+---
+{items.length > 0 && (
+  <div style="display:flex;flex-wrap:wrap;gap:10px">
+    {items.map((i) => (
+      <a href={i.href} rel="noopener" class:list={['btn', 'btn--sm', dark ? 'btn--ghost-light' : 'btn--secondary']}>{i.label}</a>
+    ))}
+  </div>
+)}

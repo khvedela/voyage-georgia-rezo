@@ -1,0 +1,38 @@
+---
+import Breadcrumbs from './Breadcrumbs.astro';
+import type { Crumb } from '../lib/schema';
+interface Props {
+  eyebrow?: string;
+  title: string;
+  summary: string;
+  crumbs: Crumb[];
+  updated?: Date | string;
+  /** Show "Prepared by Voyage Georgia Rezo". Off for utility pages. */
+  byline?: boolean;
+}
+const { eyebrow, title, summary, crumbs, updated, byline = true } = Astro.props;
+const d = updated ? new Date(updated) : undefined;
+const fmt = d?.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+---
+<Breadcrumbs items={crumbs} />
+<header class="intro">
+  <div class="wrap">
+    {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+    <h1 class="h-lg intro-h">{title}</h1>
+    <p class="answer">{summary}</p>
+    {(byline || d) && (
+      <p class="meta intro-meta">
+        {byline && <span>By {`Voyage Georgia Rezo`}</span>}
+        {byline && d && <span aria-hidden="true"> · </span>}
+        {d && <span>Last updated <time datetime={d.toISOString().slice(0, 10)}>{fmt}</time></span>}
+      </p>
+    )}
+    <slot />
+  </div>
+</header>
+<style>
+  .intro { padding: clamp(28px, 4vw, 56px) var(--edge) clamp(32px, 4vw, 56px); }
+  .intro .wrap { max-width: none; }
+  .intro-h { max-width: 22ch; margin-bottom: 22px; font-size: clamp(36px, 4.6vw, 64px); }
+  .intro-meta { margin: 18px 0 0; }
+</style>

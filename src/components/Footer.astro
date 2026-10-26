@@ -1,0 +1,42 @@
+---
+import Todo from './Todo.astro';
+import { site, whatsappLink, mailtoLink } from '../config/site';
+const wa = whatsappLink();
+const mail = mailtoLink();
+const year = new Date().getFullYear();
+---
+<footer class="site-ft">
+  <div class="ft-cols">
+    <div class="ft-col" style="flex-basis:300px;max-width:420px">
+      <div class="disp" style="font-weight:600;font-size:26px;letter-spacing:-.02em;color:#fff">Voyage Georgia <span class="red">Rezo</span></div>
+      <p style="margin:12px 0 0">A family-owned private tour agency in Georgia. Planned remotely, delivered in person: there is no walk-in office, just Rezo and a message away.</p>
+    </div>
+    <nav class="ft-col" aria-label="Plan your trip">
+      <p class="ft-h">Plan</p>
+      <a href="/design-my-trip">Design my trip</a>
+      <a href="/journeys">Example journeys</a>
+      <a href="/destinations">Destinations</a>
+      <a href="/vehicles">Vehicles</a>
+    </nav>
+    <nav class="ft-col" aria-label="Learn">
+      <p class="ft-h">Learn</p>
+      <a href="/guides">Travel guides</a>
+      <a href="/accessible-travel">Accessible travel</a>
+      <a href="/adventure-4x4">4×4 adventure</a>
+      <a href="/faq">Questions</a>
+    </nav>
+    <div class="ft-col">
+      <p class="ft-h">Talk to Rezo</p>
+      <a href="/rezo">About Rezo</a>
+      <a href="/contact">Contact</a>
+      {wa && <a href={wa} rel="noopener">WhatsApp</a>}
+      {mail && <a href={mail}>{site.contact.email}</a>}
+      {site.contact.facebook && <a href={site.contact.facebook} rel="me noopener">Facebook</a>}
+      {site.contact.messenger && <a href={site.contact.messenger} rel="noopener">Messenger</a>}
+      {site.contact.instagram && <a href={site.contact.instagram} rel="me noopener">Instagram</a>}
+    </div>
+  </div>
+  <p class="ft-legal">
+    © {year} {site.name}. <Todo>Business registration details — to add</Todo> Maps: borders from Natural Earth; elevation from SRTM (NASA), GMTED2010 (USGS) and ETOPO1 (NOAA), all public domain. Photo credits sit beside each photograph. Photo areas marked as slots are placeholders for Rezo’s own pictures.
+  </p>
+</footer>

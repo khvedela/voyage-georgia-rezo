@@ -1,0 +1,23 @@
+---
+import Logo from './Logo.astro';
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const links = [
+  { href: '/destinations', label: 'Destinations' },
+  { href: '/journeys', label: 'Journeys' },
+  { href: '/vehicles', label: 'Vehicles' },
+  { href: '/guides', label: 'Guides' },
+  { href: '/rezo', label: 'Meet Rezo' },
+  { href: '/faq', label: 'Questions' },
+];
+const current = (href: string) => path === href || path.startsWith(`${href}/`);
+---
+<header class="site-hd">
+  <a href="/" class="brand" aria-label="Voyage Georgia Rezo, home">
+    <Logo />
+    <span class="brand-name">Voyage Georgia <span class="red">Rezo</span></span>
+  </a>
+  <nav aria-label="Main" class="nav">
+    {links.map((l) => <a href={l.href} aria-current={current(l.href) ? 'page' : undefined}>{l.label}</a>)}
+  </nav>
+  <a href="/design-my-trip" class="btn btn--primary btn--sm">Design my trip</a>
+</header>

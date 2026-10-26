@@ -1,0 +1,92 @@
+---
+import { getCollection, render } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageIntro from '../../components/PageIntro.astro';
+import PhotoFigure from '../../components/PhotoFigure.astro';
+import RouteMap from '../../components/RouteMap.astro';
+import DestinationCard from '../../components/DestinationCard.astro';
+import Faq from '../../components/Faq.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { webPage, destination, faqPage, breadcrumbWithId } from '../../lib/schema';
+import { absoluteUrl } from '../../config/site';
+
+export async function getStaticPaths() {
+  const all = await getCollection('destinations');
+  return all.map((entry) => ({ params: { slug: entry.id }, props: { entry, all } }));
+}
+interface Props { entry: CollectionEntry<'destinations'>; all: CollectionEntry<'destinations'>[] }
+const { entry, all } = Astro.props;
+const d = entry.data;
+const { Content } = await render(entry);
+const path = `/destinations/${entry.id}`;
+const crumbs = [{ name: 'Home', path: '/' }, { name: 'Destinations', path: '/destinations' }, { name: d.name, path }];
+const guides = await getCollection('guides');
+const related = d.guides.map((id) => guides.find((g) => g.id === id)).filter(Boolean) as CollectionEntry<'guides'>[];
+const nearby = d.nearby.map((id) => all.find((x) => x.id === id)).filter(Boolean) as CollectionEntry<'destinations'>[];
+const iso = d.updated.toISOString().slice(0, 10);
+const graph = [
+  webPage({ path, name: d.seoTitle, description: d.description, type: 'WebPage', crumbs, dateModified: iso, about: { '@id': `${absoluteUrl(path)}#destination` } }),
+  breadcrumbWithId(path, crumbs),
+  destination({ name: d.name, description: d.summary, path, lat: d.lat, lng: d.lng, touristType: d.touristType }),
+  ...(d.faqs.length ? [faqPage(path, d.faqs)] : []),
+];
+---
+<Base title={d.seoTitle} description={d.description} path={path} ogSlug={`destinations-${entry.id}`} graph={graph} modified={iso}>
+  <PageIntro eyebrow={d.eyebrow} title={d.title} summary={d.summary} crumbs={crumbs} updated={d.updated}>
+    <dl class="facts" style="margin-top:32px;max-width:760px">
+      {d.facts.map((f) => <div><dt>{f.label}</dt><dd>{f.value}{f.note && <small>{f.note}</small>}</dd></div>)}
+    </dl>
+  </PageIntro>
+
+  <section class="section" style="padding-top:0">
+    <div class="wrap dest-grid">
+      <article class="prose"><Content /></article>
+      <aside class="dest-aside" aria-label="Map and photo">
+        {d.photo && <PhotoFigure id={d.photo} eager ratio="4 / 3" />}
+        <div class="mapbox"><RouteMap id={d.map} scale={0.62} /></div>
+        <p class="meta" style="margin:8px 0 0">Routes follow real highways. Relief from SRTM, GMTED2010 and ETOPO1 elevation data.</p>
+        <a href="/design-my-trip" class="btn btn--primary btn--sm" style="margin-top:20px">Add {d.name} to my trip</a>
+      </aside>
+    </div>
+  </section>
+
+  {d.faqs.length > 0 && (
+    <section class="section section--mist" aria-labelledby="faq-h">
+      <div class="wrap--narrow">
+        <h2 id="faq-h" class="h-sm" style="margin-bottom:28px">Questions about {d.name}</h2>
+        <Faq items={d.faqs} />
+      </div>
+    </section>
+  )}
+
+  {nearby.length > 0 && (
+    <section class="section" aria-labelledby="near-h">
+      <div class="wrap">
+        <h2 id="near-h" class="h-sm" style="margin-bottom:28px">Nearby on the map</h2>
+        <div class="grid-auto" style="--min:250px;gap:32px 24px">
+          {nearby.map((n) => <DestinationCard entry={n} />)}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {related.length > 0 && (
+    <section class="section section--mist section--tight" aria-labelledby="rel-h">
+      <div class="wrap--narrow">
+        <h2 id="rel-h" class="h-sm" style="margin-bottom:18px">Worth reading next</h2>
+        <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px">
+          {related.map((g) => <li><a class="lnk" href={`/guides/${g.id}`}>{g.data.title} <span aria-hidden="true" class="red">→</span></a></li>)}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  <CtaBand />
+</Base>
+<style>
+  .dest-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px; }
+  @media (min-width: 1000px) { .dest-grid { grid-template-columns: minmax(0, 1fr) 460px; gap: 64px; align-items: start; } .dest-aside { position: sticky; top: 96px; } }
+  .mapbox { margin-top: 20px; border: 1px solid var(--line); border-radius: 14px; padding: 8px; background: #fff; }
+  .mapbox svg { width: 100%; height: auto; display: block; border-radius: 8px; aspect-ratio: 4 / 5; }
+</style>

@@ -1,0 +1,91 @@
+---
+import { getCollection, render } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageIntro from '../../components/PageIntro.astro';
+import PhotoFigure from '../../components/PhotoFigure.astro';
+import DestinationCard from '../../components/DestinationCard.astro';
+import Faq from '../../components/Faq.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { webPage, article, faqPage, breadcrumbWithId } from '../../lib/schema';
+import { absoluteUrl } from '../../config/site';
+
+export async function getStaticPaths() {
+  const all = await getCollection('guides');
+  const dest = await getCollection('destinations');
+  return all.map((entry) => ({ params: { slug: entry.id }, props: { entry, all, dest } }));
+}
+interface Props { entry: CollectionEntry<'guides'>; all: CollectionEntry<'guides'>[]; dest: CollectionEntry<'destinations'>[] }
+const { entry, all, dest } = Astro.props;
+const d = entry.data;
+const { Content, headings } = await render(entry);
+const path = `/guides/${entry.id}`;
+const crumbs = [{ name: 'Home', path: '/' }, { name: 'Guides', path: '/guides' }, { name: d.title, path }];
+const pub = d.published.toISOString().slice(0, 10);
+const mod = d.updated.toISOString().slice(0, 10);
+const places = d.destinations.map((id) => dest.find((x) => x.id === id)).filter(Boolean) as CollectionEntry<'destinations'>[];
+const others = all.filter((g) => g.id !== entry.id).sort((a, b) => a.data.order - b.data.order);
+const toc = headings.filter((h) => h.depth === 2);
+const graph = [
+  webPage({ path, name: d.seoTitle, description: d.description, type: 'WebPage', crumbs, datePublished: pub, dateModified: mod, about: { '@id': `${absoluteUrl(path)}#article` } }),
+  breadcrumbWithId(path, crumbs),
+  article({ path, headline: d.title, description: d.description, published: pub, modified: mod, keywords: d.keywords }),
+  ...(d.faqs.length ? [faqPage(path, d.faqs)] : []),
+];
+---
+<Base title={d.seoTitle} description={d.description} path={path} type="article" published={pub} modified={mod} ogSlug={`guides-${entry.id}`} graph={graph}>
+  <PageIntro eyebrow={`Guide · ${d.readingMinutes} min read`} title={d.title} summary={d.summary} crumbs={crumbs} updated={d.updated} />
+
+  <section class="section" style="padding-top:0">
+    <div class="wrap gg">
+      <article class="prose"><Content /></article>
+      <aside class="gaside" aria-label="On this page">
+        {d.photo && <PhotoFigure id={d.photo} ratio="3 / 2" eager />}
+        {toc.length > 1 && (
+          <nav aria-label="Contents" class="toc">
+            <p class="eyebrow eyebrow--slate" style="margin-bottom:10px">On this page</p>
+            <ol>{toc.map((h) => <li><a href={`#${h.slug}`}>{h.text}</a></li>)}</ol>
+          </nav>
+        )}
+      </aside>
+    </div>
+  </section>
+
+  {d.faqs.length > 0 && (
+    <section class="section section--mist" aria-labelledby="faq-h">
+      <div class="wrap--narrow">
+        <h2 id="faq-h" class="h-sm" style="margin-bottom:28px">Quick answers</h2>
+        <Faq items={d.faqs} />
+      </div>
+    </section>
+  )}
+
+  {places.length > 0 && (
+    <section class="section" aria-labelledby="places-h">
+      <div class="wrap">
+        <h2 id="places-h" class="h-sm" style="margin-bottom:28px">The places in this guide</h2>
+        <div class="grid-auto" style="--min:250px;gap:32px 24px">{places.slice(0, 4).map((p) => <DestinationCard entry={p} />)}</div>
+      </div>
+    </section>
+  )}
+
+  <section class="section section--mist section--tight" aria-labelledby="more-h">
+    <div class="wrap--narrow">
+      <h2 id="more-h" class="h-sm" style="margin-bottom:18px">More guides</h2>
+      <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px">
+        {others.map((g) => <li><a class="lnk" href={`/guides/${g.id}`}>{g.data.title} <span aria-hidden="true" class="red">→</span></a></li>)}
+      </ul>
+    </div>
+  </section>
+
+  <CtaBand />
+</Base>
+<style>
+  .gg { display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px; }
+  @media (min-width: 1000px) { .gg { grid-template-columns: minmax(0, 1fr) 380px; gap: 72px; align-items: start; } .gaside { position: sticky; top: 96px; } }
+  .gaside { display: flex; flex-direction: column; gap: 28px; }
+  .toc ol { margin: 0; padding: 0; list-style: none; border-top: 1.5px solid var(--ink); }
+  .toc li { border-bottom: 1px solid var(--line); }
+  .toc a { display: block; padding: 10px 0; text-decoration: none; color: var(--slate-2); font-size: 15.5px; }
+  .toc a:hover { color: var(--red); }
+</style>

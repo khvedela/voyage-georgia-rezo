@@ -1,0 +1,51 @@
+---
+import { getImage } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import Footer from '../components/Footer.astro';
+import TripBuilder from '../components/builder/TripBuilder';
+import Faq from '../components/Faq.astro';
+import { photos, type PhotoId } from '../data/photos';
+import { MAP } from '../data/routes';
+import { site } from '../config/site';
+import { pageByPath } from '../data/pages';
+import { webPage, faqPage, breadcrumbWithId, ids } from '../lib/schema';
+import '../styles/builder.css';
+
+const page = pageByPath('/design-my-trip');
+const crumbs = [{ name: 'Home', path: '/' }, { name: 'Design my trip', path: '/design-my-trip' }];
+const thumbs: Record<string, string> = {};
+for (const id of Object.keys(photos) as PhotoId[]) {
+  thumbs[id] = (await getImage({ src: photos[id].src, width: 400, height: 300, format: 'webp', quality: 60 })).src;
+}
+const faqs = [
+  { q: 'Does it cost anything to send a request?', a: 'No. Sending a request is free and is not a booking. Rezo reads it himself and plans the real trip with you; nothing is charged until you both agree.' },
+  { q: 'Will I see a price?', a: 'Not in the builder. Your choices draw a first sketch of the route, but Rezo writes a real quotation, line by line, once your trip is planned.' },
+  { q: 'What if I don’t know Georgia at all?', a: 'That is the point of the builder. Tap what draws you (mountains, wine, old churches, the sea) and it shows where those interests usually lead. You can also just write a sentence.' },
+];
+const graph = [
+  webPage({ path: page.path, name: page.title, description: page.description, type: ['WebPage'], crumbs, dateModified: page.updated, about: { '@id': ids.org } }),
+  breadcrumbWithId(page.path, crumbs),
+  {
+    '@type': 'Service', '@id': `${site.url}/design-my-trip#service`, name: 'Custom private tour design for Georgia',
+    description: 'A free request form: choose interests, dates, group and pace, or write a sentence. Rezo plans a private itinerary and writes the quotation himself.',
+    provider: { '@id': ids.org }, areaServed: { '@id': ids.georgia }, serviceType: 'Private tour planning',
+    availableChannel: { '@type': 'ServiceChannel', serviceUrl: `${site.url}/design-my-trip`, name: 'Online trip request' },
+  },
+  faqPage(page.path, faqs),
+];
+---
+<Base title={page.title} description={page.description} path={page.path} ogSlug={page.slug} graph={graph} modified={page.updated} bare>
+  <TripBuilder client:load photos={thumbs} mapSrc={MAP.srcWide} endpoint={site.inquiryEndpoint} whatsapp={site.contact.whatsapp} email={site.contact.email} />
+
+  <section class="section section--mist" aria-labelledby="what-h">
+    <div class="wrap--narrow">
+      <h2 id="what-h" class="h-sm" style="margin-bottom:16px">How the trip builder works</h2>
+      <div class="prose" style="margin-bottom:36px">
+        <p>Voyage Georgia Rezo does not sell fixed packages. This builder collects what you want (interests, rough dates, group, pace) and draws a first sketch of where those interests usually lead in Georgia. Rezo, who has more than twenty years in Georgian tourism, then reads your request himself and plans the real route, the daily schedule, the vehicle and the price.</p>
+        <p>You do not need to know the map. If you would rather start from an idea, browse the <a href="/journeys">example journeys</a> or the <a href="/destinations">destinations</a>, and read <a href="/guides/best-time-to-visit-georgia">the best time to visit Georgia</a> if dates are still open.</p>
+      </div>
+      <Faq items={faqs} />
+    </div>
+  </section>
+  <Footer />
+</Base>

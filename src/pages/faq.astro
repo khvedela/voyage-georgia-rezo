@@ -1,0 +1,41 @@
+---
+import Base from '../layouts/Base.astro';
+import PageIntro from '../components/PageIntro.astro';
+import Faq from '../components/Faq.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { faqs } from '../data/faqs';
+import { pageByPath } from '../data/pages';
+import { webPage, faqPage, breadcrumbWithId } from '../lib/schema';
+
+const page = pageByPath('/faq');
+const crumbs = [{ name: 'Home', path: '/' }, { name: 'Questions', path: '/faq' }];
+const groups = [
+  { id: 'planning', title: 'Planning your trip' },
+  { id: 'pricing', title: 'Price and payment' },
+  { id: 'access', title: 'Accessibility' },
+  { id: 'roads', title: 'Roads and seasons' },
+  { id: 'practical', title: 'Practical' },
+] as const;
+const graph = [
+  webPage({ path: page.path, name: page.title, description: page.description, type: 'FAQPage', crumbs, dateModified: page.updated }),
+  breadcrumbWithId(page.path, crumbs),
+  faqPage(page.path, faqs),
+];
+---
+<Base title={page.title} description={page.description} path={page.path} ogSlug={page.slug} graph={graph} modified={page.updated}>
+  <PageIntro eyebrow="FAQ" title="Questions travellers ask" summary="Straight answers about how Rezo plans a private trip to Georgia: how the price is worked out, whether you can change the plan, wheelchair access, vehicles and what happens after you send a request." crumbs={crumbs} updated={page.updated} />
+  <section class="section" style="padding-top:0">
+    <div class="wrap--narrow">
+      {groups.map((g) => {
+        const items = faqs.filter((f) => f.topic === g.id);
+        return items.length > 0 && (
+          <div style="margin-bottom:56px">
+            <h2 class="h-sm" style="margin-bottom:20px;font-size:clamp(24px,2.6vw,32px)">{g.title}</h2>
+            <Faq items={items} />
+          </div>
+        );
+      })}
+    </div>
+  </section>
+  <CtaBand title="Still have a question?" text="Ask Rezo directly. A real person reads every message." />
+</Base>

@@ -1,0 +1,29 @@
+---
+import Base from './Base.astro';
+import '../styles/dashboard.css';
+interface Props { title: string; path: string; nav?: boolean }
+const { title, path, nav = false } = Astro.props;
+const here = Astro.url.pathname.replace(/\/$/, '');
+const items = [
+  { href: '/studio', label: 'Today', d: 'M12 3v2 M12 19v2 M3 12h2 M19 12h2 M5.6 5.6l1.4 1.4 M17 17l1.4 1.4 M18.4 5.6L17 7 M7 17l-1.4 1.4 M12 8.5a3.5 3.5 0 1 0 .01 0z' },
+  { href: '/studio/inquiry', label: 'Inquiries', d: 'M3 13l3-8h12l3 8 M3 13v6h18v-6 M3 13h5l1 2h6l1-2h5', count: 3 },
+  { href: '/studio/builder', label: 'Trips', d: 'M6 18c6 0 0-12 6-12h5 M5 16.5a1.5 1.5 0 1 0 .01 0 M17.5 4.5l2 1.5-2 1.5' },
+  { href: '/studio/quote', label: 'Quotes', d: 'M6 3h9l4 4v14H6z M15 3v4h4 M9 12h7 M9 16h7' },
+];
+---
+<Base title={`Rezo’s dashboard — ${title}`} description="Prototype of Rezo’s private field dashboard. Sample data only." path={path} noindex bare>
+  <div class="dash-app">
+    <slot />
+    {nav && (
+      <nav class="d-nav" aria-label="Dashboard">
+        {items.map((i) => (
+          <a href={i.href} aria-current={here === i.href ? 'page' : undefined}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={here === i.href ? '#D62839' : 'currentColor'} stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={i.d} /></svg>
+            {i.label}
+            {i.count && <span class="count">{i.count}</span>}
+          </a>
+        ))}
+      </nav>
+    )}
+  </div>
+</Base>

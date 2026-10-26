@@ -1,0 +1,44 @@
+---
+import { maps, type MapId } from '../data/maps';
+import { roads as roadPaths, MAP } from '../data/routes';
+
+/** `scale` < 1 shrinks strokes, pins and labels for maps shown larger than card size. */
+interface Props { id: MapId; class?: string; scale?: number }
+const { id, class: cls, scale = 1 } = Astro.props;
+const m = maps[id];
+const uid = `rm-${id}`;
+---
+<svg
+  viewBox={m.viewBox}
+  preserveAspectRatio={m.slice ? 'xMidYMid slice' : undefined}
+  class={cls}
+  role="img"
+  aria-label={m.label}
+>
+  <image class="rm-base" data-href={m.slice ? MAP.src : MAP.srcWide} x="0" y="0" width={MAP.w} height={MAP.h} />
+  {m.roads.length > 0 && (
+    <g fill="none" stroke="#D62839" stroke-width={m.stroke * scale} stroke-linecap="round" stroke-linejoin="round">
+      {m.roads.map((r) => <path d={roadPaths[r.id]} stroke-dasharray={r.dash} />)}
+    </g>
+  )}
+  <g fill={m.pinFill} stroke={m.pinStroke} stroke-width={m.pinStrokeW * scale}>
+    {m.pins.map((p) => <circle cx={p.x} cy={p.y} r={(p.r ?? m.pinR) * scale} />)}
+  </g>
+  <g font-family="Inter Variable, Inter, system-ui, sans-serif" font-size={m.fontSize * scale} font-weight="600" fill="#14161A" paint-order="stroke" stroke="#FAFAFA" stroke-width={m.textStrokeW * scale} stroke-linejoin="round">
+    {m.labels.map((l) => <text x={l.x} y={l.y} text-anchor={l.anchor}>{l.text}</text>)}
+  </g>
+  {m.extra?.map((e) => (
+    <text x={e.x} y={e.y} font-family="Inter Variable, Inter, system-ui, sans-serif" font-size={e.size * scale} letter-spacing={e.spacing} fill="#A1A1AA">{e.text}</text>
+  ))}
+</svg>
+
+<script>
+  // Every map shares one of two basemap files, so the cost is per file, not per map: maps on screen get it now,
+  // the rest once the page has loaded and gone idle, so it never competes with the first paint.
+  const attach = (im: SVGImageElement) => { if (im.dataset.href) { im.setAttribute('href', im.dataset.href); delete im.dataset.href; } };
+  const all = [...document.querySelectorAll<SVGImageElement>('image.rm-base[data-href]')];
+  for (const im of all) if ((im.ownerSVGElement ?? im).getBoundingClientRect().top < window.innerHeight * 1.5) attach(im);
+  const rest = () => all.forEach(attach);
+  const idle = () => ('requestIdleCallback' in window ? requestIdleCallback(rest, { timeout: 2000 }) : setTimeout(rest, 300));
+  if (document.readyState === 'complete') idle(); else addEventListener('load', idle, { once: true });
+</script>

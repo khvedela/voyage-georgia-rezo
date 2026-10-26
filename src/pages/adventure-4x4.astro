@@ -1,0 +1,60 @@
+---
+import Base from '../layouts/Base.astro';
+import PageIntro from '../components/PageIntro.astro';
+import Faq from '../components/Faq.astro';
+import PhotoFigure from '../components/PhotoFigure.astro';
+import PhotoSlot from '../components/PhotoSlot.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { pageByPath } from '../data/pages';
+import { webPage, faqPage, breadcrumbWithId } from '../lib/schema';
+
+const page = pageByPath('/adventure-4x4');
+const crumbs = [{ name: 'Home', path: '/' }, { name: '4×4 adventure', path: '/adventure-4x4' }];
+const faqs = [
+  { q: 'Which vehicle do you use for mountain roads?', a: 'A short Mercedes Sprinter with 4×4, chosen for mountain valleys and rough tracks that ordinary vans avoid.' },
+  { q: 'Can I drive myself on these roads?', a: 'Rezo’s tours are driven by drivers he works with, who know the roads. The roads are seasonal and weather-led, which is the main reason the vehicle and driver matter more than the schedule.' },
+  { q: 'When is the road to Tusheti open?', a: 'Usually June to October, snow permitting. The route crosses the Abano Pass at about 2,850 m and is 4×4-only.' },
+  { q: 'What happens if the weather changes the plan?', a: 'Road and weather conditions shape every mountain plan. Rezo builds slack into mountain days and, if conditions change, revises the day and tells you.' },
+];
+const graph = [
+  webPage({ path: page.path, name: page.title, description: page.description, type: 'WebPage', crumbs, dateModified: page.updated }),
+  breadcrumbWithId(page.path, crumbs),
+  faqPage(page.path, faqs),
+];
+---
+<Base title={page.title} description={page.description} path={page.path} ogSlug={page.slug} graph={graph} modified={page.updated}>
+  <PageIntro eyebrow="4×4 adventure" title="Where the road gets interesting." summary="A shorter 4×4 Sprinter and Rezo’s knowledge of Georgia’s back roads open up mountain valleys, high passes and villages that ordinary vans leave out. Road and weather conditions shape every mountain plan." crumbs={crumbs} updated={page.updated} />
+
+  <section class="section" style="padding-top:0">
+    <div class="wrap dgrid">
+      <div class="prose">
+        <h2 style="margin-top:0">Best for travellers who want the road to be part of the trip</h2>
+        <p>Some of Georgia’s most memorable places are at the end of tracks. Rezo plans these journeys around the season and the vehicle, not the other way round.</p>
+        <h2>Where a 4×4 matters</h2>
+        <ul>
+          <li><a href="/destinations/tusheti"><strong>Tusheti</strong></a>: a 4×4-only dirt road over the Abano Pass (about 2,850 m) into stone villages and summer pastures; about 100 km and four to five hours from Telavi, usually open June to October.</li>
+          <li><a href="/destinations/svaneti"><strong>Ushguli and Upper Svaneti</strong></a>: a day trip from Mestia on a mountain road, with the vehicle chosen for the conditions that day.</li>
+          <li><a href="/destinations/kazbegi"><strong>Gergeti and the Juta valley</strong></a>: reached by 4×4 or on foot above Stepantsminda; Rezo decides on the day depending on the weather.</li>
+        </ul>
+        <h2>The vehicle</h2>
+        <p>A short-wheelbase Mercedes Sprinter 4×4, one of five vehicles in the <a href="/vehicles">fleet</a>. <a href="/guides/georgia-mountain-roads-guide">Read how Georgia’s mountain roads behave</a> before you choose your dates.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:20px">
+        <PhotoFigure id="tusheti" ratio="3 / 2" eager />
+        <PhotoSlot label="Photo of the 4×4 Sprinter goes here" ratio="3 / 2" size={36} />
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--mist" aria-labelledby="faq-h">
+    <div class="wrap--narrow">
+      <h2 id="faq-h" class="h-sm" style="margin-bottom:28px">Questions about 4×4 travel</h2>
+      <Faq items={faqs} />
+    </div>
+  </section>
+  <CtaBand sample="wild" title="Start from the high villages." text="Choosing the Wine valleys to high villages idea fills in the answers for you. You can change each one." />
+</Base>
+<style>
+  .dgrid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px; }
+  @media (min-width: 1000px) { .dgrid { grid-template-columns: minmax(0, 1fr) 460px; gap: 64px; align-items: start; } }
+</style>

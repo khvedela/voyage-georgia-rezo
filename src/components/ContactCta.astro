@@ -1,0 +1,38 @@
+---
+import ContactChannels from './ContactChannels.astro';
+import ArrowIcon from './ArrowIcon.astro';
+import { site, whatsappLink, mailtoLink } from '../config/site';
+const hasChannels = Boolean(whatsappLink() || mailtoLink() || site.contact.messenger);
+---
+<section id="contact" class="section section--ink">
+  <div class="wrap" style="display:flex;flex-wrap:wrap;gap:40px clamp(32px,6vw,96px);align-items:flex-start">
+    <div style="flex:1 1 380px">
+      <h2 style="font-weight:700;font-size:clamp(38px,5.4vw,76px);line-height:.98;letter-spacing:-.035em;margin-bottom:18px">Start with<br />a sentence.</h2>
+      <p style="margin:0;max-width:430px;font-size:18px;color:var(--line-2)">Tell Rezo what you imagine. He’ll take it from there.</p>
+    </div>
+    <div style="flex:1 1 440px;min-width:0">
+      <form action="/design-my-trip" method="get" data-idea-form>
+        <label for="idea" style="display:block;margin-bottom:10px;font-weight:600;font-size:15px">Describe your ideal trip</label>
+        <textarea id="idea" rows="4" class="field idea" placeholder="We have ten days in September. We’d love mountains, wine, old churches and a little sea — without exhausting travel days."></textarea>
+        <div style="margin-top:16px;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center">
+          <button type="submit" class="btn btn--primary">Continue <ArrowIcon /></button>
+          <span style="font-size:15px;color:var(--line-2)">Then a few quick, visual questions.</span>
+        </div>
+      </form>
+      {hasChannels && <p style="margin:34px 0 10px;font-size:15px;font-weight:600">Prefer to talk?</p>}
+      <ContactChannels dark />
+    </div>
+  </div>
+</section>
+<style>
+  .idea { display: block; padding: 18px 20px; border: 0; border-radius: 12px; font-size: 18px; line-height: 1.45; min-height: 0; }
+</style>
+<script>
+  // Carry the sentence into the builder without putting it in the URL.
+  document.querySelectorAll<HTMLFormElement>('[data-idea-form]').forEach((f) =>
+    f.addEventListener('submit', () => {
+      const v = f.querySelector<HTMLTextAreaElement>('textarea')?.value.trim();
+      try { if (v) sessionStorage.setItem('vgr:idea', v); } catch { /* storage blocked: the builder simply starts empty */ }
+    }),
+  );
+</script>

@@ -1,0 +1,57 @@
+---
+import Base from '../layouts/Base.astro';
+import PageIntro from '../components/PageIntro.astro';
+import MeetRezo from '../components/home/MeetRezo.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { steps } from '../data/home';
+import { pageByPath } from '../data/pages';
+import { webPage, breadcrumbWithId, ids } from '../lib/schema';
+
+const page = pageByPath('/rezo');
+const crumbs = [{ name: 'Home', path: '/' }, { name: 'Meet Rezo', path: '/rezo' }];
+const graph = [
+  webPage({ path: page.path, name: page.title, description: page.description, type: 'ProfilePage', crumbs, dateModified: page.updated, about: { '@id': ids.rezo }, mainEntity: { '@id': ids.rezo } }),
+  breadcrumbWithId(page.path, crumbs),
+];
+---
+<Base title={page.title} description={page.description} path={page.path} ogSlug={page.slug} graph={graph} modified={page.updated}>
+  <PageIntro eyebrow="About" title="Meet Rezo" summary="Rezo owns and personally runs Voyage Georgia Rezo. He has worked in Georgian tourism for more than twenty years, is an experienced private tour guide, and plans every itinerary himself. When you message the agency, you are messaging him." crumbs={crumbs} updated={page.updated} byline={false} />
+
+  <MeetRezo link={false} />
+
+  <section class="section" aria-labelledby="how-h">
+    <div class="wrap">
+      <h2 id="how-h" class="h-md" style="margin-bottom:12px;max-width:720px">How a trip works with Rezo</h2>
+      <p class="body-lg" style="margin:0;max-width:620px">Most agencies hand you a brochure itinerary. Rezo starts with a blank map and your own words, then plans the journey around you.</p>
+      <ol class="how">
+        {steps.map((s) => (
+          <li><span class="how-n">{s.n}</span><h3 class="disp">{s.title}</h3><p>{s.body}</p></li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="section section--ink" aria-labelledby="tech-h">
+    <div class="wrap" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr));gap:40px 72px">
+      <div>
+        <p class="eyebrow" style="color:#ff6b77">Technology amplifies Rezo</p>
+        <h2 id="tech-h" class="h-sm" style="margin-bottom:20px">Assistants draft. Rezo decides.</h2>
+        <p style="margin:0;font-size:16.5px;color:#e4e4e7"><strong>Helps with:</strong> summarising inquiries, sketching regions from interests, drafting a day skeleton from his templates, sanity-checking drive times, translating messages and reminding him to follow up.</p>
+      </div>
+      <ul style="margin:0;padding-left:20px;font-size:16.5px;color:#e4e4e7;display:flex;flex-direction:column;gap:10px;align-self:end">
+        <li>Nothing generated reaches a traveller until Rezo publishes it.</li>
+        <li>Prices are written by Rezo himself; any estimate stays in his private view as a reference.</li>
+        <li>Every itinerary reads “Designed by Rezo”, with who changed what in the version history.</li>
+      </ul>
+    </div>
+  </section>
+
+  <CtaBand title="Send Rezo a sentence." />
+</Base>
+<style>
+  .how { list-style: none; margin: clamp(36px, 5vw, 64px) 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr)); gap: 36px 32px; }
+  .how li { border-top: 2px solid var(--ink); padding-top: 20px; }
+  .how-n { display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 36px; padding: 0 10px; border-radius: 999px; background: var(--red); color: #fff; font-family: var(--font-display); font-weight: 600; font-size: 14px; }
+  .how h3 { margin: 12px 0 8px; font-size: 23px; line-height: 1.2; letter-spacing: -.02em; }
+  .how p { margin: 0; color: var(--slate); font-size: 16.5px; }
+</style>

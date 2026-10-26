@@ -1,0 +1,283 @@
+---
+/**
+ * The homepage hero: a full-bleed terrain stage that stays pinned while six chapters scroll past.
+ * All copy is server-rendered HTML; the 3D scene (three.js) is a lazy enhancement that never blocks
+ * first paint, and a flat SVG map is the fallback.
+ */
+import StopPrint from './StopPrint.astro';
+import { chapters } from '../../data/home';
+import { MAP } from '../../data/routes';
+
+const fbPins: [number, number][] = [[681, 387], [767, 354], [787, 276], [419, 294], [420, 162], [283, 405]];
+const placeOf = (eyebrow: string) => (eyebrow === 'Imereti' ? 'Kutaisi' : eyebrow === 'The Black Sea' ? 'Batumi' : eyebrow);
+// Each print lands at its own angle, so the pile reads as real photographs dropped on a desk.
+const TILTS = [-2.4, 1.8, -1.4, 2.2, -2, 1.4];
+const fbLabels: [string, number, number, string][] = [
+  ['Tbilisi', 697, 419, 'start'], ['Kakheti', 781, 376, 'start'], ['Tusheti', 801, 266, 'start'],
+  ['Kutaisi', 419, 274, 'middle'], ['Svaneti', 420, 142, 'middle'], ['Batumi', 269, 435, 'end'],
+];
+---
+<section id="journey" class="journey" aria-label="A sample road journey through Georgia">
+  <div class="jstage">
+    <div class="jmap">
+      <svg id="j3d-fb" viewBox="150 100 800 460" preserveAspectRatio="xMidYMid meet" role="img"
+        aria-label="Map of Georgia showing the six stops of a sample journey: Tbilisi, Kakheti, Tusheti, Kutaisi, Svaneti and Batumi">
+        <image data-href={MAP.srcWide} x="0" y="0" width={MAP.w} height={MAP.h} />
+        <g fill="#D62839" stroke="#FFFFFF" stroke-width="2.5">{fbPins.map(([x, y]) => <circle cx={x} cy={y} r="6" />)}</g>
+        <g font-family="Inter Variable, Inter, system-ui, sans-serif" font-size="20" font-weight="600" fill="#14161A" paint-order="stroke" stroke="#FFFFFF" stroke-width="6" stroke-linejoin="round">
+          {fbLabels.map(([t, x, y, a]) => <text x={x} y={y} text-anchor={a}>{t}</text>)}
+        </g>
+      </svg>
+      <canvas id="j3d" role="img" aria-label="Three-dimensional terrain model of Georgia, moving between the six stops of a sample journey: Tbilisi, Kakheti, Tusheti, Kutaisi, Svaneti and Batumi."></canvas>
+    </div>
+    <div class="jveil"></div>
+    <div class="jmarks" role="group" aria-label="Stops on the map">
+      {chapters.map((c, i) => (
+        <button type="button" class="jm" data-stop={i} style={`--k:${i}`}>
+          <span class="jm-in">
+            <span class="jm-name"><span class="sr-only">Stop </span><span class="jm-n">{i + 1}</span> {placeOf(c.eyebrow)}</span>
+          </span>
+        </button>
+      ))}
+    </div>
+    <div class="jprints">
+      {chapters.map((c, i) => (
+        <StopPrint id={c.photo} index={i + 1} n={c.n} place={placeOf(c.eyebrow)} variant="stage" tilt={TILTS[i]} />
+      ))}
+    </div>
+    <div class="jrail">
+      <div class="jstops" role="group" aria-label="Jump to a stop">
+        <div class="jprog" aria-hidden="true"><i id="jprog"></i></div>
+        <div class="jrow">
+          {chapters.map((c, i) => (
+            <button type="button" class="jpill" data-stop={i} aria-current="false"><span class="n">{i + 1}</span>{placeOf(c.eyebrow)}</button>
+          ))}
+        </div>
+      </div>
+      <p class="jlegend"><span class="ji" aria-hidden="true">i</span>Terrain: SRTM (NASA), GMTED2010 (USGS), ETOPO1 (NOAA) · heights ×9</p>
+    </div>
+  </div>
+
+  <div class="jx">
+    <div class="jtext">
+      <article class="jch" data-ch="0">
+        <p class="eyebrow" style="margin-bottom:20px">Private tours across Georgia</p>
+        <h1 class="h-xl">Your Georgia,<br />designed by <span class="red">Rezo.</span></h1>
+        <p class="jlead">More than twenty years on Georgia’s roads, tables and mountain passes, shaped into one journey that is only yours. Tell us what you’re dreaming of. Rezo plans every day himself.</p>
+        <div class="jcta">
+          <a href="/design-my-trip" class="btn btn--primary">Design my trip
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+          </a>
+          <a href="/contact" class="btn btn--secondary">Message Rezo</a>
+        </div>
+        <p class="jsmall">About three minutes · nothing to pay · a real person reads every request</p>
+        <p class="jscroll"><span aria-hidden="true" class="jscroll-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D62839" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6" /></svg></span>Scroll to ride a sample route</p>
+      </article>
+
+      {chapters.map((c, i) => (
+        <article class="jch" data-ch={i + 1}>
+          <StopPrint id={c.photo} index={i + 1} n={c.n} place={placeOf(c.eyebrow)} variant="mobile" />
+          <p class="jeye"><span class="jnum">{c.n}</span><span>of 06</span><span class="jdot" aria-hidden="true"></span>{c.eyebrow}</p>
+          <h2 class="jh2">{c.heading}</h2>
+          <p class="jbody">{c.body}</p>
+          <dl class="jfacts">
+            {c.facts.map((f) => <div class="jfact"><dt>{f.dt}</dt><dd>{f.dd}<small>{f.small}</small></dd></div>)}
+          </dl>
+          <p class="jnote2">{c.note}</p>
+          <div class="jfoot">
+            <span class="jlinks">
+              <a href="/design-my-trip" class="lnk">Add this stop to my trip <span aria-hidden="true" class="red">+</span></a>
+              <a href={c.page.href} class="lnk lnk--quiet">{c.page.label} <span aria-hidden="true" class="red">→</span></a>
+            </span>
+          </div>
+        </article>
+      ))}
+
+      <article class="jch" data-ch={chapters.length + 1}>
+        <p class="eyebrow" style="margin-bottom:16px">Your turn</p>
+        <h2 class="h-lg" style="font-size:clamp(34px,3.6vw,52px);line-height:1.02;margin-bottom:20px">That was one route.<br />Yours will be different.</h2>
+        <p class="jbody" style="margin-bottom:28px">Add a week in the mountains, drop the sea, spend a night in Svaneti. Rezo builds the route around you, schedules every day and prices it himself.</p>
+        <div class="jcta">
+          <a href="/design-my-trip" class="btn btn--primary">Design my trip
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+          </a>
+          <a href="/contact" class="btn btn--secondary">Message Rezo</a>
+        </div>
+        <p class="jnote2" style="margin-top:18px">This is a sample. Nothing here is a fixed package, and no price is shown until Rezo has planned your trip.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  /* ---------- Layout: text on the site grid's left edge, the stop's print beside it, the map beyond ---------- */
+  .journey {
+    position: relative; background: #fff;
+    --stage-h: min(calc(100vh - var(--header-h)), 1000px);
+    --jt: clamp(380px, 31vw, 600px);          /* text column */
+    --gap: clamp(32px, 3.6vw, 88px);          /* text to print */
+    --pw: clamp(240px, 20.5vw, 460px);        /* print width */
+  }
+  .jstage { position: sticky; top: var(--header-h); height: var(--stage-h); z-index: 0; overflow: hidden; }
+  .jmap { position: absolute; inset: 0; }
+  .jmap > svg { position: absolute; top: 0; right: 0; width: 72%; height: 100%; opacity: 0; transition: opacity .4s; }
+  .jmap > svg.show { opacity: 1; }
+  .jmap > canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  /* A clean white field for the text column only; the map is never washed out behind the print. */
+  .jveil { position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(90deg, #fff 0, #fff calc(var(--edge) + var(--jt) - 40px), rgba(255,255,255,0) calc(var(--edge) + var(--jt) + 60px)),
+                linear-gradient(180deg, #fff 0%, rgba(255,255,255,0) 12%, rgba(255,255,255,0) 88%, #fff 100%); }
+  .jx { position: relative; z-index: 1; margin-top: calc(-1 * var(--stage-h)); padding: 0 var(--edge); pointer-events: none; }
+  .jx a, .jx button { pointer-events: auto; }
+  .jtext { width: var(--jt); pointer-events: auto; }
+
+  /* ---------- The prints: a small pile of travel photographs that grows as the van travels ---------- */
+  .jprints { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+  .jprint { margin: 0; }
+  .jprint--stage { position: absolute; left: calc(var(--edge) + var(--jt) + var(--gap)); top: 50%; width: var(--pw); margin-top: calc(var(--pw) * -.69 - 10px); transform-origin: 50% 70%; }
+  .jprint-mat { position: relative; padding: 12px 12px 0; background: #fff;
+    box-shadow: 0 1px 2px rgba(20,22,26,.06), 0 30px 70px -34px rgba(20,22,26,.45), 0 10px 24px -18px rgba(20,22,26,.22); }
+  .jprint-img { position: relative; aspect-ratio: 4 / 5; overflow: hidden; background: var(--mist); }
+  .jprint-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+  .jprint-cap { display: flex; flex-direction: column; gap: 3px; padding: 12px 4px 14px; }
+  .jprint-title { font-family: var(--font-display); font-weight: 600; font-size: 14.5px; line-height: 1.25; letter-spacing: -.01em; color: var(--ink); }
+  .jprint-n { margin-right: 8px; color: var(--red); font-variant-numeric: tabular-nums; }
+  .jprint-place { color: var(--slate); font-weight: 500; }
+  .jprint-credit { align-self: flex-start; font-size: 11.5px; color: var(--muted); text-decoration: none; }
+  .jprint-credit:hover { color: var(--ink); text-decoration: underline; }
+
+  /* States are set by the journey script: next (waiting below), on (top of the pile), past (underneath, --d deep). */
+  .jprint--stage {
+    --ease: cubic-bezier(.19, 1, .22, 1);
+    opacity: 0; visibility: hidden;
+    transform: translate3d(12%, 62vh, 0) rotate(calc(var(--tilt) + 9deg));
+    transition: transform 1.15s var(--ease), opacity .5s ease, visibility 0s linear 1.15s;
+  }
+  .jprint--stage.is-on {
+    opacity: 1; visibility: visible; pointer-events: auto;
+    transform: rotate(var(--tilt));
+    transition: transform 1.15s var(--ease), opacity .35s ease, visibility 0s;
+  }
+  .jprint--stage.is-past {
+    opacity: calc(1 - var(--d) * .18); visibility: visible;
+    transform: translate3d(calc(var(--d) * -16px), calc(var(--d) * -12px), 0) rotate(calc(var(--tilt) - var(--d) * 2.5deg)) scale(calc(1 - var(--d) * .045));
+    transition: transform 1.15s var(--ease), opacity .6s ease, visibility 0s;
+  }
+  .jprint--stage.is-past.is-deep { opacity: 0; }
+  .jprint--stage.is-past .jprint-cap { opacity: 0; transition: opacity .3s ease; }
+  /* The photo inside settles from a slow push-in as the print lands. */
+  .jprint-img img { transform: scale(1.16); transition: transform 1.8s var(--ease, cubic-bezier(.19, 1, .22, 1)); }
+  .is-on .jprint-img img, .is-past .jprint-img img { transform: none; }
+  .jprint-cap > * { transition: opacity .5s ease .35s, transform .7s cubic-bezier(.19, 1, .22, 1) .35s; }
+  .jprint:not(.is-on) .jprint-cap > * { opacity: 0; transform: translate3d(0, 6px, 0); transition-delay: 0s; }
+
+
+  /* ---------- Map labels: small pills riding above each stop's red cube ---------- */
+  .jmarks { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+  .jm { position: absolute; left: 0; top: 0; padding: 0; border: 0; background: none; cursor: pointer; pointer-events: auto; will-change: transform; }
+  .jm-in { --s: .9; position: absolute; left: 0; bottom: 14px; transform: translate(-50%, 0) scale(var(--s)); transform-origin: 50% 100%;
+    transition: transform .5s cubic-bezier(.34, 1.56, .64, 1), opacity .3s ease; }
+  .jm-name { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px 4px 4px; border-radius: 999px; background: rgba(255,255,255,.97);
+    box-shadow: 0 6px 16px -8px rgba(20,22,26,.55), 0 0 0 1px rgba(20,22,26,.06); font: 600 12.5px/1 var(--font-body); color: var(--ink); white-space: nowrap; transition: background .3s ease, color .3s ease; }
+  .jm-n { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: var(--red); color: #fff; font-size: 10.5px; font-variant-numeric: tabular-nums; }
+  .jm.is-active { z-index: 2; }
+  .jm.is-active .jm-in { --s: 1.08; }
+  .jm.is-active .jm-name { background: var(--ink); color: #fff; }
+  .jm:hover .jm-in, .jm:focus-visible .jm-in { --s: 1; }
+  .jm:focus-visible { outline: none; }
+  .jm:focus-visible .jm-name { outline: 3px solid var(--red); outline-offset: 2px; }
+  .jm.is-off { pointer-events: none; }
+  .jm.is-off .jm-in { opacity: 0; --s: .4; }
+  .jmarks:not(.is-ready) .jm { visibility: hidden; }
+  .jmarks.is-ready .jm-name { animation: jmPop .7s cubic-bezier(.34, 1.56, .64, 1) both; animation-delay: calc(var(--k) * 70ms + .1s); }
+  @keyframes jmPop { from { transform: translateY(6px) scale(.6); opacity: 0; } to { transform: none; opacity: 1; } }
+
+  /* ---------- Chapters ---------- */
+  .jch { position: relative; min-height: var(--stage-h); display: flex; flex-direction: column; justify-content: center; padding: 56px 0; }
+  @keyframes jIn { from { transform: translate3d(0, 18px, 0); } to { transform: none; } }
+  .js-journey .jch.is-active > :not(.jprint) { animation: jIn .95s cubic-bezier(.2, .75, .2, 1) both; }
+  .js-journey .jch.is-active > :nth-child(2) { animation-delay: .04s; }
+  .js-journey .jch.is-active > :nth-child(3) { animation-delay: .09s; }
+  .js-journey .jch.is-active > :nth-child(4) { animation-delay: .13s; }
+  .js-journey .jch.is-active > :nth-child(5) { animation-delay: .17s; }
+  .js-journey .jch.is-active > :nth-child(6) { animation-delay: .21s; }
+  .js-journey .jch.is-active > :nth-child(7) { animation-delay: .25s; }
+  .js-journey .jch.is-active > :nth-child(8) { animation-delay: .29s; }
+  /* Chapters you have not reached yet recede gently (by colour, so every line keeps WCAG AA contrast). */
+  .jch :is(h1, .jh2, .h-lg, .jfact dd, .jfact dd small, .jbody, .jlead, .jnote2, .jsmall, .jfact dt, .jscroll, .jeye > span:not(.jnum)) { transition: color .6s ease; }
+  .js-journey .jch:not(.is-active) :is(h1, .jh2, .h-lg, .jfact dd) { color: #6e6e76; }
+  .js-journey .jch:not(.is-active) :is(.jfact dd small, .jbody, .jlead, .jnote2, .jsmall, .jfact dt, .jscroll, .jeye > span:not(.jnum), .jlinks .lnk) { color: #6e6e76; }
+
+  .jlead { margin: clamp(20px, 2.5vw, 30px) 0 0; max-width: 520px; font-size: clamp(17px, 1.3vw, 21px); color: var(--slate); }
+  .jcta { margin-top: 32px; display: flex; flex-wrap: wrap; gap: 12px 14px; align-items: center; }
+  .jsmall { margin: 16px 0 0; font-size: 14px; color: var(--slate); }
+  .jscroll { margin: clamp(36px, 6vw, 72px) 0 0; display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 600; }
+  .jscroll-ico { display: inline-flex; width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--ink); align-items: center; justify-content: center; }
+  .jeye { margin: 0 0 18px; display: flex; align-items: center; gap: 8px; font-size: 12.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--slate); font-weight: 600; }
+  .jnum { font-family: var(--font-display); font-size: 13px; letter-spacing: .04em; color: var(--red); font-variant-numeric: tabular-nums; }
+  .jdot { width: 4px; height: 4px; border-radius: 50%; background: var(--line-3); margin: 0 2px; }
+  .jh2 { margin: 0 0 20px; font-family: var(--font-display); font-weight: 600; font-size: clamp(34px, 3.5vw, 64px); line-height: 1.02; letter-spacing: -.032em; text-wrap: balance; }
+  .jbody { margin: 0 0 30px; font-size: clamp(17px, 1.05vw, 19px); line-height: 1.6; color: var(--slate-2); }
+  .jfacts { margin: 0 0 22px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--ink); border-bottom: 1px solid var(--line); }
+  .jfact { padding: 14px 16px 14px 0; }
+  .jfact + .jfact { padding-left: 16px; border-left: 1px solid var(--line); }
+  .jfact dt { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .jfact dd { margin: 6px 0 0; font-family: var(--font-display); font-weight: 600; font-size: 20px; line-height: 1.2; letter-spacing: -.015em; font-variant-numeric: tabular-nums; }
+  .jfact dd small { display: block; margin-top: 4px; font-family: var(--font-body); font-weight: 500; font-size: 12.5px; letter-spacing: 0; color: var(--muted); line-height: 1.35; }
+  .jnote2 { margin: 0 0 14px; font-size: 14.5px; color: var(--slate); }
+  .jfoot { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 20px; }
+  .jlinks { display: flex; flex-wrap: wrap; gap: 0 22px; }
+  .lnk--quiet { font-weight: 500; }
+
+  /* ---------- Stop rail ---------- */
+  .jrail { position: absolute; right: var(--edge); bottom: 28px; z-index: 3; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; max-width: calc(100% - 40px); }
+  .jstops { background: rgba(255,255,255,.9); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border: 1px solid var(--line); border-radius: 14px; padding: 4px; box-shadow: 0 10px 30px -18px rgba(20,22,26,.35); max-width: 100%; overflow-x: auto; }
+  .jrow { display: flex; gap: 2px; }
+  .jpill { appearance: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 12px 0 8px; border-radius: 10px; border: 0; background: transparent; color: var(--slate); font: 600 13.5px var(--font-body); white-space: nowrap; transition: background .2s, color .2s; }
+  .jpill .n { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--line-2); font-size: 11px; font-variant-numeric: tabular-nums; color: var(--slate); transition: all .2s; }
+  .jpill:hover { background: var(--mist); color: var(--ink); }
+  .jpill[aria-current="true"] { background: var(--ink); color: #fff; }
+  .jpill[aria-current="true"] .n { background: var(--red); border-color: var(--red); color: #fff; }
+  .jpill.done .n { border-color: var(--ink); color: var(--ink); }
+  .jprog { height: 2px; margin: 3px 10px 4px; background: var(--mist); border-radius: 2px; overflow: hidden; }
+  .jprog i { display: block; height: 100%; background: var(--red); transform: scaleX(var(--p, 0)); transform-origin: left; transition: transform 1s cubic-bezier(.19, 1, .22, 1); }
+  .jlegend { margin: 0; display: flex; align-items: center; gap: 8px; font-size: 11.5px; color: var(--muted); }
+  .ji { display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; border-radius: 50%; border: 1px solid var(--line-3); font: italic 600 9.5px Georgia, serif; color: var(--muted); }
+
+  .jprint--inline { display: none; }
+
+  /* Narrower desktops: the print shrinks before the text does. */
+  @media (max-width: 1180px) and (min-width: 901px) {
+    .journey { --jt: clamp(360px, 36vw, 420px); --gap: 28px; --pw: clamp(200px, 21vw, 250px); }
+    .jh2 { font-size: clamp(32px, 3.6vw, 44px); }
+  }
+
+  @media (max-width: 900px) {
+    .journey { --stage-h: 400px; --jt: 100%; }
+    .jstage { top: 0; z-index: 3; background: #fff; }
+    .jx { margin-top: 0; }
+    .jveil { background: linear-gradient(180deg, rgba(255,255,255,0) 82%, #fff 100%); }
+    .jmap > svg { width: 100%; }
+    .jprints { display: none; }
+    /* small screens: only the current stop shows its name; the others keep it for screen readers */
+    .jm:not(.is-active) .jm-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; padding: 0; }
+    .jprint--inline { display: block; width: min(100%, 460px); margin: 0 0 26px; transition: opacity .6s ease, transform 1s cubic-bezier(.19, 1, .22, 1); }
+    .jprint--inline .jprint-img { aspect-ratio: 4 / 3; }
+    .js-journey .jprint--inline:not(.is-on) { opacity: .35; transform: translate3d(0, 18px, 0) scale(.98); }
+    .jch { min-height: 480px; padding: 40px 0; }
+    .jfacts { grid-template-columns: 1fr 1fr; }
+    .jfact:nth-child(3) { grid-column: 1 / -1; border-left: 0; padding-left: 0; border-top: 1px solid var(--line); }
+    .jrail { left: 16px; right: 16px; bottom: 10px; align-items: stretch; }
+    .jlegend { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .jprint, .jprint--stage, .jprint--stage.is-on, .jprint--stage.is-past, .jprint-img img, .jprint-cap > * { transition: opacity .2s ease, visibility 0s; }
+    .jprint--stage, .jprint--stage.is-on, .jprint--stage.is-past, .js-journey .jprint--inline:not(.is-on) { transform: none; }
+    .jprint-img img { transform: none; }
+    .js-journey .jch.is-active > * { animation: none; }
+    .jprog i { transition: none; }
+    .jm-in { transition: opacity .2s ease; }
+    .jmarks.is-ready .jm-name { animation: none; }
+  }
+</style>

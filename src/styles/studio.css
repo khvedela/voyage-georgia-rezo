@@ -1,0 +1,15 @@
+.st-banner { background: var(--ink-deep); color: var(--line-2); text-align: center; font-size: 13.5px; padding: 8px 20px; }
+.st-hd { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; padding: 12px var(--gutter); border-bottom: 1px solid var(--line); }
+.st-private { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; font-size: 14.5px; color: var(--slate); }
+.st-status { display: inline-flex; align-items: center; min-height: 36px; padding: 0 14px; border-radius: 999px; font-size: 14px; font-weight: 600; }
+.st-hero { background: #fff; border-bottom: 1px solid var(--line); }
+.st-hero-in { padding: clamp(36px, 5vw, 72px) var(--gutter); display: flex; flex-wrap: wrap; gap: 40px clamp(28px, 4vw, 64px); align-items: center; }
+.st-pillbtn { appearance: none; min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1.5px solid; font-size: 15px; font-weight: 600; cursor: pointer; }
+.st-dayhd { display: flex; align-items: center; gap: 14px 18px; width: 100%; padding: 16px 20px; border: 0; text-align: left; cursor: pointer; color: var(--ink); font: inherit; }
+.st-calc { margin-top: 18px; display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 44px; padding: 0; border: 0; border-top: 1px solid #2e3138; background: transparent; color: #fff; font-size: 15.5px; font-weight: 600; cursor: pointer; }
+.st-btn { appearance: none; min-height: 48px; padding: 0 22px; border-radius: 999px; font-size: 16px; font-weight: 600; cursor: pointer; }
+.st-btn--lg { min-height: 54px; font-size: 17px; }
+.st-btn:disabled { opacity: .45; cursor: not-allowed; }
+.st-quick { appearance: none; min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1.5px solid var(--line-2); background: transparent; color: var(--slate-2); font-size: 14.5px; cursor: pointer; }
+.st-quick:hover { border-color: var(--ink); }
+.st .tb-textlink { min-height: 50px; }

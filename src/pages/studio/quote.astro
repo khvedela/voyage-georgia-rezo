@@ -1,0 +1,56 @@
+---
+import Dash from '../../layouts/Dash.astro';
+const lines = [
+  ['Vehicle & driver', '10 days', '€1,500', '€1,250'], ['Accommodation', '9 nights', '€1,260', '€1,100'],
+  ['Planning, guiding & support', '', '€600', '€600'], ['Visits & entrance fees', '', '€340', '€300'], ['Meals included', '', '€250', '€230'],
+];
+---
+<Dash title="Quotation" path="/studio/quote">
+  <header class="d-hd d-hd--rule">
+    <a href="/studio/builder" class="d-back" aria-label="Back to itinerary"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg></a>
+    <div style="flex:1;min-width:0"><h1 class="d-title">Quotation · Leila H.</h1><p class="d-sub">Draft v1 · only you see the costs · sample data</p></div>
+  </header>
+  <div class="d-main" style="gap:18px">
+    <section aria-label="Vehicle">
+      <p class="d-eyebrow">Vehicle</p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px"><span class="d-pill d-pill--on">Delica</span><span class="d-pill">Sprinter long</span><span class="d-pill">Sprinter short</span><span class="d-pill">Sprinter 4×4</span></div>
+    </section>
+    <section aria-label="Price lines">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
+        <p class="d-eyebrow" style="margin:0">Lines</p>
+        <p style="margin:0;font-size:12px;color:var(--slate);display:flex;gap:28px"><span>Price</span><span>Your cost</span></p>
+      </div>
+      <ul class="d-lines">
+        {lines.map(([l, sub, p, c]) => <li><span class="l">{l}{sub && <small>{sub}</small>}</span><strong>{p}</strong><span class="c">{c}</span></li>)}
+      </ul>
+      <button type="button" style="margin-top:10px;min-height:44px;padding:0 6px;border:0;background:transparent;color:var(--ink);font-size:15px;font-weight:600;text-decoration:underline;text-underline-offset:4px;cursor:pointer;font-family:inherit">+ Add a line</button>
+    </section>
+    <section aria-label="Totals" class="d-totals">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:10px">
+        <div><div style="font-size:13px;color:var(--line-3)">Traveller sees</div><div class="disp" style="font-size:46px;line-height:1.05;letter-spacing:-.02em">€3,950</div><div style="font-size:14px;color:#d4d4d8">€1,975 per person · rounded to €50</div></div>
+        <div style="text-align:right"><div style="font-size:13px;color:var(--line-3)">Your margin</div><div style="font-size:20px;font-weight:600;color:#ff6b77">€470 · 11.9%</div></div>
+      </div>
+      <p style="margin:12px 0 0;padding-top:10px;border-top:1px solid #2e3138;font-size:13.5px;color:var(--line-3)">Assistant’s rough range for this kind of trip: €3,800–4,200. For your reference only — it is never shown to the traveller and never sets the price.</p>
+    </section>
+    <section aria-label="Before publishing">
+      <p class="d-eyebrow">Before it reaches Leila</p>
+      <form id="checks" style="display:flex;flex-direction:column;gap:2px">
+        <label class="d-check"><input type="checkbox" checked /> I’ve checked every drive time</label>
+        <label class="d-check"><input type="checkbox" checked /> Access needs confirmed (none noted)</label>
+        <label class="d-check"><input type="checkbox" /> Hotel prices are current</label>
+      </form>
+    </section>
+  </div>
+  <footer class="d-foot" style="padding-top:10px">
+    <button type="button" id="publish" class="d-btn" disabled>Publish v1 to Leila</button>
+    <p style="margin:0;text-align:center;font-size:13px;color:var(--slate)">Tick everything to publish. Nothing reaches the traveller until you do.</p>
+    <div style="display:flex;gap:10px"><a href="/trip/demo" class="d-btn d-btn--line" style="min-height:48px;font-size:15px">Preview as traveller</a><a href="/studio" class="d-btn d-btn--line" style="min-height:48px;font-size:15px">Save as template</a></div>
+  </footer>
+</Dash>
+<script>
+  const boxes = [...document.querySelectorAll<HTMLInputElement>('#checks input')];
+  const btn = document.getElementById('publish') as HTMLButtonElement;
+  const sync = () => { btn.disabled = !boxes.every((b) => b.checked); };
+  boxes.forEach((b) => b.addEventListener('change', sync));
+  sync();
+</script>

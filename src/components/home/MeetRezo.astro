@@ -1,0 +1,33 @@
+---
+import PhotoSlot from '../PhotoSlot.astro';
+import Todo from '../Todo.astro';
+import { site } from '../../config/site';
+interface Props { heading?: 'h1' | 'h2'; link?: boolean }
+const { heading = 'h2', link = true } = Astro.props;
+const H = heading;
+---
+<section id="rezo" class="section section--mist" aria-labelledby="rezo-h">
+  <div class="wrap" style="display:flex;flex-wrap:wrap;gap:48px clamp(32px,6vw,96px);align-items:center">
+    <div style="flex:1 1 320px;max-width:460px">
+      <PhotoSlot label="Portrait photo of Rezo goes here — ideally on the road, in daylight." ratio="4 / 5" size={40} style="border-radius:14px;background:#fff;padding:24px" />
+    </div>
+    <div style="flex:1 1 440px;min-width:0">
+      <p class="eyebrow">The person behind every trip</p>
+      <H id="rezo-h" class="h-md" style="margin-bottom:24px;font-size:clamp(32px,4.2vw,56px);line-height:1.04">The person who plans your journey is the person you message.</H>
+      <p style="margin:0 0 16px;font-size:18px;color:var(--slate-2);max-width:620px">Rezo owns and personally runs Voyage Georgia Rezo. He has worked in Georgian tourism for more than twenty years and is an experienced private tour guide. Drivers he works with help deliver your tours and transfers.</p>
+      <p style="margin:0 0 32px;font-size:16px;color:var(--slate);max-width:620px"><Todo>Rezo’s own words about why he does this — to be written with him.</Todo></p>
+      <dl class="stat-grid">
+        <div><dt>20+ years</dt><dd>in Georgian tourism</dd></div>
+        <div><dt>Hand-built</dt><dd>routes, schedules and prices</dd></div>
+        {site.showPlaceholders && <div><dt><Todo>Licence</Todo></dt><dd>guide credentials — to verify</dd></div>}
+      </dl>
+      {link && <p style="margin:28px 0 0"><a href="/rezo" class="lnk">More about Rezo <span aria-hidden="true" class="red">→</span></a></p>}
+    </div>
+  </div>
+</section>
+<style>
+  .stat-grid { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr)); gap: 20px 28px; }
+  .stat-grid > div { border-top: 2px solid var(--ink); padding-top: 14px; }
+  .stat-grid dt { font-family: var(--font-display); font-weight: 600; font-size: 30px; line-height: 1.1; letter-spacing: -.02em; }
+  .stat-grid dd { margin: 6px 0 0; font-size: 15px; color: var(--slate); }
+</style>

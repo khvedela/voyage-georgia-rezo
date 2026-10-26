@@ -1,0 +1,106 @@
+---
+import '../styles/fonts.css';
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import SmoothScroll from '../components/SmoothScroll.astro';
+import { site, absoluteUrl } from '../config/site';
+import { baseGraph } from '../lib/schema';
+import interLatin from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
+import tightLatin from '@fontsource-variable/inter-tight/files/inter-tight-latin-wght-normal.woff2?url';
+
+export interface Props {
+  /** Page title without the site suffix. */
+  title: string;
+  description: string;
+  /** Canonical path, e.g. "/destinations/kazbegi". */
+  path: string;
+  /** Slug of a generated Open Graph image (/og/<slug>.png). */
+  ogSlug?: string;
+  ogAlt?: string;
+  type?: 'website' | 'article';
+  /** Keep out of search: private trip links and the dashboard prototype. */
+  noindex?: boolean;
+  /** Page-specific JSON-LD nodes, merged into one @graph with the site-wide entities. */
+  graph?: Record<string, unknown>[];
+  published?: string;
+  modified?: string;
+  /** Hide the global header/footer (full-screen builder). */
+  bare?: boolean;
+  /** Preload the largest above-the-fold image for LCP. */
+  preloadImage?: string;
+}
+
+const {
+  title, description, path, ogSlug = 'home', ogAlt, type = 'website', noindex = false, graph = [],
+  published, modified, bare = false, preloadImage,
+} = Astro.props;
+
+const isHome = path === '/';
+// Brand suffix only while the whole title stays under ~62 characters (Google truncates around 600 px).
+const branded = `${title} | ${site.name}`;
+const fullTitle = isHome || title.includes(site.name) || branded.length > 62 ? title : branded;
+const canonical = absoluteUrl(path);
+const ogImage = absoluteUrl(`/og/${ogSlug}.png`);
+const robots = noindex
+  ? 'noindex, nofollow, noarchive, nosnippet'
+  : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
+const ld = JSON.stringify({ '@context': 'https://schema.org', '@graph': [...baseGraph(), ...graph] }).replace(/</g, '\\u003c');
+---
+<!doctype html>
+<html lang={site.locale} dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content={robots} />
+    <link rel="canonical" href={canonical} />
+    {!noindex && <link rel="alternate" hreflang="en" href={canonical} />}
+    {!noindex && <link rel="alternate" hreflang="x-default" href={canonical} />}
+
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:locale" content="en_GB" />
+    <meta property="og:type" content={type} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:alt" content={ogAlt ?? fullTitle} />
+    {type === 'article' && published && <meta property="article:published_time" content={published} />}
+    {type === 'article' && modified && <meta property="article:modified_time" content={modified} />}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <meta name="theme-color" content={site.themeColor} />
+    <meta name="format-detection" content="telephone=no" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+    <link rel="alternate" type="application/rss+xml" title="Georgia travel guides" href="/rss.xml" />
+    <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM-readable site summary" />
+
+    <link rel="preload" href={interLatin} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={tightLatin} as="font" type="font/woff2" crossorigin />
+    {preloadImage && <link rel="preload" as="image" href={preloadImage} fetchpriority="high" />}
+
+    <script type="application/ld+json" set:html={ld} is:inline></script>
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    {!bare && <Header />}
+    <main id="main">
+      <slot />
+    </main>
+    {!bare && <Footer />}
+    {!bare && <SmoothScroll />}
+  </body>
+</html>

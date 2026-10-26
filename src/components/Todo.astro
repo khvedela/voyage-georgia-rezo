@@ -1,0 +1,11 @@
+---
+/**
+ * A fact Rezo still has to supply. Visible while developing (or when PUBLIC_SHOW_PLACEHOLDERS=true),
+ * silently omitted in production so no "[to be verified]" text ever reaches search results.
+ */
+import { site } from '../config/site';
+---
+{site.showPlaceholders && <span class="todo">[<slot />]</span>}
+<style>
+  .todo { color: var(--slate); background: var(--red-wash); padding: 0 .25em; border-radius: 4px; }
+</style>

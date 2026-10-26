@@ -1,0 +1,39 @@
+---
+import Base from '../layouts/Base.astro';
+import PageIntro from '../components/PageIntro.astro';
+import VehicleCards from '../components/VehicleCards.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { vehicles } from '../data/vehicles';
+import { pageByPath } from '../data/pages';
+import { webPage, itemList, breadcrumbWithId } from '../lib/schema';
+
+const page = pageByPath('/vehicles');
+const crumbs = [{ name: 'Home', path: '/' }, { name: 'Vehicles', path: '/vehicles' }];
+const graph = [
+  webPage({ path: page.path, name: page.title, description: page.description, type: 'CollectionPage', crumbs, dateModified: page.updated }),
+  breadcrumbWithId(page.path, crumbs),
+  itemList('Voyage Georgia Rezo vehicles', vehicles.map((v) => ({ name: v.name, path: '/vehicles' }))),
+];
+---
+<Base title={page.title} description={page.description} path={page.path} ogSlug={page.slug} graph={graph} modified={page.updated}>
+  <PageIntro eyebrow="The fleet" title="Five vehicles. One for every road." summary="The vehicle is chosen after the route, never the other way round. Voyage Georgia Rezo runs a long and a short Mercedes Sprinter, a wheelchair-accessible Sprinter, a 4×4 Sprinter and two Mitsubishi Delicas, all driven by drivers Rezo works with." crumbs={crumbs} updated={page.updated} />
+  <section class="section" style="padding-top:0">
+    <div class="wrap">
+      <VehicleCards headingLevel={2} />
+    </div>
+  </section>
+  <section class="section section--mist" aria-labelledby="choose-h">
+    <div class="wrap--prose prose">
+      <h2 id="choose-h" style="margin-top:0">How Rezo chooses</h2>
+      <p>Group size, luggage, road conditions and access needs decide the vehicle, and Rezo makes the choice once the route is drawn. A couple on a wine route does not need what a family of six crossing mountain valleys needs.</p>
+      <ul>
+        <li><strong>Mountain valleys and rough tracks</strong> (for example <a href="/destinations/tusheti">Tusheti</a>): the short <a href="/adventure-4x4">4×4 Sprinter</a>.</li>
+        <li><strong>Travellers who use a wheelchair</strong>: the short, <a href="/accessible-travel">wheelchair-accessible Sprinter</a>, with access confirmed stop by stop.</li>
+        <li><strong>Longer touring days with a group</strong>: the long-wheelbase Sprinter.</li>
+        <li><strong>Couples, families and small groups</strong>: the Delicas.</li>
+      </ul>
+      <p>Your private itinerary names the vehicle Rezo has assigned once the plan is settled.</p>
+    </div>
+  </section>
+  <CtaBand />
+</Base>

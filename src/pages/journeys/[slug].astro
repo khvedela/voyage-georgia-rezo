@@ -1,0 +1,105 @@
+---
+import { getCollection, render } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageIntro from '../../components/PageIntro.astro';
+import PhotoFigure from '../../components/PhotoFigure.astro';
+import RouteMap from '../../components/RouteMap.astro';
+import Faq from '../../components/Faq.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import JourneyCard from '../../components/JourneyCard.astro';
+import { webPage, touristTrip, faqPage, breadcrumbWithId } from '../../lib/schema';
+import { absoluteUrl } from '../../config/site';
+
+export async function getStaticPaths() {
+  const all = await getCollection('journeys');
+  return all.map((entry) => ({ params: { slug: entry.id }, props: { entry, all } }));
+}
+interface Props { entry: CollectionEntry<'journeys'>; all: CollectionEntry<'journeys'>[] }
+const { entry, all } = Astro.props;
+const d = entry.data;
+const { Content } = await render(entry);
+const path = `/journeys/${entry.id}`;
+const crumbs = [{ name: 'Home', path: '/' }, { name: 'Example journeys', path: '/journeys' }, { name: d.title, path }];
+const others = all.filter((x) => x.id !== entry.id).sort((a, b) => a.data.order - b.data.order);
+const iso = d.updated.toISOString().slice(0, 10);
+const graph = [
+  webPage({ path, name: d.seoTitle, description: d.description, type: 'WebPage', crumbs, dateModified: iso, about: { '@id': `${absoluteUrl(path)}#trip` } }),
+  breadcrumbWithId(path, crumbs),
+  touristTrip({
+    path, name: `${d.title} (${d.days}-day example itinerary)`, description: d.summary, days: d.days,
+    stops: d.stops.map((s) => ({ name: s.name, description: `${s.nights}. ${s.note}`, path: s.destination ? `/destinations/${s.destination}` : undefined })),
+  }),
+  ...(d.faqs.length ? [faqPage(path, d.faqs)] : []),
+];
+---
+<Base title={d.seoTitle} description={d.description} path={path} ogSlug={`journeys-${entry.id}`} graph={graph} modified={iso}>
+  <PageIntro eyebrow={d.meta} title={d.title} summary={d.summary} crumbs={crumbs} updated={d.updated}>
+    <p style="margin:26px 0 0;display:flex;flex-wrap:wrap;gap:10px">
+      <span class="pill">{d.days} days</span><span class="pill">{d.pace}</span><span class="pill">Best: {d.bestMonths.split('.')[0]}</span>
+    </p>
+  </PageIntro>
+
+  <section class="section" style="padding-top:0">
+    <div class="wrap jgrid">
+      <div>
+        <h2 class="h-sm" style="margin-bottom:20px">Where the nights go</h2>
+        <ol class="stops">
+          {d.stops.map((s, i) => (
+            <li>
+              <span class="stop-n" aria-hidden="true">{i + 1}</span>
+              <div>
+                <p class="stop-h">
+                  {s.destination ? <a href={`/destinations/${s.destination}`}>{s.name}</a> : s.name}
+                  <span class="stop-nights">{s.nights}</span>
+                </p>
+                <p class="stop-t">{s.note}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+        <article class="prose" style="margin-top:48px"><Content /></article>
+      </div>
+      <aside class="jaside" aria-label="Route map">
+        <div class="mapcard"><RouteMap id={d.map} /></div>
+        <PhotoFigure id={d.photo} ratio="3 / 2" />
+        <a href={`/design-my-trip?sample=${d.builderSample}`} class="btn btn--primary btn--sm">Start from this idea</a>
+      </aside>
+    </div>
+  </section>
+
+  {d.faqs.length > 0 && (
+    <section class="section section--mist" aria-labelledby="faq-h">
+      <div class="wrap--narrow">
+        <h2 id="faq-h" class="h-sm" style="margin-bottom:28px">Questions about this journey</h2>
+        <Faq items={d.faqs} />
+      </div>
+    </section>
+  )}
+
+  <section class="section" aria-labelledby="more-h">
+    <div class="wrap">
+      <h2 id="more-h" class="h-sm" style="margin-bottom:28px">Other starting points</h2>
+      <div class="grid-auto" style="--min:330px">{others.map((j) => <JourneyCard entry={j} />)}</div>
+    </div>
+  </section>
+
+  <CtaBand sample={d.builderSample} title="Start from this idea." text="Choosing it fills in the answers for you, and you can change each one. Nothing is booked and no price is shown until Rezo has planned the real trip." />
+</Base>
+<style>
+  .jgrid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px; }
+  @media (min-width: 1000px) { .jgrid { grid-template-columns: minmax(0, 1fr) 520px; gap: 64px; align-items: start; } .jaside { position: sticky; top: 96px; } }
+  .jaside { display: flex; flex-direction: column; gap: 20px; align-items: flex-start; }
+  .jaside > * { width: 100%; }
+  .jaside .btn { width: auto; }
+  .mapcard { border: 1px solid var(--line); border-radius: 14px; padding: 8px; background: #fff; }
+  .mapcard svg { width: 100%; height: auto; display: block; border-radius: 8px; background: var(--mist); }
+  .stops { list-style: none; margin: 0; padding: 0; border-top: 1.5px solid var(--ink); }
+  .stops li { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 14px; padding: 18px 0; border-bottom: 1px solid var(--line); }
+  .stop-n { width: 30px; height: 30px; border-radius: 50%; background: var(--red); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 600; font-size: 14px; }
+  .stop-h { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; font-family: var(--font-display); font-weight: 600; font-size: 22px; letter-spacing: -.015em; }
+  .stop-h a { color: var(--ink); text-underline-offset: 4px; text-decoration-color: var(--line-3); }
+  .stop-h a:hover { color: var(--red); }
+  .stop-nights { font-family: var(--font-body); font-weight: 500; font-size: 14px; color: var(--slate); letter-spacing: 0; }
+  .stop-t { margin: 4px 0 0; color: var(--slate); font-size: 16px; }
+</style>

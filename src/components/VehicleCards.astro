@@ -1,0 +1,24 @@
+---
+import PhotoSlot from './PhotoSlot.astro';
+import Todo from './Todo.astro';
+import { vehicles } from '../data/vehicles';
+import { site } from '../config/site';
+interface Props { headingLevel?: 2 | 3 }
+const { headingLevel = 3 } = Astro.props;
+const H = `h${headingLevel}` as 'h2' | 'h3';
+---
+<div class="grid-auto" style="--min:260px">
+  {vehicles.map((v) => (
+    <article class="card">
+      <PhotoSlot label="Photo of this vehicle" />
+      <H class="disp" style="margin:16px 8px 8px;font-size:21px;line-height:1.2;letter-spacing:-.02em">
+        {v.name}{v.count && <span class="red"> × {v.count}</span>}
+      </H>
+      <div style="margin:0 8px 10px;display:flex;flex-wrap:wrap;gap:6px">
+        {v.tags.map((t) => <span class:list={['tag', t.red && 'tag--red']}>{t.label}</span>)}
+      </div>
+      <p style="margin:0 8px 12px;font-size:15.5px;color:var(--slate)">{v.text}</p>
+      {site.showPlaceholders && <p style="margin:auto 8px 0;font-size:13.5px;color:var(--slate);border-top:1px solid var(--line);padding-top:10px">{v.detailLabel}: <Todo>to be verified</Todo></p>}
+    </article>
+  ))}
+</div>

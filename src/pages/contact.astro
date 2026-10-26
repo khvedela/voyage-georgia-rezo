@@ -1,0 +1,46 @@
+---
+import Base from '../layouts/Base.astro';
+import PageIntro from '../components/PageIntro.astro';
+import ContactChannels from '../components/ContactChannels.astro';
+import ContactCta from '../components/ContactCta.astro';
+import Todo from '../components/Todo.astro';
+import { site, whatsappLink, mailtoLink } from '../config/site';
+import { pageByPath } from '../data/pages';
+import { webPage, breadcrumbWithId } from '../lib/schema';
+
+const page = pageByPath('/contact');
+const crumbs = [{ name: 'Home', path: '/' }, { name: 'Contact', path: '/contact' }];
+const hasChannels = Boolean(whatsappLink() || mailtoLink() || site.contact.messenger);
+const graph = [
+  webPage({ path: page.path, name: page.title, description: page.description, type: 'ContactPage', crumbs, dateModified: page.updated }),
+  breadcrumbWithId(page.path, crumbs),
+];
+---
+<Base title={page.title} description={page.description} path={page.path} ogSlug={page.slug} graph={graph} modified={page.updated}>
+  <PageIntro eyebrow="Contact" title="Talk to Rezo." summary="Start with a sentence about the trip you imagine, or message Rezo directly. A real person reads every request. It is free, nothing is booked, and nothing is charged until you and Rezo agree on the plan." crumbs={crumbs} updated={page.updated} byline={false}>
+    {hasChannels && (
+      <div style="margin-top:28px"><ContactChannels /></div>
+    )}
+  </PageIntro>
+
+  <section class="section" style="padding-top:0" aria-labelledby="next-h">
+    <div class="wrap--narrow">
+      <h2 id="next-h" class="h-sm" style="margin-bottom:24px">What happens next</h2>
+      <ol class="next">
+        <li><span>1</span><div><strong class="disp">Rezo reads it himself.</strong><p>He may reply with a question or two first, on the channel you choose.</p></div></li>
+        <li><span>2</span><div><strong class="disp">He plans your first proposal.</strong><p>Route, daily schedule, vehicle and price, worked out by hand. How long it takes depends on the season and the trip. <Todo>Rezo to add his usual response time.</Todo></p></div></li>
+        <li><span>3</span><div><strong class="disp">You get a private link.</strong><p>Review the journey and ask for changes. Nothing is booked until you and Rezo agree.</p></div></li>
+      </ol>
+      <p class="note" style="margin-top:28px">Prefer to answer a few easy questions instead of writing? <a href="/design-my-trip" class="lnk">Design my trip</a>.</p>
+    </div>
+  </section>
+
+  <ContactCta />
+</Base>
+<style>
+  .next { list-style: none; margin: 0; padding: 0; border-bottom: 1px solid var(--line); }
+  .next li { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 14px; padding: 18px 0; border-top: 1px solid var(--line); }
+  .next li > span { font-family: var(--font-display); font-weight: 600; font-size: 15px; width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line-2); display: flex; align-items: center; justify-content: center; color: var(--red); }
+  .next strong { font-weight: 600; font-size: 19px; }
+  .next p { margin: 4px 0 0; color: var(--slate); font-size: 15.5px; }
+</style>
