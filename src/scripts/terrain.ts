@@ -27,18 +27,20 @@ export function whenIdle(fn: () => void, { delay = 900, timeout = 3000 } = {}) {
   else window.addEventListener('load', run, { once: true });
 }
 
-/** Mesh spacing (map units), shadow-map size and pixel ratio: phones and low-core devices get a lighter model. */
-export function sceneQuality(): { cell: number; shadowMap: number; maxDpr: number } {
+/** Shadow-map size and pixel ratio: phones and low-core devices get a lighter model. */
+export function sceneQuality(): { shadowMap: number; maxDpr: number } {
   const low = window.innerWidth <= 900 || (navigator.hardwareConcurrency ?? 8) <= 4;
-  return { cell: low ? 4 : 2.5, shadowMap: low ? 1024 : 2048, maxDpr: low ? 1.5 : 2 };
+  return { shadowMap: low ? 1024 : 2048, maxDpr: low ? 1.5 : 2 };
 }
 
 type MountOptions = Record<string, unknown>;
 
+/** The Blender-built miniature (public/models/georgia.glb, ~2 MB with Draco), loaded only once the page is idle. */
 export async function mountTerrain(canvas: HTMLCanvasElement, opts: MountOptions): Promise<Terrain | null> {
-  const { VGR3D } = await import('./vgr3d.js');
-  return VGR3D.mount(canvas, {
-    terrainH: '/terrain/height.webp',
+  const { VGRGLB } = await import('./vgr-glb.js');
+  return VGRGLB.mount(canvas, {
+    model: '/models/georgia.glb',
+    dracoPath: '/draco/',
     ...sceneQuality(),
     ...opts,
   });

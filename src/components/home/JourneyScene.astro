@@ -77,18 +77,22 @@ const fbLabels: [string, number, number, string][] = [
       {chapters.map((c, i) => (
         <article class="jch" data-ch={i + 1}>
           <StopPrint id={c.photo} index={i + 1} n={c.n} place={placeOf(c.eyebrow)} variant="mobile" />
-          <p class="jeye"><span class="jnum">{c.n}</span><span>of 06</span><span class="jdot" aria-hidden="true"></span>{c.eyebrow}</p>
+          <header class="jmark">
+            <span class="jmark-n" aria-hidden="true">{c.n}</span>
+            <span class="jmark-txt">
+              <span class="jmark-place"><span class="sr-only">Stop {i + 1} of {chapters.length}: </span>{c.eyebrow}</span>
+              <span class="jmark-seg" aria-hidden="true">{chapters.map((_, k) => <i class:list={[k < i && 'done', k === i && 'now']}></i>)}</span>
+            </span>
+          </header>
           <h2 class="jh2">{c.heading}</h2>
           <p class="jbody">{c.body}</p>
           <dl class="jfacts">
             {c.facts.map((f) => <div class="jfact"><dt>{f.dt}</dt><dd>{f.dd}<small>{f.small}</small></dd></div>)}
           </dl>
-          <p class="jnote2">{c.note}</p>
+          <p class="jnote2"><span class="jnote-k">Planning note</span>{c.note}</p>
           <div class="jfoot">
-            <span class="jlinks">
-              <a href="/design-my-trip" class="lnk">Add this stop to my trip <span aria-hidden="true" class="red">+</span></a>
-              <a href={c.page.href} class="lnk lnk--quiet">{c.page.label} <span aria-hidden="true" class="red">→</span></a>
-            </span>
+            <a href="/design-my-trip" class="btn btn--secondary btn--sm">Add this stop to my trip</a>
+            <a href={c.page.href} class="lnk lnk--quiet">{c.page.label} <span aria-hidden="true" class="red">→</span></a>
           </div>
         </article>
       ))}
@@ -116,7 +120,7 @@ const fbLabels: [string, number, number, string][] = [
     --stage-h: min(calc(100vh - var(--header-h)), 1000px);
     --jt: clamp(380px, 31vw, 600px);          /* text column */
     --gap: clamp(32px, 3.6vw, 88px);          /* text to print */
-    --pw: clamp(240px, 20.5vw, 460px);        /* print width */
+    --pw: clamp(230px, 18.5vw, 420px);        /* print width */
   }
   .jstage { position: sticky; top: var(--header-h); height: var(--stage-h); z-index: 0; overflow: hidden; }
   .jmap { position: absolute; inset: 0; }
@@ -135,16 +139,17 @@ const fbLabels: [string, number, number, string][] = [
   .jprints { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
   .jprint { margin: 0; }
   .jprint--stage { position: absolute; left: calc(var(--edge) + var(--jt) + var(--gap)); top: 50%; width: var(--pw); margin-top: calc(var(--pw) * -.69 - 10px); transform-origin: 50% 70%; }
-  .jprint-mat { position: relative; padding: 12px 12px 0; background: #fff;
-    box-shadow: 0 1px 2px rgba(20,22,26,.06), 0 30px 70px -34px rgba(20,22,26,.45), 0 10px 24px -18px rgba(20,22,26,.22); }
-  .jprint-img { position: relative; aspect-ratio: 4 / 5; overflow: hidden; background: var(--mist); }
+  .jprint-mat { position: relative; padding: 10px 10px 0; background: #fff; border-radius: 3px;
+    box-shadow: 0 0 0 1px rgba(20,22,26,.05), 0 1px 2px rgba(20,22,26,.06), 0 28px 64px -32px rgba(20,22,26,.5), 0 10px 22px -16px rgba(20,22,26,.25); }
+  .jprint-img { position: relative; aspect-ratio: 4 / 5; overflow: hidden; background: var(--mist); border-radius: 2px; }
+  .jprint-img::after { content: ''; position: absolute; inset: 0; box-shadow: inset 0 0 0 1px rgba(20,22,26,.08); pointer-events: none; }
   .jprint-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
-  .jprint-cap { display: flex; flex-direction: column; gap: 3px; padding: 12px 4px 14px; }
-  .jprint-title { font-family: var(--font-display); font-weight: 600; font-size: 14.5px; line-height: 1.25; letter-spacing: -.01em; color: var(--ink); }
+  .jprint-cap { display: flex; flex-direction: column; gap: 4px; padding: 12px 4px 13px; }
+  .jprint-title { font-family: var(--font-display); font-weight: 600; font-size: 14px; line-height: 1.25; letter-spacing: -.01em; color: var(--ink); }
   .jprint-n { margin-right: 8px; color: var(--red); font-variant-numeric: tabular-nums; }
   .jprint-place { color: var(--slate); font-weight: 500; }
-  .jprint-credit { align-self: flex-start; font-size: 11.5px; color: var(--muted); text-decoration: none; }
-  .jprint-credit:hover { color: var(--ink); text-decoration: underline; }
+  .jprint-credit { align-self: flex-start; font-size: 11px; letter-spacing: .01em; color: var(--muted); text-decoration: none; opacity: .85; }
+  .jprint-credit:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; opacity: 1; }
 
   /* States are set by the journey script: next (waiting below), on (top of the pile), past (underneath, --d deep). */
   .jprint--stage {
@@ -213,20 +218,28 @@ const fbLabels: [string, number, number, string][] = [
   .jsmall { margin: 16px 0 0; font-size: 14px; color: var(--slate); }
   .jscroll { margin: clamp(36px, 6vw, 72px) 0 0; display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 600; }
   .jscroll-ico { display: inline-flex; width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--ink); align-items: center; justify-content: center; }
-  .jeye { margin: 0 0 18px; display: flex; align-items: center; gap: 8px; font-size: 12.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--slate); font-weight: 600; }
-  .jnum { font-family: var(--font-display); font-size: 13px; letter-spacing: .04em; color: var(--red); font-variant-numeric: tabular-nums; }
-  .jdot { width: 4px; height: 4px; border-radius: 50%; background: var(--line-3); margin: 0 2px; }
-  .jh2 { margin: 0 0 20px; font-family: var(--font-display); font-weight: 600; font-size: clamp(34px, 3.5vw, 64px); line-height: 1.02; letter-spacing: -.032em; text-wrap: balance; }
-  .jbody { margin: 0 0 30px; font-size: clamp(17px, 1.05vw, 19px); line-height: 1.6; color: var(--slate-2); }
+  /* The chapter marker: a large numeral, the region, and six small bars that show where this stop sits in the route. */
+  .jmark { margin: 0 0 18px; display: flex; align-items: center; gap: 14px; }
+  .jmark-n { font-family: var(--font-display); font-weight: 600; font-size: clamp(30px, 2.4vw, 38px); line-height: 1; letter-spacing: -.03em; color: var(--red); font-variant-numeric: tabular-nums; }
+  .jmark-txt { display: flex; flex-direction: column; gap: 7px; padding-top: 2px; }
+  .jmark-place { font-size: 12.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink); font-weight: 600; line-height: 1; }
+  .jmark-seg { display: flex; gap: 4px; }
+  .jmark-seg i { display: block; width: 16px; height: 2px; border-radius: 2px; background: var(--line-2); transition: background .4s ease, width .4s ease; }
+  .jmark-seg i.done { background: var(--ink); }
+  .jmark-seg i.now { background: var(--red); width: 26px; }
+  .jh2 { margin: 0 0 18px; font-family: var(--font-display); font-weight: 600; font-size: clamp(34px, 3.5vw, 62px); line-height: 1.02; letter-spacing: -.032em; text-wrap: balance; max-width: 12ch; }
+  .jbody { margin: 0 0 26px; max-width: 46ch; font-size: clamp(16.5px, 1.02vw, 18px); line-height: 1.62; color: var(--slate-2); text-wrap: pretty; }
+  /* Three facts in a ruled row, the value in display type over a quiet sub-line. */
   .jfacts { margin: 0 0 22px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--ink); border-bottom: 1px solid var(--line); }
-  .jfact { padding: 14px 16px 14px 0; }
+  .jfact { padding: 14px 14px 14px 0; display: flex; flex-direction: column; }
   .jfact + .jfact { padding-left: 16px; border-left: 1px solid var(--line); }
-  .jfact dt { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
-  .jfact dd { margin: 6px 0 0; font-family: var(--font-display); font-weight: 600; font-size: 20px; line-height: 1.2; letter-spacing: -.015em; font-variant-numeric: tabular-nums; }
-  .jfact dd small { display: block; margin-top: 4px; font-family: var(--font-body); font-weight: 500; font-size: 12.5px; letter-spacing: 0; color: var(--muted); line-height: 1.35; }
-  .jnote2 { margin: 0 0 14px; font-size: 14.5px; color: var(--slate); }
-  .jfoot { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 20px; }
-  .jlinks { display: flex; flex-wrap: wrap; gap: 0 22px; }
+  .jfact dt { font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .jfact dd { margin: 7px 0 0; font-family: var(--font-display); font-weight: 600; font-size: clamp(19px, 1.3vw, 22px); line-height: 1.15; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+  .jfact dd small { display: block; margin-top: 4px; font-family: var(--font-body); font-weight: 500; font-size: 12.5px; letter-spacing: 0; color: var(--muted); line-height: 1.35; text-wrap: pretty; }
+  /* The planning note: a red hairline and a small label, so it reads as advice rather than more body copy. */
+  .jnote2 { margin: 0 0 22px; padding: 2px 0 2px 14px; border-left: 2px solid var(--red); font-size: 14.5px; line-height: 1.5; color: var(--slate); max-width: 48ch; }
+  .jnote-k { display: block; margin-bottom: 3px; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--red); font-weight: 600; }
+  .jfoot { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 22px; }
   .lnk--quiet { font-weight: 500; }
 
   /* ---------- Stop rail ---------- */
@@ -261,12 +274,18 @@ const fbLabels: [string, number, number, string][] = [
     .jprints { display: none; }
     /* small screens: only the current stop shows its name; the others keep it for screen readers */
     .jm:not(.is-active) .jm-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; padding: 0; }
-    .jprint--inline { display: block; width: min(100%, 460px); margin: 0 0 26px; transition: opacity .6s ease, transform 1s cubic-bezier(.19, 1, .22, 1); }
-    .jprint--inline .jprint-img { aspect-ratio: 4 / 3; }
+    .jprint--inline { display: block; width: min(100%, 460px); margin: 0 0 24px; transition: opacity .6s ease, transform 1s cubic-bezier(.19, 1, .22, 1); }
+    .jprint--inline .jprint-mat { padding: 8px 8px 0; border-radius: 14px; border: 1px solid var(--line); box-shadow: 0 14px 34px -24px rgba(20,22,26,.3); }
+    .jprint--inline .jprint-img { aspect-ratio: 4 / 3; border-radius: 8px; }
+    .jprint--inline .jprint-cap { padding: 12px 6px 12px; }
     .js-journey .jprint--inline:not(.is-on) { opacity: .35; transform: translate3d(0, 18px, 0) scale(.98); }
-    .jch { min-height: 480px; padding: 40px 0; }
+    .jch { min-height: 0; padding: 36px 0 44px; }
+    .jch[data-ch="0"] { padding-top: 28px; }
+    .jh2 { max-width: none; }
+    .jbody { max-width: none; }
     .jfacts { grid-template-columns: 1fr 1fr; }
     .jfact:nth-child(3) { grid-column: 1 / -1; border-left: 0; padding-left: 0; border-top: 1px solid var(--line); }
+    .jfoot .btn { width: 100%; justify-content: center; }
     .jrail { left: 16px; right: 16px; bottom: 10px; align-items: stretch; }
     .jlegend { display: none; }
   }

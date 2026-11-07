@@ -107,7 +107,7 @@ if (stage && 'IntersectionObserver' in window) {
 // ---- Camera framing, derived from the real layout so the stop always lands just right of the print ----
 function framing() {
   const W = stage?.clientWidth || window.innerWidth;
-  if (narrow.matches || !stage || !textCol) return { shift: 0, focusShift: 0, safeLeft: 0, fitFrac: 1, overviewZoom: 1.06 };
+  if (narrow.matches || !stage || !textCol) return { shift: 0, focusShift: 0, safeLeft: 0, fitFrac: 1, overviewZoom: 1.06, center: true };
   const textRight = textCol.getBoundingClientRect().right - stage.getBoundingClientRect().left;
   const print = stagePrints[0];
   const printRight = print ? print.offsetLeft + print.offsetWidth : textRight;
@@ -184,13 +184,14 @@ if (!canvas || !canLoad3D()) {
   whenIdle(async () => {
     try {
       scene = await mountTerrain(canvas, {
-        routes: ['Tbilisi>Telavi', 'Telavi>Omalo', 'Omalo>Kutaisi', 'Kutaisi>Mestia', 'Mestia>Batumi'],
-        sequential: true, hideVan: true, hidePins: true,
-        pins: [['Tbilisi', 'Tbilisi'], ['Telavi', 'Kakheti', 'Telavi'], ['Omalo', 'Tusheti', 'Omalo'], ['Kutaisi', 'Kutaisi'], ['Mestia', 'Svaneti', 'Mestia'], ['Batumi', 'Batumi']],
-        elevation: 47, focusElev: 40, focusZoom: 0.4, overviewYaw: -0.32,
+        elevation: 47, overviewYaw: -0.32,
         ...framing(), fallback,
+        // Clicking a destination on the model scrolls to its chapter, like the label pills do.
+        onPick: (i: number) => { const ch = chapters[i + 1]; if (ch) scrollToElement(ch, { center: true }); },
+        onFail: () => { scene?.dispose(); scene = null; showFlatMap(); },
       });
-    } catch {
+    } catch (e) {
+      console.warn('[journey] 3D model could not be mounted; showing the flat map', e);
       scene = null;
     }
     if (!scene) showFlatMap();
