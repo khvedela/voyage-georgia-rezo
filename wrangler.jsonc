@@ -1,0 +1,13 @@
+// Cloudflare Workers deploy config: the site is fully static, so Wrangler only uploads the built `dist` folder as
+// static assets (no server code, no adapter). Having this file also stops `wrangler deploy` from auto-configuring
+// the project as a server-rendered Astro app. `_headers` in `dist` is applied as-is.
+{
+  "name": "voyage-georgia-rezo",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./dist",
+    // /destinations/svaneti is served from destinations/svaneti.html (Astro's build.format: 'file').
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  }
+}

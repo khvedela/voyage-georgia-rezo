@@ -16,14 +16,12 @@
       "port": 4321
     },
     {
-      "name": "cf-pages-local",
+      "name": "cf-local",
       "runtimeExecutable": "npx",
       "runtimeArgs": [
         "--yes",
         "wrangler@4",
-        "pages",
         "dev",
-        "dist",
         "--port",
         "8788",
         "--ip",
