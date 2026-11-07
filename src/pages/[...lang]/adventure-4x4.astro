@@ -1,0 +1,48 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageIntro from '../../components/PageIntro.astro';
+import Faq from '../../components/Faq.astro';
+import PhotoFigure from '../../components/PhotoFigure.astro';
+import PhotoSlot from '../../components/PhotoSlot.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { pageByPath } from '../../data/pages';
+import { webPage, faqPage, breadcrumbWithId } from '../../lib/schema';
+import { getLang, langPaths, localizeHtml, useT } from '../../i18n';
+
+export const getStaticPaths = () => langPaths();
+const lang = getLang(Astro);
+const t = useT(lang);
+const c = t.pages.adventure;
+const page = pageByPath(t, '/adventure-4x4');
+const crumbs = [{ name: t.common.nav.home, path: '/' }, { name: page.nav, path: '/adventure-4x4' }];
+const graph = [
+  webPage({ lang, path: page.path, name: page.title, description: page.description, type: 'WebPage', crumbs, dateModified: page.updated }),
+  breadcrumbWithId(lang, page.path, crumbs),
+  faqPage(lang, page.path, c.faqs),
+];
+---
+<Base title={page.title} description={page.description} path={page.path} ogSlug={page.slug} graph={graph} modified={page.updated}>
+  <PageIntro eyebrow={c.eyebrow} title={c.title} summary={c.summary} crumbs={crumbs} updated={page.updated} />
+
+  <section class="section" style="padding-top:0">
+    <div class="wrap dgrid">
+      <div class="prose" set:html={localizeHtml(lang, c.bodyHtml)} />
+      <div style="display:flex;flex-direction:column;gap:20px">
+        <PhotoFigure id="tusheti" ratio="3 / 2" eager />
+        <PhotoSlot label={c.photo} ratio="3 / 2" size={36} />
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--mist" aria-labelledby="faq-h">
+    <div class="wrap--narrow">
+      <h2 id="faq-h" class="h-sm" style="margin-bottom:28px">{c.faqTitle}</h2>
+      <Faq items={c.faqs} />
+    </div>
+  </section>
+  <CtaBand sample="wild" title={c.ctaTitle} text={c.ctaText} />
+</Base>
+<style>
+  .dgrid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px; }
+  @media (min-width: 1000px) { .dgrid { grid-template-columns: minmax(0, 1fr) 460px; gap: 64px; align-items: start; } }
+</style>

@@ -1,0 +1,41 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../../../layouts/Base.astro';
+import PageIntro from '../../../components/PageIntro.astro';
+import CtaBand from '../../../components/CtaBand.astro';
+import { photos } from '../../../data/photos';
+import { pageByPath } from '../../../data/pages';
+import { webPage, itemList, breadcrumbWithId } from '../../../lib/schema';
+import { fmt, getLang, l, langPaths, useT } from '../../../i18n';
+import { getLocalized } from '../../../i18n/content';
+
+export const getStaticPaths = () => langPaths();
+const lang = getLang(Astro);
+const t = useT(lang);
+const c = t.pages.guides;
+const page = pageByPath(t, '/guides');
+const items = await getLocalized('guides', lang);
+const crumbs = [{ name: t.common.nav.home, path: '/' }, { name: page.nav, path: '/guides' }];
+const graph = [
+  webPage({ lang, path: page.path, name: page.title, description: page.description, type: 'CollectionPage', crumbs, dateModified: page.updated }),
+  breadcrumbWithId(lang, page.path, crumbs),
+  itemList(lang, c.listName, items.map((g) => ({ name: g.data.title, path: `/guides/${g.slug}` }))),
+];
+---
+<Base title={page.title} description={page.description} path={page.path} ogSlug={page.slug} graph={graph} modified={page.updated}>
+  <PageIntro eyebrow={c.eyebrow} title={c.title} summary={c.summary} crumbs={crumbs} updated={page.updated} />
+  <section class="section" style="padding-top:0">
+    <div class="wrap grid-auto" style="--min:330px">
+      {items.map((g) => (
+        <article class="card card--stretched">
+          {g.data.photo && <Image src={photos[g.data.photo].src} alt="" widths={[480, 768]} sizes="(min-width: 700px) 400px, 100vw" style="aspect-ratio:3/2;width:100%;height:auto;object-fit:cover;border-radius:8px" loading="lazy" />}
+          <p class="card-eyebrow">{fmt(t.common.cards.minRead, { n: g.data.readingMinutes })}</p>
+          <h2 class="card-title card-title--sm disp"><a href={l(lang, `/guides/${g.slug}`)} class="stretch" style="text-decoration:none">{g.data.title}</a></h2>
+          <p class="card-text" style="flex:1">{g.data.summary.split(/(?<=[.!?։。])\s/)[0]}</p>
+          <span class="lnk">{t.common.cards.readGuide}</span>
+        </article>
+      ))}
+    </div>
+  </section>
+  <CtaBand />
+</Base>

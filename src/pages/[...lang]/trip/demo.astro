@@ -1,0 +1,17 @@
+---
+import Base from '../../../layouts/Base.astro';
+import TripStudio from '../../../components/studio/TripStudio';
+import { MAP } from '../../../data/routes';
+import { site } from '../../../config/site';
+import { getLang, langPaths, useT } from '../../../i18n';
+import '../../../styles/builder.css';
+import '../../../styles/studio.css';
+
+export const getStaticPaths = () => langPaths();
+const lang = getLang(Astro);
+const t = useT(lang);
+---
+<!-- Private by design: real trips live at /trip/<long-unguessable-token>. This demo shows what a traveller receives. -->
+<Base title={t.studio.trip.meta.title} description={t.studio.trip.meta.description} path="/trip/demo" noindex bare>
+  <TripStudio client:load lang={lang} t={t.studio.trip} places={t.common.places} mapSrc={MAP.srcWide} whatsapp={site.contact.whatsapp} />
+</Base>

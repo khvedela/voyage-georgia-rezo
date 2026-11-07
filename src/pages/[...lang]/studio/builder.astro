@@ -1,0 +1,72 @@
+---
+import Dash from '../../../layouts/Dash.astro';
+import { eur } from '../../../data/studio';
+import { fmt, getLang, l, langPaths, useT } from '../../../i18n';
+
+export const getStaticPaths = () => langPaths();
+const lang = getLang(Astro);
+const s = useT(lang).studio;
+const t = s.builder;
+const icons = {
+  drive: 'M3 14l2-6h14l2 6v4H3z M7 18v2 M17 18v2',
+  visit: 'M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z M12 12a2.2 2.2 0 1 0 0-4.4 2.2 2.2 0 0 0 0 4.4',
+  stay: 'M3 18V8 M3 14h18v4 M21 14v-2a3 3 0 0 0-3-3h-7v5',
+};
+// Structure of the sample day; words in studio.builder.stops.
+const stops = ([
+  { t: '09:00', icon: icons.drive, key: 'leave', gap: true },
+  { t: '09:30', icon: icons.visit, key: 'mtskheta', sel: true, gap: true },
+  { t: '12:30', icon: icons.visit, key: 'ananuri', gap: true },
+  { t: '15:30', icon: icons.stay, key: 'arrive', gap: false },
+] as const).map((x) => ({ ...x, h: t.stops[x.key].title, s: t.stops[x.key].sub, gap: x.gap ? t.stops[x.key].gap : '' }));
+const day = 3;
+const chip = (n: number) => fmt(t.chip, { n });
+---
+<Dash title={t.title} path="/studio/builder">
+  <header class="d-hd">
+    <a href={l(lang, '/studio/inquiry')} class="d-back" aria-label={t.back}><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg></a>
+    <div style="flex:1;min-width:0"><h1 class="d-title">{fmt(t.heading, { name: s.dash.people.leila })}</h1><p class="d-sub">{t.meta}</p></div>
+  </header>
+  <div role="tablist" aria-label={t.daysLabel} style="display:flex;gap:8px;padding:4px 16px 12px;overflow-x:auto">
+    {[1, 2].map((n) => <span class="d-chip">{chip(n)}</span>)}
+    <span role="tab" aria-selected="true" class="d-chip d-chip--on">{chip(day)}</span>
+    {[4, 5, 6].map((n) => <span class="d-chip">{chip(n)}</span>)}
+    <span class="d-chip d-chip--add">{t.addDay}</span>
+  </div>
+  <div class="d-main" style="padding:0 16px 16px;gap:12px">
+    <div class="d-offline"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M2 8.8a15 15 0 0 1 20 0 M5 12.5a10 10 0 0 1 14 0 M8.5 16a5 5 0 0 1 7 0 M12 20h.01" /><path d="M3 3l18 18" /></svg>{t.offline}</div>
+    <div>
+      <p class="d-eyebrow" style="margin:0">{fmt(t.day, { n: day })}</p>
+      <h2 class="disp" style="margin:0;font-weight:400;font-size:28px;line-height:1.1">{t.dayTitle}</h2>
+    </div>
+    <ol class="d-timeline">
+      {stops.map((s) => (
+        <>
+          <li>
+            <div class="d-time">{s.t}</div>
+            <div class:list={['d-stop', s.sel && 'd-stop--sel']}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#D62839" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d={s.icon} /></svg>
+              <div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:600">{s.h}</div><div style="font-size:13.5px;color:var(--slate)">{s.s}</div></div>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="#8B99A3" aria-hidden="true" style="flex:none"><circle cx="9" cy="6" r="1.6" /><circle cx="15" cy="6" r="1.6" /><circle cx="9" cy="12" r="1.6" /><circle cx="15" cy="12" r="1.6" /><circle cx="9" cy="18" r="1.6" /><circle cx="15" cy="18" r="1.6" /></svg>
+            </div>
+          </li>
+          {s.gap && <li class="d-gap" aria-hidden="true"><div style="width:46px;flex:none;margin:0"></div><div><i></i>{s.gap}</div></li>}
+        </>
+      ))}
+    </ol>
+    <button type="button" style="min-height:52px;border-radius:12px;border:1.5px dashed var(--line-3);background:transparent;color:var(--ink);font-size:16px;font-weight:600;cursor:pointer;font-family:inherit">{t.addStop}</button>
+    <div style="display:flex;flex-wrap:wrap;gap:8px">{[t.kinds.visit, t.kinds.meal, t.kinds.drive, t.kinds.library].map((l) => <button type="button" class="d-pill" style="font-family:inherit">{l}</button>)}</div>
+    <div style="padding:14px 16px;border-radius:12px;background:var(--mist);font-size:14.5px;display:flex;flex-direction:column;gap:4px">
+      <div style="display:flex;justify-content:space-between"><span>{t.driving}</span><strong>{t.drivingValue}</strong></div>
+      <div style="display:flex;justify-content:space-between"><span>{t.length}</span><strong>{t.lengthValue}</strong></div>
+      <div style="display:flex;justify-content:space-between"><span>{t.pace}</span><strong>{t.paceValue}</strong></div>
+      <p style="margin:6px 0 0;font-size:13px;color:var(--slate)">{t.estimates}</p>
+    </div>
+    <label for="note" style="font-size:14px;font-weight:600">{t.noteLabel}</label>
+    <textarea id="note" rows="2" placeholder={t.notePlaceholder} class="field" style="padding:12px 14px;min-height:0;background:var(--paper);resize:none"></textarea>
+  </div>
+  <footer class="d-foot" style="flex-direction:row;align-items:center;gap:12px;padding-top:10px">
+    <div style="flex:1;min-width:0"><div style="font-size:12.5px;color:var(--slate)">{t.quoteSoFar}</div><div class="disp" style="font-size:24px;line-height:1.1">{eur(lang, 3950)} <span style="font-size:13px;font-family:var(--font-body);color:var(--slate)">{t.draft}</span></div></div>
+    <a href={l(lang, '/studio/quote')} class="d-btn" style="min-height:52px;padding:0 24px;font-size:16px">{t.openQuote}</a>
+  </footer>
+</Dash>

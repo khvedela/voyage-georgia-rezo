@@ -1,0 +1,114 @@
+---
+import { render } from 'astro:content';
+import Base from '../../../layouts/Base.astro';
+import Localized from "../../../components/Localized.astro";
+import PageIntro from '../../../components/PageIntro.astro';
+import PhotoFigure from '../../../components/PhotoFigure.astro';
+import RouteMap from '../../../components/RouteMap.astro';
+import DestinationCard from '../../../components/DestinationCard.astro';
+import Faq from '../../../components/Faq.astro';
+import CtaBand from '../../../components/CtaBand.astro';
+import { webPage, destination, faqPage, breadcrumbWithId } from '../../../lib/schema';
+import { absoluteUrl } from '../../../config/site';
+import { Image } from 'astro:assets';
+import { modelView } from '../../../data/model';
+import { fmt, getLang, l, locales, defaultLocale, useT } from '../../../i18n';
+import { getLocalized, slugs } from '../../../i18n/content';
+
+export async function getStaticPaths() {
+  const all = await slugs('destinations');
+  return locales.flatMap((lang) => all.map((slug) => ({ params: { lang: lang === defaultLocale ? undefined : lang, slug } })));
+}
+const lang = getLang(Astro);
+const t = useT(lang);
+const c = t.pages.destination;
+const all = await getLocalized('destinations', lang);
+const entry = all.find((e) => e.slug === Astro.params.slug)!;
+const d = entry.data;
+const { Content } = await render(entry);
+const path = `/destinations/${entry.slug}`;
+const crumbs = [{ name: t.common.nav.home, path: '/' }, { name: t.pages.meta.destinations.nav, path: '/destinations' }, { name: d.name, path }];
+const guides = await getLocalized('guides', lang);
+const related = d.guides.map((id) => guides.find((g) => g.slug === id)).filter((g) => g !== undefined);
+const nearby = d.nearby.map((id) => all.find((x) => x.slug === id)).filter((x) => x !== undefined);
+const view = modelView(t, entry.slug);
+const iso = d.updated.toISOString().slice(0, 10);
+const graph = [
+  webPage({ lang, path, name: d.seoTitle, description: d.description, type: 'WebPage', crumbs, dateModified: iso, about: { '@id': `${absoluteUrl(l(lang, path))}#destination` } }),
+  breadcrumbWithId(lang, path, crumbs),
+  destination({ lang, name: d.name, description: d.summary, path, lat: d.lat, lng: d.lng, touristType: d.touristType }),
+  ...(d.faqs.length ? [faqPage(lang, path, d.faqs)] : []),
+];
+---
+<Base title={d.seoTitle} description={d.description} path={path} ogSlug={`destinations-${entry.slug}`} graph={graph} modified={iso}>
+  <PageIntro eyebrow={d.eyebrow} title={d.title} summary={d.summary} crumbs={crumbs} updated={d.updated}>
+    <dl class="facts" style="margin-top:32px;max-width:760px">
+      {d.facts.map((f) => <div><dt>{f.label}</dt><dd>{f.value}{f.note && <small>{f.note}</small>}</dd></div>)}
+    </dl>
+    {view && (
+      <figure slot="aside" class="model-piece">
+        <div class="plinth model-piece-img">
+          <Image src={view.src} alt={view.alt} widths={[560, 840]} sizes="(min-width: 1000px) 46vw, 100vw" loading="eager" fetchpriority="high" />
+        </div>
+        <figcaption>{lang !== 'ka' && <span class="ka model-ka" lang="ka">{view.ka}</span>}<span>{fmt(t.data.modelCaption, { name: d.name, see: view.see })}</span></figcaption>
+      </figure>
+    )}
+  </PageIntro>
+
+  <section class="section" style="padding-top:0">
+    <div class="wrap dest-grid">
+      <article class="prose"><Localized><Content /></Localized></article>
+      <aside class="dest-aside" aria-label={c.asideLabel}>
+        {d.photo && <PhotoFigure id={d.photo} ratio="4 / 3" />}
+        <div class="mapbox"><RouteMap id={d.map} scale={0.62} /></div>
+        <p class="meta" style="margin:8px 0 0">{c.mapNote}</p>
+        <a href={l(lang, '/design-my-trip')} class="btn btn--primary btn--sm" style="margin-top:20px">{fmt(c.add, { name: d.name })}</a>
+      </aside>
+    </div>
+  </section>
+
+  {d.faqs.length > 0 && (
+    <section class="section section--mist" aria-labelledby="faq-h">
+      <div class="wrap--narrow">
+        <h2 id="faq-h" class="h-sm" style="margin-bottom:28px">{fmt(c.faqTitle, { name: d.name })}</h2>
+        <Faq items={d.faqs} />
+      </div>
+    </section>
+  )}
+
+  {nearby.length > 0 && (
+    <section class="section" aria-labelledby="near-h">
+      <div class="wrap">
+        <h2 id="near-h" class="h-sm" style="margin-bottom:28px">{c.nearbyTitle}</h2>
+        <div class="grid-auto" style="--min:250px;gap:32px 24px">
+          {nearby.map((n) => <DestinationCard entry={n} />)}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {related.length > 0 && (
+    <section class="section section--mist section--tight" aria-labelledby="rel-h">
+      <div class="wrap--narrow">
+        <h2 id="rel-h" class="h-sm" style="margin-bottom:18px">{c.readNext}</h2>
+        <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px">
+          {related.map((g) => <li><a class="lnk" href={l(lang, `/guides/${g.slug}`)}>{g.data.title}</a></li>)}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  <CtaBand />
+</Base>
+<style>
+  .dest-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px; }
+  @media (min-width: 1000px) { .dest-grid { grid-template-columns: minmax(0, 1fr) 460px; gap: 64px; align-items: start; } .dest-aside { position: sticky; top: 96px; } }
+  .mapbox { margin-top: 28px; border-radius: var(--r); padding: 8px; background: var(--surface); box-shadow: var(--plinth-sm); }
+  .model-piece { margin: 0; }
+  .model-piece-img { padding: 10px; }
+  .model-piece-img :global(img) { display: block; width: 100%; height: auto; aspect-ratio: 7 / 5; object-fit: cover; border-radius: 12px; background: #fff; }
+  .model-piece figcaption { margin-top: 28px; display: flex; flex-direction: column; gap: 6px; font: 400 14.5px/1.45 var(--font-ui); color: var(--slate); }
+  /* the region's name in Georgian, set large enough for the script to be read as lettering */
+  .model-ka { font-size: clamp(30px, 2.6vw, 40px); line-height: 1.15; font-weight: 400; color: var(--ink); }
+  .mapbox svg { width: 100%; height: auto; display: block; border-radius: 8px; aspect-ratio: 4 / 5; }
+</style>

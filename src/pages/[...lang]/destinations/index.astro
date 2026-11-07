@@ -1,0 +1,49 @@
+---
+import Base from '../../../layouts/Base.astro';
+import PageIntro from '../../../components/PageIntro.astro';
+import DestinationCard from '../../../components/DestinationCard.astro';
+import CtaBand from '../../../components/CtaBand.astro';
+import { pageByPath } from '../../../data/pages';
+import { webPage, itemList, breadcrumbWithId } from '../../../lib/schema';
+import { getLang, langPaths, useT } from '../../../i18n';
+import { getLocalized } from '../../../i18n/content';
+
+export const getStaticPaths = () => langPaths();
+const lang = getLang(Astro);
+const t = useT(lang);
+const c = t.pages.destinations;
+const page = pageByPath(t, '/destinations');
+const items = await getLocalized('destinations', lang);
+const crumbs = [{ name: t.common.nav.home, path: '/' }, { name: page.nav, path: '/destinations' }];
+const graph = [
+  webPage({ lang, path: page.path, name: page.title, description: page.description, type: 'CollectionPage', crumbs, dateModified: page.updated }),
+  breadcrumbWithId(lang, page.path, crumbs),
+  itemList(lang, c.listName, items.map((d) => ({ name: d.data.name, path: `/destinations/${d.slug}` }))),
+];
+---
+<Base title={page.title} description={page.description} path={page.path} ogSlug={page.slug} graph={graph} modified={page.updated}>
+  <PageIntro eyebrow={c.eyebrow} title={c.title} summary={c.summary} crumbs={crumbs} updated={page.updated} />
+
+  <section class="section" style="padding-top:0">
+    <div class="wrap">
+      <div class="grid-auto" style="--min:250px;gap:32px 24px">
+        {items.map((d) => <DestinationCard entry={d} level={2} />)}
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--mist" aria-labelledby="legs-h">
+    <div class="wrap--narrow">
+      <h2 id="legs-h" class="h-sm" style="margin-bottom:12px">{c.legsTitle}</h2>
+      <p class="body-lg" style="margin:0 0 28px">{c.legsText}</p>
+      <div class="prose" style="overflow-x:auto">
+        <table>
+          <thead><tr><th scope="col">{c.colLeg}</th><th scope="col">{c.colDistance}</th><th scope="col">{c.colTime}</th></tr></thead>
+          <tbody>{c.legs.map(([a, b, x]) => <tr><th scope="row" style="font-size:16px;letter-spacing:0;text-transform:none;color:var(--ink);border-top:1px solid var(--line);border-bottom:0">{a}</th><td>{b}</td><td>{x}</td></tr>)}</tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <CtaBand />
+</Base>

@@ -1,0 +1,65 @@
+---
+import Dash from '../../../layouts/Dash.astro';
+import { eur } from '../../../data/studio';
+import { fmt, formatNumber, getLang, l, langPaths, useT } from '../../../i18n';
+
+export const getStaticPaths = () => langPaths();
+const lang = getLang(Astro);
+const s = useT(lang).studio;
+const t = s.quote;
+// Sample quotation: [line id, price, Rezo's cost]. Labels in studio.quote.items.
+const rows = ([['vehicle', 1500, 1250], ['stays', 1260, 1100], ['guiding', 600, 600], ['visits', 340, 300], ['meals', 250, 230]] as const);
+const lines = rows.map(([id, p, c]) => [t.items[id].label, t.items[id].sub, eur(lang, p), eur(lang, c)]);
+const price = rows.reduce((a, r) => a + r[1], 0);
+const margin = price - rows.reduce((a, r) => a + r[2], 0);
+const num = (n: number) => formatNumber(lang, n);
+---
+<Dash title={t.title} path="/studio/quote">
+  <header class="d-hd d-hd--rule">
+    <a href={l(lang, '/studio/builder')} class="d-back" aria-label={t.back}><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg></a>
+    <div style="flex:1;min-width:0"><h1 class="d-title">{fmt(t.heading, { name: s.dash.people.leila })}</h1><p class="d-sub">{t.meta}</p></div>
+  </header>
+  <div class="d-main" style="gap:18px">
+    <section aria-label={t.vehicle}>
+      <p class="d-eyebrow">{t.vehicle}</p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px"><span class="d-pill d-pill--on">{t.vehicles.delica}</span><span class="d-pill">{t.vehicles.long}</span><span class="d-pill">{t.vehicles.short}</span><span class="d-pill">{t.vehicles.x4}</span></div>
+    </section>
+    <section aria-label={t.linesLabel}>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
+        <p class="d-eyebrow" style="margin:0">{t.lines}</p>
+        <p style="margin:0;font-size:12px;color:var(--slate);display:flex;gap:28px"><span>{t.price}</span><span>{t.cost}</span></p>
+      </div>
+      <ul class="d-lines">
+        {lines.map(([l, sub, p, c]) => <li><span class="l">{l}{sub && <small>{sub}</small>}</span><strong>{p}</strong><span class="c">{c}</span></li>)}
+      </ul>
+      <button type="button" style="margin-top:10px;min-height:44px;padding:0 6px;border:0;background:transparent;color:var(--ink);font-size:15px;font-weight:600;text-decoration:underline;text-underline-offset:4px;cursor:pointer;font-family:inherit">{t.addLine}</button>
+    </section>
+    <section aria-label={t.totals} class="d-totals">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:10px">
+        <div><div style="font-size:13px;color:var(--line-3)">{t.sees}</div><div class="disp" style="font-size:46px;line-height:1.05;letter-spacing:-.02em">{eur(lang, price)}</div><div style="font-size:14px;color:#C2CED5">{fmt(t.perPerson, { amount: eur(lang, price / 2), step: eur(lang, 50) })}</div></div>
+        <div style="text-align:right"><div style="font-size:13px;color:var(--line-3)">{t.margin}</div><div style="font-size:20px;font-weight:600;color:#ff6b77">{fmt(t.marginValue, { amount: eur(lang, margin), pct: formatNumber(lang, margin / price, { style: 'percent', maximumFractionDigits: 1 }) })}</div></div>
+      </div>
+      <p style="margin:12px 0 0;padding-top:10px;border-top:1px solid #2e3138;font-size:13.5px;color:var(--line-3)">{fmt(t.rangeNote, { range: fmt(t.range, { lo: num(3800), hi: num(4200) }) })}</p>
+    </section>
+    <section aria-label={t.beforeLabel}>
+      <p class="d-eyebrow">{t.before}</p>
+      <form id="checks" style="display:flex;flex-direction:column;gap:2px">
+        <label class="d-check"><input type="checkbox" checked /> {t.checks.drives}</label>
+        <label class="d-check"><input type="checkbox" checked /> {t.checks.access}</label>
+        <label class="d-check"><input type="checkbox" /> {t.checks.hotels}</label>
+      </form>
+    </section>
+  </div>
+  <footer class="d-foot" style="padding-top:10px">
+    <button type="button" id="publish" class="d-btn" disabled>{t.publish}</button>
+    <p style="margin:0;text-align:center;font-size:13px;color:var(--slate)">{t.tick}</p>
+    <div style="display:flex;gap:10px"><a href={l(lang, '/trip/demo')} class="d-btn d-btn--line" style="min-height:48px;font-size:15px">{t.preview}</a><a href={l(lang, '/studio')} class="d-btn d-btn--line" style="min-height:48px;font-size:15px">{t.saveTemplate}</a></div>
+  </footer>
+</Dash>
+<script>
+  const boxes = [...document.querySelectorAll<HTMLInputElement>('#checks input')];
+  const btn = document.getElementById('publish') as HTMLButtonElement;
+  const sync = () => { btn.disabled = !boxes.every((b) => b.checked); };
+  boxes.forEach((b) => b.addEventListener('change', sync));
+  sync();
+</script>

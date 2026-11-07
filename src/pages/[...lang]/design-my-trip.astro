@@ -1,0 +1,49 @@
+---
+import { getImage } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import Footer from '../../components/Footer.astro';
+import TripBuilder from '../../components/builder/TripBuilder';
+import Faq from '../../components/Faq.astro';
+import { photos, type PhotoId } from '../../data/photos';
+import { MAP } from '../../data/routes';
+import { site } from '../../config/site';
+import { pageByPath } from '../../data/pages';
+import { webPage, faqPage, breadcrumbWithId, ids } from '../../lib/schema';
+import { getLang, l, langPaths, localizeHtml, useT } from '../../i18n';
+import '../../styles/builder.css';
+
+export const getStaticPaths = () => langPaths();
+const lang = getLang(Astro);
+const t = useT(lang);
+const c = t.pages.designTrip;
+const page = pageByPath(t, '/design-my-trip');
+const crumbs = [{ name: t.common.nav.home, path: '/' }, { name: c.crumb, path: '/design-my-trip' }];
+const thumbs: Record<string, string> = {};
+for (const id of Object.keys(photos) as PhotoId[]) {
+  thumbs[id] = (await getImage({ src: photos[id].src, width: 400, height: 300, format: 'webp', quality: 60 })).src;
+}
+const url = `${site.url}${l(lang, '/design-my-trip')}`;
+const graph = [
+  webPage({ lang, path: page.path, name: page.title, description: page.description, type: ['WebPage'], crumbs, dateModified: page.updated, about: { '@id': ids.org } }),
+  breadcrumbWithId(lang, page.path, crumbs),
+  {
+    '@type': 'Service', '@id': `${url}#service`, name: c.serviceName,
+    description: c.serviceDescription,
+    provider: { '@id': ids.org }, areaServed: { '@id': ids.georgia }, serviceType: c.serviceType,
+    availableChannel: { '@type': 'ServiceChannel', serviceUrl: url, name: c.channelName },
+  },
+  faqPage(lang, page.path, c.faqs),
+];
+---
+<Base title={page.title} description={page.description} path={page.path} ogSlug={page.slug} graph={graph} modified={page.updated} bare>
+  <TripBuilder client:load lang={lang} t={t.builder} places={t.common.places} photos={thumbs} mapSrc={MAP.srcWide} endpoint={site.inquiryEndpoint} whatsapp={site.contact.whatsapp} email={site.contact.email} />
+
+  <section class="section section--mist" aria-labelledby="what-h">
+    <div class="wrap--narrow">
+      <h2 id="what-h" class="h-sm" style="margin-bottom:16px">{c.howTitle}</h2>
+      <div class="prose" style="margin-bottom:36px" set:html={localizeHtml(lang, c.howHtml)} />
+      <Faq items={c.faqs} />
+    </div>
+  </section>
+  <Footer />
+</Base>

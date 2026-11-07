@@ -1,0 +1,41 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageIntro from '../../components/PageIntro.astro';
+import Faq from '../../components/Faq.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { faqText } from '../../data/faqs';
+import { pageByPath } from '../../data/pages';
+import { webPage, faqPage, breadcrumbWithId } from '../../lib/schema';
+import { getLang, langPaths, useT } from '../../i18n';
+
+export const getStaticPaths = () => langPaths();
+const lang = getLang(Astro);
+const t = useT(lang);
+const c = t.pages.faq;
+const page = pageByPath(t, '/faq');
+const faqs = faqText(t);
+const crumbs = [{ name: t.common.nav.home, path: '/' }, { name: c.crumb, path: '/faq' }];
+const groups = (['planning', 'pricing', 'access', 'roads', 'practical'] as const).map((id) => ({ id, title: c.groups[id] }));
+const graph = [
+  webPage({ lang, path: page.path, name: page.title, description: page.description, type: 'FAQPage', crumbs, dateModified: page.updated }),
+  breadcrumbWithId(lang, page.path, crumbs),
+  faqPage(lang, page.path, faqs),
+];
+---
+<Base title={page.title} description={page.description} path={page.path} ogSlug={page.slug} graph={graph} modified={page.updated}>
+  <PageIntro eyebrow={c.eyebrow} title={c.title} summary={c.summary} crumbs={crumbs} updated={page.updated} />
+  <section class="section" style="padding-top:0">
+    <div class="wrap--narrow">
+      {groups.map((g) => {
+        const items = faqs.filter((f) => f.topic === g.id);
+        return items.length > 0 && (
+          <div style="margin-bottom:56px">
+            <h2 class="h-sm" style="margin-bottom:20px;font-size:clamp(24px,2.6vw,32px)">{g.title}</h2>
+            <Faq items={items} />
+          </div>
+        );
+      })}
+    </div>
+  </section>
+  <CtaBand title={c.ctaTitle} text={c.ctaText} />
+</Base>

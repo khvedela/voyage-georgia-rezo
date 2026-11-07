@@ -1,0 +1,37 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageIntro from '../../components/PageIntro.astro';
+import VehicleCards from '../../components/VehicleCards.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { vehicles } from '../../data/vehicles';
+import { pageByPath } from '../../data/pages';
+import { webPage, itemList, breadcrumbWithId } from '../../lib/schema';
+import { getLang, langPaths, localizeHtml, useT } from '../../i18n';
+
+export const getStaticPaths = () => langPaths();
+const lang = getLang(Astro);
+const t = useT(lang);
+const c = t.pages.vehicles;
+const page = pageByPath(t, '/vehicles');
+const crumbs = [{ name: t.common.nav.home, path: '/' }, { name: page.nav, path: '/vehicles' }];
+const graph = [
+  webPage({ lang, path: page.path, name: page.title, description: page.description, type: 'CollectionPage', crumbs, dateModified: page.updated }),
+  breadcrumbWithId(lang, page.path, crumbs),
+  itemList(lang, c.listName, vehicles(t).map((v) => ({ name: v.name, path: '/vehicles' }))),
+];
+---
+<Base title={page.title} description={page.description} path={page.path} ogSlug={page.slug} graph={graph} modified={page.updated}>
+  <PageIntro eyebrow={c.eyebrow} title={c.title} summary={c.summary} crumbs={crumbs} updated={page.updated} />
+  <section class="section" style="padding-top:0">
+    <div class="wrap">
+      <VehicleCards headingLevel={2} />
+    </div>
+  </section>
+  <section class="section section--mist" aria-labelledby="choose-h">
+    <div class="wrap--prose prose">
+      <h2 id="choose-h" style="margin-top:0">{c.chooseTitle}</h2>
+      <Fragment set:html={localizeHtml(lang, c.chooseHtml)} />
+    </div>
+  </section>
+  <CtaBand />
+</Base>

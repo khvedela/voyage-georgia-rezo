@@ -1,0 +1,59 @@
+---
+import Dash from '../../../layouts/Dash.astro';
+import { MAP, roads } from '../../../data/routes';
+import { getLang, l, langPaths, useT } from '../../../i18n';
+
+export const getStaticPaths = () => langPaths();
+const lang = getLang(Astro);
+const { studio: s, common } = useT(lang);
+const t = s.inquiry;
+const { people, interests } = s.dash;
+const places = common.places;
+const route = [roads.tbilisiKazbegi, roads.kazbegiTelavi, roads.telaviKutaisi, roads.kutaisiBatumi];
+const pins: [number, number][] = [[681, 387], [662, 228], [767, 354], [419, 294], [283, 405]];
+const answers = ['when', 'length', 'travellers', 'pace', 'budget', 'access', 'reply'] as const;
+const tags = [interests.mountains, interests.wine, interests.churches, interests.blackSea];
+---
+<Dash title={t.title} path="/studio/inquiry">
+  <header class="d-hd d-hd--rule" style="padding-block:10px">
+    <a href={l(lang, '/studio')} class="d-back" aria-label={t.back}><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg></a>
+    <div style="flex:1;min-width:0">
+      <h1 class="d-title" style="font-size:24px">{people.leila}</h1>
+      <p class="d-sub">{t.meta}</p>
+    </div>
+    <span style="padding:3px 10px;border-radius:999px;background:var(--red);color:#fff;font-size:12px;font-weight:600">{t.badge}</span>
+  </header>
+  <div class="d-main" style="padding:18px 20px 20px;gap:20px">
+    <section aria-label={t.inWords} style="padding:18px 18px 20px;border-radius:14px;background:var(--paper);border:1px solid var(--line)">
+      <p class="d-eyebrow">{t.inWords}</p>
+      <p class="disp" style="margin:0;font-size:21px;line-height:1.3">{t.words}</p>
+    </section>
+    <section aria-label={t.answersLabel}>
+      <dl style="margin:0;display:grid;grid-template-columns:minmax(96px,max-content) 1fr;gap:10px 12px;font-size:15.5px">
+        {answers.map((k) => <><dt style="color:var(--slate)">{t.answers[k].label}</dt><dd style="margin:0">{t.answers[k].value}</dd></>)}
+      </dl>
+      <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:6px">{tags.map((x) => <span class="d-tag" style="padding:4px 12px;font-size:14px">{x}</span>)}</div>
+    </section>
+    <section aria-label={t.sketch} style="padding:16px;border-radius:14px;background:var(--mist)">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px">
+        <p class="d-eyebrow" style="margin:0">{t.sketch}</p>
+        <span style="padding:2px 9px;border-radius:999px;border:1px solid var(--line-3);font-size:11.5px;color:var(--slate-2)">{t.draft}</span>
+      </div>
+      <svg viewBox="60 60 880 490" style="width:100%;height:auto;display:block;border-radius:8px" role="img" aria-label={t.mapAlt}>
+        <image href={MAP.srcWide} x="0" y="0" width={MAP.w} height={MAP.h} />
+        <g fill="none" stroke="#D62839" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">{route.map((d) => <path d={d} />)}</g>
+        <g fill="#D62839" stroke="#1D2A35" stroke-width="3.5">{pins.map(([x, y]) => <circle cx={x} cy={y} r="11" />)}</g>
+        <g font-family="Atkinson Hyperlegible Next Variable, sans-serif" font-size="34" fill="#1D2A35" font-weight="600" paint-order="stroke" stroke="#F8FAFB" stroke-width="8" stroke-linejoin="round"><text x="700" y="430">{places.Tbilisi}</text><text x="640" y="214" text-anchor="end">{places.Kazbegi}</text><text x="786" y="340">{places.Kakheti}</text><text x="419" y="262" text-anchor="middle">{places.Kutaisi}</text><text x="266" y="446" text-anchor="end">{places.Batumi}</text></g>
+      </svg>
+      <p style="margin:6px 0 0;font-size:14.5px;color:var(--slate-2)">{t.sketchNote}</p>
+    </section>
+    <section aria-label={t.askLabel}>
+      <p class="d-eyebrow">{t.askTitle}</p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px"><span class="d-pill">{t.ask.airports}</span><span class="d-pill">{t.ask.hotels}</span><span class="d-pill">{t.ask.dates}</span></div>
+    </section>
+  </div>
+  <footer class="d-foot">
+    <a href={l(lang, '/studio/builder')} class="d-btn" style="min-height:54px">{t.start}</a>
+    <div style="display:flex;gap:10px"><a href={l(lang, '/studio/inquiry')} class="d-btn d-btn--line">{t.reply}</a><a href={l(lang, '/studio/builder')} class="d-btn d-btn--line">{t.template}</a></div>
+  </footer>
+</Dash>

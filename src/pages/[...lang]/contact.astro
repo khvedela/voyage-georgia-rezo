@@ -1,0 +1,51 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageIntro from '../../components/PageIntro.astro';
+import ContactChannels from '../../components/ContactChannels.astro';
+import ContactCta from '../../components/ContactCta.astro';
+import Todo from '../../components/Todo.astro';
+import { site, whatsappLink, mailtoLink } from '../../config/site';
+import { pageByPath } from '../../data/pages';
+import { webPage, breadcrumbWithId } from '../../lib/schema';
+import { getLang, l, langPaths, useT } from '../../i18n';
+
+export const getStaticPaths = () => langPaths();
+const lang = getLang(Astro);
+const t = useT(lang);
+const c = t.pages.contact;
+const page = pageByPath(t, '/contact');
+const crumbs = [{ name: t.common.nav.home, path: '/' }, { name: page.nav, path: '/contact' }];
+const hasChannels = Boolean(whatsappLink() || mailtoLink() || site.contact.messenger);
+const graph = [
+  webPage({ lang, path: page.path, name: page.title, description: page.description, type: 'ContactPage', crumbs, dateModified: page.updated }),
+  breadcrumbWithId(lang, page.path, crumbs),
+];
+---
+<Base title={page.title} description={page.description} path={page.path} ogSlug={page.slug} graph={graph} modified={page.updated}>
+  <PageIntro eyebrow={c.eyebrow} title={c.title} summary={c.summary} crumbs={crumbs} updated={page.updated} byline={false}>
+    {hasChannels && (
+      <div style="margin-top:28px"><ContactChannels /></div>
+    )}
+  </PageIntro>
+
+  <section class="section" style="padding-top:0" aria-labelledby="next-h">
+    <div class="wrap--narrow">
+      <h2 id="next-h" class="h-sm" style="margin-bottom:24px">{c.nextTitle}</h2>
+      <ol class="next">
+        {c.steps.map((s, i) => (
+          <li><span>{i + 1}</span><div><strong class="disp">{s.title}</strong><p>{s.text}{i === 1 && <> <Todo>{c.responseTodo}</Todo></>}</p></div></li>
+        ))}
+      </ol>
+      <p class="note" style="margin-top:28px">{c.prefer} <a href={l(lang, '/design-my-trip')} class="lnk">{c.designTrip}</a>.</p>
+    </div>
+  </section>
+
+  <ContactCta />
+</Base>
+<style>
+  .next { list-style: none; margin: 0; padding: 0; border-bottom: 1px solid var(--line); }
+  .next li { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 14px; padding: 18px 0; border-top: 1px solid var(--line); }
+  .next li > span { font-family: var(--font-ui); font-weight: 600; font-size: 15px; width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line-2); display: flex; align-items: center; justify-content: center; color: var(--red); }
+  .next strong { font-weight: 600; font-size: 19px; }
+  .next p { margin: 4px 0 0; color: var(--slate); font-size: 15.5px; }
+</style>

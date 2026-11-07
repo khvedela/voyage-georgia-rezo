@@ -1,0 +1,22 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getLang, l, langPaths, useT } from '../../i18n';
+// One 404 per language (/404.html, /ru/404.html …): the host serves the nearest one for a missing URL.
+export const getStaticPaths = () => langPaths();
+const lang = getLang(Astro);
+const n = useT(lang).common.notFound;
+---
+<Base title={n.title} description={n.description} path="/404" noindex>
+  <section class="section" style="min-height:60vh;display:flex;align-items:center">
+    <div class="wrap">
+      <p class="eyebrow">404</p>
+      <h1 class="h-lg" style="margin-bottom:18px">{n.heading}</h1>
+      <p class="body-lg" style="margin:0 0 28px;max-width:520px">{n.text}</p>
+      <div style="display:flex;flex-wrap:wrap;gap:12px">
+        <a href={l(lang, '/')} class="btn btn--primary">{n.home}</a>
+        <a href={l(lang, '/destinations')} class="btn btn--secondary">{n.destinations}</a>
+        <a href={l(lang, '/design-my-trip')} class="btn btn--secondary">{n.designTrip}</a>
+      </div>
+    </div>
+  </section>
+</Base>
