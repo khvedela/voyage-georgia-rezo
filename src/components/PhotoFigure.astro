@@ -6,11 +6,11 @@ const { id, eager = false, ratio = '4 / 3', sizes = '(min-width: 1000px) 560px, 
 const p = photos[id];
 ---
 <figure class:list={['pf', cls]} style="margin:0">
-  <Image src={p.src} alt={p.alt} widths={[480, 768, 1100]} sizes={sizes} loading={eager ? 'eager' : 'lazy'} fetchpriority={eager ? 'high' : 'auto'} decoding={eager ? 'sync' : 'async'} style={`aspect-ratio:${ratio};width:100%;height:auto;object-fit:cover;border-radius:14px;display:block`} />
+  <Image src={p.src} alt={p.alt} widths={[480, 768, 1100]} sizes={sizes} loading={eager ? 'eager' : 'lazy'} fetchpriority={eager ? 'high' : 'auto'} decoding={eager ? 'sync' : 'async'} style={`aspect-ratio:${ratio};width:100%;height:auto;object-fit:cover;border-radius:var(--r);display:block;box-shadow:var(--plinth-sm)`} />
   <figcaption><a href={p.creditUrl} target="_blank" rel="noopener">{p.credit}</a></figcaption>
 </figure>
 <style>
-  figcaption { margin-top: 8px; font-size: 11.5px; line-height: 1.35; }
+  figcaption { margin-top: 16px; font-size: 11.5px; line-height: 1.35; }
   figcaption a { color: var(--muted); text-decoration: none; }
   figcaption a:hover { color: var(--ink); text-decoration: underline; }
 </style>

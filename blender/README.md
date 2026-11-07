@@ -8,22 +8,57 @@ model lines up with the site's routes, pins and camera.
 
 | File | What it is |
 | --- | --- |
-| `build_georgia.py` | Builds the whole scene from scratch (terrain, sea, frame, five destinations, animations, cameras). ~10 s. |
+| `build_georgia.py` | Builds the whole scene from scratch (terrain, rivers, roads, sea, frame, five destinations and four scenery stops, animations, cameras). ~15 s. |
+| `vehicles.py` | The vehicles, boats and birds (Mitsubishi Delica Space Gear, Land Cruiser 76, UAZ-452, MTZ-80 tractor, sloop, fishing boat, passenger ferry, golden eagle, yellow-legged gull). Loaded by the build; run on its own it builds a "Workshop" showroom scene and renders close-ups to `renders/vehicles/`. |
+| `export_glb.py` | Writes `public/models/georgia.glb` (Draco) and prints what the bytes went on. |
 | `render.py` | Eevee preview renders into `renders/` using the scene's own cameras. |
-| `bl.py` | Tiny client for the MCP-for-Blender addon socket (127.0.0.1:9876): runs a script inside the open Blender. |
+| `bl.py` | Tiny client for Blender's MCP add-on socket (127.0.0.1:9876, null-byte-delimited JSON): runs a script inside the open Blender. |
 | `georgia-lowpoly.blend` | The last build, saved. |
 | `renders/` | Previews: `overview`, one per destination, `edge`, `coast`. |
 
 ```bash
 python3 blender/bl.py blender/build_georgia.py          # rebuild in the open Blender
 python3 blender/bl.py blender/render.py all frame=60    # previews (res=60 for quick ones, hl=1 to show the highlights)
+python3 blender/bl.py blender/export_glb.py               # the site's model
 ```
+
+Build options (after the script name): `dump=/path/channels.json` writes the traced rivers and roads, `verbose=1` reports
+house placements that came up short.
 
 ## Coordinates
 
 three.js world `(X, Y up, Z)` = Blender `(X, -Y, Z up)`. The glTF export (+Y up) therefore lands exactly where the site's
 scene expects. Map units → world: `S = 0.01` (1 map unit = 0.653 km). Heights are ×9 like the site, with a further +30%
 above 2300 m so the high Caucasus reads as mountains from the overview.
+
+## How it is made (and how it stays true to the real places)
+
+- **Terrain**: the site's height map, triangulated finer near the stops. Each stop sits on a gently levelled shelf;
+  `SCULPT` restores landforms the 650 m grid smooths away (Narikala's Sololaki ridge and Mtatsminda, Elia hill under
+  Sameba, Metekhi's rock, Sighnaghi's ridge, Gremi's knoll, Gergeti's knoll, Bagrati's Ukimerioni hill, Gelati's hill,
+  the Erusheti cliff at Vardzia, Uplistsikhe's rock, Gori's castle hill) and flattens Batumi's coastal plain. `PEAKS` puts
+  Kazbek, Shkhara and Ushba back to their real heights.
+- **Rivers** are traced from the height map itself (priority-flood fill, D8 flow, accumulation), so they run in the real
+  valleys: the Mtkvari through Tbilisi's gorge, the Rioni through Kutaisi, the Alazani down Kakheti, the Terek past
+  Stepantsminda, the Mtkvari under Vardzia and Uplistsikhe. Each stop chooses how many streams it shows (`STOP_RIVERS`);
+  `NO_RIVER` + `LOCAL_CHANNELS` redraw the Chorokhi south of Batumi and the two Alazani rivers either side of Omalo.
+- **Roads**: the site's own route lines, plus each stop's local loop (`LOCAL_CHANNELS`, which the vans and jeeps drive).
+- Rivers and roads are **cut into the land**: a centre line and two bank lines go into the triangulation as constraint
+  edges and are levelled across, so water lies in a flat bed that only runs downhill and a road sits on its own bench.
+- **Colour**: two climates (humid west, dry east, with the irrigated Alazani valley), bands by height with ragged edges,
+  forest belts in patches, Voronoi field patchworks on the lowlands, greener riverbanks, worn ground in towns (`URBAN`),
+  rock only on steep high ground, snow above ~3450 m. Trees are scattered with the same forest mask, so the 3D forest
+  and the ground colour agree; species follow height and climate (beech/oak, spruce/fir, Scots pine and birch in Tusheti
+  and Kazbegi, olive-green scrub in the dry east, eucalyptus and palms at Batumi, poplars along Kakheti's road).
+- **Layouts follow the real geography** (`ll_map` converts latitude/longitude; landmarks keep their real relative
+  bearings, spread out like a diorama): e.g. in Tbilisi the old town, Abanotubani and Narikala are on the right bank,
+  Metekhi, Rike Park and Sameba on the left, the Bridge of Peace between, Kartlis Deda along the ridge and the TV tower
+  on Mtatsminda; in Kutaisi Bagrati is on the right bank, the old centre and the Colchis Fountain on the left.
+- **Landmarks** are built from a small kit (`xchurch` for Georgian cross-dome churches with polygonal drums and conical
+  domes, `basilica`, `hall_church`, `campanile`, `svan_tower`, `tush_tower`, `tb_house` with carved balconies,
+  `svan_house`, `tush_house`, `town_house`) plus one-off pieces: Sameba's tiers and gilded dome, the Bridge of Peace's
+  undulating canopy, the Abanotubani domes and the blue Orbeliani bath, Kartlis Deda, the TV tower, the Alphabet Tower's
+  double helix, Vardzia's banded tuff face with tiers of caves, Uplistsikhe's rock-cut plateau.
 
 ## What the frontend gets (object names)
 
@@ -35,12 +70,17 @@ Everything lives in the `Georgia` collection under one root empty `Georgia`. Pre
 **Five destinations**, each an empty named `Tbilisi`, `Kakheti`, `Svaneti`, `Tusheti`, `Batumi` with children:
 
 - `<Dest>_Static` — houses, trees and small pieces, merged.
-- Named landmarks, one mesh each, e.g. `Tbilisi_Sameba`, `Tbilisi_Narikala`, `Tbilisi_Metekhi`, `Tbilisi_BridgeOfPeace`,
-  `Tbilisi_Abanotubani`, `Tbilisi_KartlisDeda`, `Tbilisi_TVTower`, `Kakheti_Alaverdi`, `Kakheti_Sighnaghi`, `Kakheti_Bodbe`,
-  `Kakheti_WineEstate`, `Kakheti_Vineyards`, `Svaneti_Mestia`, `Svaneti_Ushguli`, `Svaneti_Enguri`, `Tusheti_Keselo`,
-  `Tusheti_Omalo`, `Tusheti_Dartlo`, `Batumi_AlphabetTower`, `Batumi_Skyline`, `Batumi_Boulevard`, `Batumi_Lighthouse`,
-  `Batumi_Piazza`, `Batumi_AliAndNino`; plus `<Dest>_Roads`, `<Dest>_Lanes`, `<Dest>_Paths`, `<Dest>_River`.
-- Animated objects (all loop over 480 frames at 24 fps = 20 s): `Tbilisi_Van`, `Tbilisi_Wheel` (+ `_Cab1..10`),
+- Named landmarks, one mesh each: `Tbilisi_Sameba`, `Tbilisi_Narikala`, `Tbilisi_Metekhi`, `Tbilisi_BridgeOfPeace`,
+  `Tbilisi_RikePark`, `Tbilisi_Abanotubani`, `Tbilisi_KartlisDeda`, `Tbilisi_TVTower`, `Kakheti_Alaverdi`, `Kakheti_Telavi`,
+  `Kakheti_WineEstate` (Tsinandali), `Kakheti_Gremi`, `Kakheti_Sighnaghi`, `Kakheti_Bodbe`, `Kakheti_Vineyards`,
+  `Svaneti_Mestia`, `Svaneti_Ushguli`, `Tusheti_Keselo`, `Tusheti_Omalo`, `Tusheti_Dartlo`, `Batumi_AlphabetTower`,
+  `Batumi_Skyline`, `Batumi_Boulevard`, `Batumi_Lighthouse`, `Batumi_Piazza`, `Batumi_AliAndNino`; plus `<Dest>_Roads`,
+  `<Dest>_Lanes`, `<Dest>_River` where a stop has them. The country-wide rivers and main roads are `Georgia_River` and
+  `Georgia_Roads` (directly under the root).
+- Animated objects (all loop over 480 frames at 24 fps = 20 s). Vehicles: `Tbilisi_Van` and `Kakheti_Van` are Rezo's
+  Mitsubishi Delicas, `Svaneti_Jeep` a Land Cruiser 76, `Tusheti_Jeep` a UAZ-452, `Kakheti_Tractor` an MTZ-80 with a trailer of grapes;
+  `Batumi_Boat1/4` sloops, `Batumi_Boat2` a fishing boat, `Batumi_Boat3` a passenger ferry; eagles and gulls bank into their turns.
+  All of them: `Tbilisi_Van`, `Tbilisi_Wheel` (+ `_Cab1..10`),
   `Tbilisi_Cabin1..3`, `Kakheti_Van`, `Kakheti_Tractor`, `Kakheti_Balloon`, `Svaneti_Jeep`, `Svaneti_EagleA/B`,
   `Tusheti_Jeep`, `Tusheti_Sheep1..14`, `Tusheti_Horse1..3`, `Tusheti_Eagle`, `Batumi_Wheel` (+ cabs), `Batumi_AlphabetGlobe`,
   `Batumi_LighthouseBeam`, `Batumi_Boat1..4`, `Batumi_Gull1..3`, `Batumi_Ali`, `Batumi_Nino`, `<Dest>_Tree1..4` / `Batumi_Palm1..4`
@@ -49,16 +89,26 @@ Everything lives in the `Georgia` collection under one root empty `Georgia`. Pre
 - `Highlight_<dest>` — a soft red glow disc on the ground (vertex alpha fades to the rim). Hidden by default
   (`hide_render`); the site fades it in when the destination is active.
 
+**The site's route van**: `Vehicle_Delica` (under the root, parked below the model, hidden in renders) is the van that
+drives the red route between stops: three.js units, nose along +z, wheels on y = 0, 0.036 long. `world3d.js` hides it and
+clones it into the drive.
+
 **Cameras**: `Cam_overview` and `Cam_tbilisi`, `Cam_kakheti`, `Cam_svaneti`, `Cam_tusheti`, `Cam_batumi`, each with an empty
 `CamTarget_<name>` it looks at (also its depth-of-field focus). The site should ease between camera position + target pairs;
 no camera animation is baked.
 
-Scenery along the way, not destinations (no pick area, highlight or camera): `Scenery_Kutaisi` (Bagrati, Gelati, Motsameta,
-the White Bridge, the Colchis Fountain), `Scenery_Kazbegi` (Gergeti Trinity, Stepantsminda, the Military Highway), `Scenery_Vardzia`
-(the cave monastery cliff) and `Scenery_Uplistsikhe` (the cave town and Gori fortress). Each has a `_Static` mesh only.
+Scenery along the way, not destinations (no pick area, highlight or camera): `Scenery_Kutaisi` (Bagrati, the Colchis
+Fountain and the theatre, the White Bridge, Gelati, Motsameta), `Scenery_Kazbegi` (Gergeti Trinity and its bell tower,
+Stepantsminda and Gergeti villages, the Military Highway in `Scenery_Kazbegi_Roads`), `Scenery_Vardzia` (the cave monastery
+cliff) and `Scenery_Uplistsikhe` (the rock-cut town and its basilica, Gori castle). Each has a `_Static` mesh.
+
+## Budget
+
+About 150k vertices; the Draco GLB is ~2.4 MB (mesh ~1.1 MB, animation ~0.7 MB). Most of the animation is per-frame
+keys for the vehicles, flocks and wheels, and could be thinned if the file needs to shrink.
 
 ## Not yet done
 
-- No glTF/GLB export yet (iterations first). A Draco test export was 3.6 MB; most of it is animation keys, which can be
-  thinned, and the terrain, which can be simplified away from the destinations.
 - Vegetation movement is a few swaying trees per destination; a wind shader on the site would be cheaper and cover all of them.
+- The stops are dioramas with landmarks drawn far larger than the land, so neighbouring stops can show in each other's
+  wide shots (Tbilisi is only ~60 km from Telavi). Cameras are aimed to keep that to the edges.

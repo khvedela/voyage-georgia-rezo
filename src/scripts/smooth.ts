@@ -36,6 +36,12 @@ export function scrollToElement(el: HTMLElement, { center = false } = {}) {
   lenis.scrollTo(el, { offset, duration: 1.4, easing: easeInOutExpo });
 }
 
+/** Glide to an exact scroll position (used to jump along the homepage drive). */
+export function scrollToY(y: number, duration = 1.6) {
+  if (!lenis) { window.scrollTo({ top: y, behavior: reduce ? 'auto' : 'smooth' }); return; }
+  lenis.scrollTo(y, { duration, easing: easeInOutExpo });
+}
+
 // In-page links (including "Skip to content"): glide there, then move keyboard focus like a native jump would.
 function onAnchorClick(e: MouseEvent) {
   if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;

@@ -61,11 +61,11 @@ def place_cam(name, target, yaw, elev, dist, lens=60, size=(1600, 1000)):
 def scenery(name, dx=0.1, dy=0.0, yaw=-0.4, elev=38, dist=1.7):
     e = bpy.data.objects['Scenery_' + name]; t = e.matrix_world.translation
     return place_cam('Cam', (t.x + dx, t.y + dy, t.z + 0.05), yaw, elev, dist, lens=55, size=(1400, 1000))
-EXTRA = {
-    'kutaisi': lambda: scenery('Kutaisi', 0.15, -0.1, -0.4, 40, 1.9),
-    'kazbegi': lambda: scenery('Kazbegi', 0.0, 0.0, -0.3, 36, 1.5),
-    'vardzia': lambda: scenery('Vardzia', 0.0, 0.0, -0.1, 34, 1.3),
-    'uplistsikhe': lambda: scenery('Uplistsikhe', -0.2, -0.05, -0.3, 40, 1.8),
+EXTRA = {  # scenery stops have no camera of their own; frame each on its landmark (dx, dy: Blender world offsets from the empty)
+    'kutaisi': lambda: scenery('Kutaisi', 0.13, 0.11, -0.45, 38, 1.9),
+    'kazbegi': lambda: scenery('Kazbegi', -0.08, 0.04, 0.95, 30, 2.0),
+    'vardzia': lambda: scenery('Vardzia', -0.13, 0.06, 1.45, 24, 1.15),
+    'uplistsikhe': lambda: scenery('Uplistsikhe', -0.08, 0.13, -0.55, 34, 1.5),
     'edge': lambda: place_cam('Cam', (1.2, -1.5, 0.05), -0.25, 30, 4.8, lens=50),
     'coast': lambda: place_cam('Cam', (-3.2, -1.2, 0.05), -1.0, 32, 4.8, lens=50),
 }

@@ -141,7 +141,7 @@ export function derive(s: State) {
     const left = p.x > 820 || !!p.left;
     return {
       x: p.x, y: p.y, n: p.n, r: inR ? 13 : hit ? 7 : 5, fill: inR ? '#D62839' : '#FFFFFF',
-      stroke: inR ? '#FFFFFF' : hit ? '#14161A' : '#A1A1AA', num: inR ? String(idx + 1) : '', ny: p.y + 5.5,
+      stroke: inR ? '#FFFFFF' : hit ? '#1D2A35' : '#8B99A3', num: inR ? String(idx + 1) : '', ny: p.y + 5.5,
       op: inR || hit ? 1 : 0.55, lop: inR || hit ? 1 : 0, lw, lx: left ? p.x - 20 - lw : p.x + 18, ly: p.y - 13,
       tx: left ? p.x - 20 - lw + 9 : p.x + 27, ty: p.y + 5.5,
     };

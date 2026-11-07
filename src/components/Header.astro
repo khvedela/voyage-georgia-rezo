@@ -14,7 +14,7 @@ const current = (href: string) => path === href || path.startsWith(`${href}/`);
 <header class="site-hd">
   <a href="/" class="brand" aria-label="Voyage Georgia Rezo, home">
     <Logo />
-    <span class="brand-name">Voyage Georgia <span class="red">Rezo</span></span>
+    <span class="brand-name">Voyage Georgia Rezo</span>
   </a>
   <nav aria-label="Main" class="nav">
     {links.map((l) => <a href={l.href} aria-current={current(l.href) ? 'page' : undefined}>{l.label}</a>)}

@@ -13,10 +13,8 @@ type Kind = 'words' | 'clip' | 'edge' | 'up';
 
 const SKIP = '.journey, .tb, .st, .dash-app, [data-no-reveal]';
 const RULES: [Kind, string][] = [
-  ['words', 'main h1, main h2'],
-  ['clip', 'main .card, main .pf, main .mapbox, main .mapcard, main .jprint--inline, main .slot, main .callout'],
-  ['edge', 'main .eyebrow, main .card-eyebrow'],
-  ['up', 'main .answer, main .body-lg, main .prose > *, main .steps li, main .how li, main .stat-grid > div, main .trust li, main details.faq, main .facts, main .next li, main .ico-ring, main .tb-q'],
+  // One effect, used sparingly: cards and steps are set down on the table as they come into view.
+  ['up', 'main .card, main .dcard, main .road li'],
 ];
 const STAGGER = 70; // ms between neighbours revealed together
 const DONE_AFTER = 1900; // ms: then the reveal styles are dropped, so hover effects and shadows behave normally

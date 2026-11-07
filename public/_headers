@@ -1,4 +1,7 @@
 # Cloudflare Pages / Netlify header rules. Other hosts: replicate these in their config.
+# The homepage model needs 'wasm-unsafe-eval' (the Draco decoder is WebAssembly) and worker-src blob: (three.js runs
+# the decoder in a worker created from a blob URL), and blob: in img-src and connect-src for the model's embedded
+# textures, which GLTFLoader reads through blob URLs. Without them the 3D model fails and only the still image shows.
 /*
   X-Content-Type-Options: nosniff
   X-Frame-Options: SAMEORIGIN
@@ -6,7 +9,7 @@
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), interest-cohort=()
   Strict-Transport-Security: max-age=31536000; includeSubDomains
   Cross-Origin-Opener-Policy: same-origin
-  Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self' https:; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'
+  Content-Security-Policy: default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; worker-src 'self' blob:; font-src 'self'; connect-src 'self' https: blob:; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'
 
 # Fingerprinted build output never changes: cache forever.
 /_astro/*
@@ -19,6 +22,11 @@
   Cache-Control: public, max-age=604800, stale-while-revalidate=86400
 /og/*
   Cache-Control: public, max-age=86400
+# The model keeps its URL when it is rebuilt, so a day's cache, refreshed in the background; the decoder rarely changes.
+/models/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+/draco/*
+  Cache-Control: public, max-age=604800, stale-while-revalidate=86400
 
 # Machine-readable files: short cache so updates reach crawlers quickly.
 /sitemap.xml

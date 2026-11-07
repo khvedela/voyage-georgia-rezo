@@ -6,8 +6,8 @@ import Footer from '../components/Footer.astro';
 import SmoothScroll from '../components/SmoothScroll.astro';
 import { site, absoluteUrl } from '../config/site';
 import { baseGraph } from '../lib/schema';
-import interLatin from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
-import tightLatin from '@fontsource-variable/inter-tight/files/inter-tight-latin-wght-normal.woff2?url';
+import bodyLatin from '@fontsource-variable/piazzolla/files/piazzolla-latin-opsz-normal.woff2?url';
+import displayLatin from '@fontsource-variable/instrument-sans/files/instrument-sans-latin-wght-normal.woff2?url';
 
 export interface Props {
   /** Page title without the site suffix. */
@@ -87,8 +87,8 @@ const ld = JSON.stringify({ '@context': 'https://schema.org', '@graph': [...base
     <link rel="alternate" type="application/rss+xml" title="Georgia travel guides" href="/rss.xml" />
     <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM-readable site summary" />
 
-    <link rel="preload" href={interLatin} as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href={tightLatin} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={bodyLatin} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={displayLatin} as="font" type="font/woff2" crossorigin />
     {preloadImage && <link rel="preload" as="image" href={preloadImage} fetchpriority="high" />}
 
     <script type="application/ld+json" set:html={ld} is:inline></script>

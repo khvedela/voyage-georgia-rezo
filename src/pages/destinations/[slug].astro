@@ -10,6 +10,8 @@ import Faq from '../../components/Faq.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import { webPage, destination, faqPage, breadcrumbWithId } from '../../lib/schema';
 import { absoluteUrl } from '../../config/site';
+import { Image } from 'astro:assets';
+import { modelViews } from '../../data/model';
 
 export async function getStaticPaths() {
   const all = await getCollection('destinations');
@@ -24,6 +26,7 @@ const crumbs = [{ name: 'Home', path: '/' }, { name: 'Destinations', path: '/des
 const guides = await getCollection('guides');
 const related = d.guides.map((id) => guides.find((g) => g.id === id)).filter(Boolean) as CollectionEntry<'guides'>[];
 const nearby = d.nearby.map((id) => all.find((x) => x.id === id)).filter(Boolean) as CollectionEntry<'destinations'>[];
+const view = modelViews[entry.id];
 const iso = d.updated.toISOString().slice(0, 10);
 const graph = [
   webPage({ path, name: d.seoTitle, description: d.description, type: 'WebPage', crumbs, dateModified: iso, about: { '@id': `${absoluteUrl(path)}#destination` } }),
@@ -37,13 +40,21 @@ const graph = [
     <dl class="facts" style="margin-top:32px;max-width:760px">
       {d.facts.map((f) => <div><dt>{f.label}</dt><dd>{f.value}{f.note && <small>{f.note}</small>}</dd></div>)}
     </dl>
+    {view && (
+      <figure slot="aside" class="model-piece">
+        <div class="plinth model-piece-img">
+          <Image src={view.src} alt={view.alt} widths={[560, 840]} sizes="(min-width: 1000px) 46vw, 100vw" loading="eager" fetchpriority="high" />
+        </div>
+        <figcaption><span class="ka model-ka" lang="ka">{view.ka}</span><span>{d.name} on the model: {view.see}.</span></figcaption>
+      </figure>
+    )}
   </PageIntro>
 
   <section class="section" style="padding-top:0">
     <div class="wrap dest-grid">
       <article class="prose"><Content /></article>
       <aside class="dest-aside" aria-label="Map and photo">
-        {d.photo && <PhotoFigure id={d.photo} eager ratio="4 / 3" />}
+        {d.photo && <PhotoFigure id={d.photo} ratio="4 / 3" />}
         <div class="mapbox"><RouteMap id={d.map} scale={0.62} /></div>
         <p class="meta" style="margin:8px 0 0">Routes follow real highways. Relief from SRTM, GMTED2010 and ETOPO1 elevation data.</p>
         <a href="/design-my-trip" class="btn btn--primary btn--sm" style="margin-top:20px">Add {d.name} to my trip</a>
@@ -76,7 +87,7 @@ const graph = [
       <div class="wrap--narrow">
         <h2 id="rel-h" class="h-sm" style="margin-bottom:18px">Worth reading next</h2>
         <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px">
-          {related.map((g) => <li><a class="lnk" href={`/guides/${g.id}`}>{g.data.title} <span aria-hidden="true" class="red">→</span></a></li>)}
+          {related.map((g) => <li><a class="lnk" href={`/guides/${g.id}`}>{g.data.title}</a></li>)}
         </ul>
       </div>
     </section>
@@ -87,6 +98,12 @@ const graph = [
 <style>
   .dest-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px; }
   @media (min-width: 1000px) { .dest-grid { grid-template-columns: minmax(0, 1fr) 460px; gap: 64px; align-items: start; } .dest-aside { position: sticky; top: 96px; } }
-  .mapbox { margin-top: 20px; border: 1px solid var(--line); border-radius: 14px; padding: 8px; background: #fff; }
+  .mapbox { margin-top: 28px; border-radius: var(--r); padding: 8px; background: var(--surface); box-shadow: var(--plinth-sm); }
+  .model-piece { margin: 0; }
+  .model-piece-img { padding: 10px; }
+  .model-piece-img :global(img) { display: block; width: 100%; height: auto; aspect-ratio: 7 / 5; object-fit: cover; border-radius: 12px; background: #fff; }
+  .model-piece figcaption { margin-top: 28px; display: flex; flex-direction: column; gap: 6px; font: 400 14.5px/1.45 var(--font-ui); color: var(--slate); }
+  /* the region's name in Georgian, set large enough for the script to be read as lettering */
+  .model-ka { font-size: clamp(30px, 2.6vw, 40px); line-height: 1.15; font-weight: 400; color: var(--ink); }
   .mapbox svg { width: 100%; height: auto; display: block; border-radius: 8px; aspect-ratio: 4 / 5; }
 </style>

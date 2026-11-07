@@ -24,11 +24,11 @@ const uid = `rm-${id}`;
   <g fill={m.pinFill} stroke={m.pinStroke} stroke-width={m.pinStrokeW * scale}>
     {m.pins.map((p) => <circle cx={p.x} cy={p.y} r={(p.r ?? m.pinR) * scale} />)}
   </g>
-  <g font-family="Inter Variable, Inter, system-ui, sans-serif" font-size={m.fontSize * scale} font-weight="600" fill="#14161A" paint-order="stroke" stroke="#FAFAFA" stroke-width={m.textStrokeW * scale} stroke-linejoin="round">
+  <g font-family="Atkinson Hyperlegible Next Variable, system-ui, sans-serif" font-size={m.fontSize * scale} font-weight="600" fill="#1D2A35" paint-order="stroke" stroke="#F8FAFB" stroke-width={m.textStrokeW * scale} stroke-linejoin="round">
     {m.labels.map((l) => <text x={l.x} y={l.y} text-anchor={l.anchor}>{l.text}</text>)}
   </g>
   {m.extra?.map((e) => (
-    <text x={e.x} y={e.y} font-family="Inter Variable, Inter, system-ui, sans-serif" font-size={e.size * scale} letter-spacing={e.spacing} fill="#A1A1AA">{e.text}</text>
+    <text x={e.x} y={e.y} font-family="Atkinson Hyperlegible Next Variable, system-ui, sans-serif" font-size={e.size * scale} letter-spacing={e.spacing} fill="#8B99A3">{e.text}</text>
   ))}
 </svg>
 

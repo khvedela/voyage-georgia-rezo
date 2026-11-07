@@ -25,7 +25,7 @@ const wide = {
   viewBox: '60 60 880 490', stroke: 3.6, pinR: 8, pinFill: '#D62839', pinStroke: '#FFFFFF', pinStrokeW: 3, fontSize: 30, textStrokeW: 6,
 };
 const crop = {
-  slice: true, stroke: 2.2, pinR: 3.4, pinFill: '#D62839', pinStroke: '#14161A', pinStrokeW: 1.2, fontSize: 8.5, textStrokeW: 2.4,
+  slice: true, stroke: 2.2, pinR: 3.4, pinFill: '#D62839', pinStroke: '#1D2A35', pinStrokeW: 1.2, fontSize: 8.5, textStrokeW: 2.4,
 };
 
 export const maps = {

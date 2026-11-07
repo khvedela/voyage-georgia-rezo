@@ -18,7 +18,7 @@ const Arrow = ({ size = 18 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
 );
 const Chevron = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#14161A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1D2A35" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>
 );
 const Check = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10" /></svg>
@@ -137,7 +137,7 @@ export default function TripBuilder({ photos, mapSrc, endpoint, whatsapp, email 
     <div class="tb">
       <header class="tb-hd">
         <a href="/" class="brand" aria-label="Voyage Georgia Rezo, home" style="min-height:44px">
-          <svg width="30" height="30" viewBox="0 0 34 34" fill="none" aria-hidden="true"><circle cx="17" cy="17" r="16" stroke="#14161A" stroke-width="1.5" /><path d="M8 24C12 10 16 26 20 15S25 12 26 9" stroke="#14161A" stroke-width="2" stroke-linecap="round" /><circle cx="8" cy="24" r="2.4" fill="#D62839" /><circle cx="26" cy="9" r="2.4" fill="#D62839" /></svg>
+          <svg width="30" height="30" viewBox="0 0 34 34" fill="none" aria-hidden="true"><circle cx="17" cy="17" r="16" stroke="#1D2A35" stroke-width="1.5" /><path d="M8 24C12 10 16 26 20 15S25 12 26 9" stroke="#1D2A35" stroke-width="2" stroke-linecap="round" /><circle cx="8" cy="24" r="2.4" fill="#D62839" /><circle cx="26" cy="9" r="2.4" fill="#D62839" /></svg>
           <span class="brand-name" style="font-size:19px">Voyage Georgia <span class="red">Rezo</span></span>
         </a>
         {inFlow && s.mode !== 'write' && (
@@ -197,7 +197,7 @@ export default function TripBuilder({ photos, mapSrc, endpoint, whatsapp, email 
                       <span class="sb">
                         <span style="display:block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#D62839;font-weight:600">{x.meta}</span>
                         <span class="disp" style="display:block;margin:4px 0 6px;font-weight:600;font-size:20px;letter-spacing:-.015em;line-height:1.15">{x.title}</span>
-                        <span style="display:block;font-size:14px;color:#52525B;line-height:1.45">{x.route}</span>
+                        <span style="display:block;font-size:14px;color:#4A5762;line-height:1.45">{x.route}</span>
                       </span>
                     </button>
                   ))}
@@ -255,8 +255,8 @@ export default function TripBuilder({ photos, mapSrc, endpoint, whatsapp, email 
                 </div>
                 {se.key > 0 && (
                   <div class="tb-note" style="margin-top:16px;max-width:620px">
-                    <p style="margin:0 0 4px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#52525B;font-weight:600">{se.name}</p>
-                    <p style="margin:0;font-size:15px;color:#27272A;line-height:1.5">{se.text}</p>
+                    <p style="margin:0 0 4px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#4A5762;font-weight:600">{se.name}</p>
+                    <p style="margin:0;font-size:15px;color:#2A3741;line-height:1.5">{se.text}</p>
                   </div>
                 )}
                 {d.blockedT && (
@@ -269,7 +269,7 @@ export default function TripBuilder({ photos, mapSrc, endpoint, whatsapp, email 
                 <div style="display:flex;flex-wrap:wrap;align-items:center;gap:16px 28px">
                   <div style="display:flex;align-items:center;gap:16px">
                     <button type="button" class="tb-step" aria-label="One day fewer" onClick={() => set({ days: Math.max(3, (s.daysOpen ? 10 : s.days) - 1), daysOpen: false })}>−</button>
-                    <div style="min-width:110px;text-align:center"><span class="disp" style="font-weight:600;font-size:56px;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums" aria-live="polite">{s.daysOpen ? '–' : s.days}</span> <span style="font-size:16px;color:#52525B">days</span></div>
+                    <div style="min-width:110px;text-align:center"><span class="disp" style="font-weight:600;font-size:56px;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums" aria-live="polite">{s.daysOpen ? '–' : s.days}</span> <span style="font-size:16px;color:#4A5762">days</span></div>
                     <button type="button" class="tb-step" aria-label="One day more" onClick={() => set({ days: Math.min(21, (s.daysOpen ? 10 : s.days) + 1), daysOpen: false })}>+</button>
                   </div>
                   <div style="display:flex;flex-wrap:wrap;gap:8px">
@@ -277,7 +277,7 @@ export default function TripBuilder({ photos, mapSrc, endpoint, whatsapp, email 
                     <Chip soft on={s.daysOpen} onClick={() => set({ daysOpen: !s.daysOpen })}>Suggest a length</Chip>
                   </div>
                 </div>
-                <p style="margin:14px 0 0;font-size:14.5px;color:#52525B;max-width:600px">{d.lenTip}</p>
+                <p style="margin:14px 0 0;font-size:14.5px;color:#4A5762;max-width:600px">{d.lenTip}</p>
               </>
             )}
 
@@ -287,8 +287,8 @@ export default function TripBuilder({ photos, mapSrc, endpoint, whatsapp, email 
                 <h1 class="tb-q" ref={heading} tabIndex={-1}>Who’s coming along?</h1>
                 <p class="tb-lead">So Rezo can think about the vehicle, rooms and how long each day should be.</p>
                 <div style="display:flex;flex-wrap:wrap;gap:20px 48px">
-                  <div><p style="margin:0 0 8px;font-size:14.5px;color:#52525B">Adults</p><Stepper label="adult" value={s.adults} onDown={() => set({ adults: Math.max(1, s.adults - 1) })} onUp={() => set({ adults: Math.min(16, s.adults + 1) })} /></div>
-                  <div><p style="margin:0 0 8px;font-size:14.5px;color:#52525B">Children</p><Stepper label="child" value={s.kids} onDown={() => set({ kids: Math.max(0, s.kids - 1) })} onUp={() => set({ kids: Math.min(10, s.kids + 1) })} /></div>
+                  <div><p style="margin:0 0 8px;font-size:14.5px;color:#4A5762">Adults</p><Stepper label="adult" value={s.adults} onDown={() => set({ adults: Math.max(1, s.adults - 1) })} onUp={() => set({ adults: Math.min(16, s.adults + 1) })} /></div>
+                  <div><p style="margin:0 0 8px;font-size:14.5px;color:#4A5762">Children</p><Stepper label="child" value={s.kids} onDown={() => set({ kids: Math.max(0, s.kids - 1) })} onUp={() => set({ kids: Math.min(10, s.kids + 1) })} /></div>
                 </div>
                 <p class="tb-sub" style="margin-top:34px">Anything that changes how you travel?</p>
                 <div style="display:flex;flex-wrap:wrap;gap:8px">
@@ -303,9 +303,9 @@ export default function TripBuilder({ photos, mapSrc, endpoint, whatsapp, email 
                   })}
                 </div>
                 {(s.mob.includes('wheel') || s.mob.includes('walk')) && (
-                  <div class="tb-note" style="margin-top:16px;max-width:620px;font-size:15px;color:#27272A;line-height:1.5">One of Rezo’s Sprinters is wheelchair-accessible. He talks through your needs first and checks each stop before suggesting it. Add any details in the last step.</div>
+                  <div class="tb-note" style="margin-top:16px;max-width:620px;font-size:15px;color:#2A3741;line-height:1.5">One of Rezo’s Sprinters is wheelchair-accessible. He talks through your needs first and checks each stop before suggesting it. Add any details in the last step.</div>
                 )}
-                {s.kids > 0 && <div class="tb-note" style="margin-top:12px;max-width:620px;font-size:15px;color:#27272A;line-height:1.5">Add the children’s ages in the last step, so the days can be planned around them.</div>}
+                {s.kids > 0 && <div class="tb-note" style="margin-top:12px;max-width:620px;font-size:15px;color:#2A3741;line-height:1.5">Add the children’s ages in the last step, so the days can be planned around them.</div>}
               </>
             )}
 
@@ -317,7 +317,7 @@ export default function TripBuilder({ photos, mapSrc, endpoint, whatsapp, email 
                 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(190px,100%),1fr));gap:12px">
                   {PACES.map((p) => (
                     <button type="button" class="tb-card" key={p.id} aria-pressed={s.pace === p.id ? 'true' : 'false'} onClick={() => set({ pace: p.id })}>
-                      <svg viewBox="0 0 120 14" width="120" height="14" aria-hidden="true"><path d="M4 7H116" stroke="#D4D4D8" stroke-width="2" stroke-linecap="round" />{p.xs.map((x) => <circle key={x} cx={x} cy="7" r="4" fill="#D62839" />)}</svg>
+                      <svg viewBox="0 0 120 14" width="120" height="14" aria-hidden="true"><path d="M4 7H116" stroke="#C2CED5" stroke-width="2" stroke-linecap="round" />{p.xs.map((x) => <circle key={x} cx={x} cy="7" r="4" fill="#D62839" />)}</svg>
                       <span class="ct">{p.label}</span><span class="cn">{p.note}</span>
                     </button>
                   ))}
@@ -326,7 +326,7 @@ export default function TripBuilder({ photos, mapSrc, endpoint, whatsapp, email 
                 <div style="display:flex;flex-wrap:wrap;gap:8px">
                   {BUDGETS.map((b) => <Chip key={b.id} on={s.budget === b.id} onClick={() => set({ budget: s.budget === b.id ? '' : b.id })}>{b.label}</Chip>)}
                 </div>
-                <p style="margin:12px 0 0;font-size:14px;color:#52525B">Just a feeling. There is no price yet: Rezo writes a real quote, line by line, once your trip is planned.</p>
+                <p style="margin:12px 0 0;font-size:14px;color:#4A5762">Just a feeling. There is no price yet: Rezo writes a real quote, line by line, once your trip is planned.</p>
               </>
             )}
 
@@ -335,7 +335,7 @@ export default function TripBuilder({ photos, mapSrc, endpoint, whatsapp, email 
                 <p class="eyebrow">Almost done</p>
                 <h1 class="tb-q" ref={heading} tabIndex={-1}>Check it over, then send it to Rezo.</h1>
                 <p class="tb-lead">Change anything with one tap. Sending is free and isn’t a booking.</p>
-                <div style="border-bottom:1px solid #E4E4E7">
+                <div style="border-bottom:1px solid #D6DFE4">
                   {review.map((r) => (
                     <div class="tb-row" key={r.k}><span class="k">{r.k}</span><span>{r.v}</span><button type="button" class="tb-edit" onClick={go(r.step)} aria-label={r.aria}>Change</button></div>
                   ))}
@@ -350,7 +350,7 @@ export default function TripBuilder({ photos, mapSrc, endpoint, whatsapp, email 
                 </fieldset>
                 <label for="extra" class="tb-label" style="margin-top:20px">Anything else? <span style="font-weight:400;color:var(--muted)">Optional</span></label>
                 <textarea id="extra" class="field" rows={3} value={s.extra} onInput={(e) => set({ extra: (e.target as HTMLTextAreaElement).value })} placeholder="A birthday, children’s ages, a place you’ve always wanted to see, something you’d rather skip…" />
-                <p style="margin:12px 0 0;font-size:13.5px;color:#52525B">Your details go to Rezo only.</p>
+                <p style="margin:12px 0 0;font-size:13.5px;color:#4A5762">Your details go to Rezo only.</p>
                 {error && <div class="tb-warn" role="alert"><span aria-hidden="true">!</span><span>{error}{(wa || mail) && <> {wa && <a href={wa} rel="noopener" target="_blank">WhatsApp</a>}{wa && mail && ' · '}{mail && <a href={mail}>Email</a>}</>}</span></div>}
               </form>
             )}
@@ -369,21 +369,21 @@ export default function TripBuilder({ photos, mapSrc, endpoint, whatsapp, email 
                   </>
                 )}
                 {delivery !== 'none' && <p class="tb-lead">Here is what happens next.</p>}
-                {delivery !== 'none' && <ol style="list-style:none;margin:0;padding:0;max-width:600px;border-bottom:1px solid #E4E4E7">
+                {delivery !== 'none' && <ol style="list-style:none;margin:0;padding:0;max-width:600px;border-bottom:1px solid #D6DFE4">
                   {[
                     ['Rezo reads it himself.', `He may reply on ${s.channel === 'Email' ? 'email' : s.channel} with a question or two first.`],
                     ['He plans your first proposal.', 'Route, daily schedule, vehicle and price, worked out by hand. How long it takes depends on the season and the trip.'],
                     ['You get a private link.', 'Review the journey and ask for changes. Nothing is booked until you and Rezo agree.'],
                   ].map(([a, b], i) => (
-                    <li key={a} style="display:grid;grid-template-columns:40px minmax(0,1fr);gap:14px;padding:18px 0;border-top:1px solid #E4E4E7">
-                      <span class="disp" style="font-weight:600;font-size:15px;width:30px;height:30px;border-radius:50%;border:1px solid #D4D4D8;display:flex;align-items:center;justify-content:center;color:#D62839">{i + 1}</span>
-                      <div><strong class="disp" style="font-weight:600;font-size:19px">{a}</strong><p style="margin:4px 0 0;color:#52525B;font-size:15px">{b}</p></div>
+                    <li key={a} style="display:grid;grid-template-columns:40px minmax(0,1fr);gap:14px;padding:18px 0;border-top:1px solid #D6DFE4">
+                      <span class="disp" style="font-weight:600;font-size:15px;width:30px;height:30px;border-radius:50%;border:1px solid #C2CED5;display:flex;align-items:center;justify-content:center;color:#D62839">{i + 1}</span>
+                      <div><strong class="disp" style="font-weight:600;font-size:19px">{a}</strong><p style="margin:4px 0 0;color:#4A5762;font-size:15px">{b}</p></div>
                     </li>
                   ))}
                 </ol>}
                 <div style="margin-top:26px;display:flex;flex-wrap:wrap;gap:10px">
-                  <a href="/journeys" class="btn btn--sm" style="background:#14161A;color:#fff;min-height:52px;border-radius:10px">See example journeys</a>
-                  <a href="/" class="btn btn--sm btn--secondary" style="min-height:52px;border-radius:10px;border-color:#D4D4D8">Back to home</a>
+                  <a href="/journeys" class="btn btn--sm" style="background:#1D2A35;color:#fff;min-height:52px;border-radius:10px">See example journeys</a>
+                  <a href="/" class="btn btn--sm btn--secondary" style="min-height:52px;border-radius:10px;border-color:#C2CED5">Back to home</a>
                 </div>
               </>
             )}
@@ -408,9 +408,9 @@ export default function TripBuilder({ photos, mapSrc, endpoint, whatsapp, email 
           </div>
           <div class="tb-tip">
             <span class="av" aria-hidden="true">R</span>
-            <div><p style="margin:0 0 2px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#D62839;font-weight:600">Good to know</p><p style="margin:0;font-size:14.5px;color:#27272A;line-height:1.5">{s.step === 2 && d.blockedT ? 'Tusheti is only reachable in summer, so the sketch leaves it out for these dates. Svaneti or Kazbegi give you high mountains all year, weather permitting.' : s.step === 2 ? 'September and October are the busiest months. If you’re flexible, May, June and late October are quieter and still beautiful.' : TIPS[s.step] ?? TIPS[0]}</p></div>
+            <div><p style="margin:0 0 2px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#D62839;font-weight:600">Good to know</p><p style="margin:0;font-size:14.5px;color:#2A3741;line-height:1.5">{s.step === 2 && d.blockedT ? 'Tusheti is only reachable in summer, so the sketch leaves it out for these dates. Svaneti or Kazbegi give you high mountains all year, weather permitting.' : s.step === 2 ? 'September and October are the busiest months. If you’re flexible, May, June and late October are quieter and still beautiful.' : TIPS[s.step] ?? TIPS[0]}</p></div>
           </div>
-          <div style="background:#FFFFFF;border:1px solid #E4E4E7;border-radius:14px;padding:8px">
+          <div style="background:#FFFFFF;border:1px solid #D6DFE4;border-radius:14px;padding:8px">
             <svg viewBox="240 110 700 390" style="width:100%;height:auto;display:block" role="img" aria-label={d.hasSketch ? `Map of Georgia with a first sketch: ${d.sketchText}` : 'Map of Georgia'}>
               <image href={mapSrc} x="0" y="0" width="1000" height="560" />
               <polyline points={d.hasSketch ? d.sketchPts : '681,387'} fill="none" stroke="#D62839" stroke-width="3.5" stroke-dasharray="2 9" stroke-linecap="round" stroke-linejoin="round" opacity={d.hasSketch ? 1 : 0} />
@@ -418,22 +418,22 @@ export default function TripBuilder({ photos, mapSrc, endpoint, whatsapp, email 
                 <g key={p.n} opacity={p.op}>
                   <circle cx={p.x} cy={p.y} r={p.r} fill={p.fill} stroke={p.stroke} stroke-width="2.5" />
                   <text x={p.x} y={p.ny} text-anchor="middle" font-family="Inter Variable, Inter, sans-serif" font-size="15" font-weight="700" fill="#FFFFFF">{p.num}</text>
-                  <rect x={p.lx} y={p.ly} width={p.lw} height="26" rx="6" fill="#FFFFFF" stroke="#D4D4D8" opacity={p.lop} />
-                  <text x={p.tx} y={p.ty} font-family="Inter Variable, Inter, sans-serif" font-size="16" font-weight="600" fill="#14161A" opacity={p.lop}>{p.n}</text>
+                  <rect x={p.lx} y={p.ly} width={p.lw} height="26" rx="6" fill="#FFFFFF" stroke="#C2CED5" opacity={p.lop} />
+                  <text x={p.tx} y={p.ty} font-family="Inter Variable, Inter, sans-serif" font-size="16" font-weight="600" fill="#1D2A35" opacity={p.lop}>{p.n}</text>
                 </g>
               ))}
             </svg>
           </div>
           {d.hasSketch ? (
             <div>
-              <p style="margin:0 0 6px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#52525B;font-weight:600">A route like this could be</p>
+              <p style="margin:0 0 6px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#4A5762;font-weight:600">A route like this could be</p>
               <p class="disp" style="margin:0;font-weight:600;font-size:18px;letter-spacing:-.01em;line-height:1.35">{d.sketchText}</p>
-              <p style="margin:6px 0 0;font-size:14px;color:#52525B">{d.nightsText}</p>
+              <p style="margin:6px 0 0;font-size:14px;color:#4A5762">{d.nightsText}</p>
             </div>
           ) : (
-            <p style="margin:0;font-size:14.5px;color:#52525B">Your choices draw a first sketch here: where your interests usually take you, and roughly in what order.</p>
+            <p style="margin:0;font-size:14.5px;color:#4A5762">Your choices draw a first sketch here: where your interests usually take you, and roughly in what order.</p>
           )}
-          <dl style="margin:0;border-top:1px solid #D4D4D8;padding-top:14px;display:flex;flex-direction:column;gap:8px">
+          <dl style="margin:0;border-top:1px solid #C2CED5;padding-top:14px;display:flex;flex-direction:column;gap:8px">
             {summary.map((r) => (
               <div key={r.k} style="display:grid;grid-template-columns:86px minmax(0,1fr);gap:12px;font-size:14.5px"><dt style="color:var(--muted)">{r.k}</dt><dd style="margin:0">{r.v}</dd></div>
             ))}

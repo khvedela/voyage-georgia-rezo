@@ -12,11 +12,13 @@ interface Props {
 }
 const { eyebrow, title, summary, crumbs, updated, byline = true } = Astro.props;
 const d = updated ? new Date(updated) : undefined;
+const hasAside = Astro.slots.has('aside');
 const fmt = d?.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
 ---
 <Breadcrumbs items={crumbs} />
-<header class="intro">
+<header class:list={['intro', hasAside && 'intro--aside']}>
   <div class="wrap">
+    <div class="intro-main">
     {eyebrow && <p class="eyebrow">{eyebrow}</p>}
     <h1 class="h-lg intro-h">{title}</h1>
     <p class="answer">{summary}</p>
@@ -28,11 +30,16 @@ const fmt = d?.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year
       </p>
     )}
     <slot />
+    </div>
+    {hasAside && <div class="intro-aside"><slot name="aside" /></div>}
   </div>
 </header>
 <style>
   .intro { padding: clamp(28px, 4vw, 56px) var(--edge) clamp(32px, 4vw, 56px); }
   .intro .wrap { max-width: none; }
-  .intro-h { max-width: 22ch; margin-bottom: 22px; font-size: clamp(36px, 4.6vw, 64px); }
+  .intro-h { max-width: 20ch; margin-bottom: 22px; font-size: clamp(38px, 4.8vw, 70px); }
   .intro-meta { margin: 18px 0 0; }
+  /* With an aside (a destination's piece of the model), the text and the model sit side by side. */
+  .intro--aside .wrap { display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px; align-items: center; }
+  @media (min-width: 1000px) { .intro--aside .wrap { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: clamp(40px, 5vw, 88px); } }
 </style>
