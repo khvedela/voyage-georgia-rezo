@@ -3,15 +3,18 @@
  * A destination as a piece of the model: its close-up render on a small plinth, the name in Latin and Georgian,
  * and one line on why to go. Falls back to the route map for a region the model does not cover.
  */
-import type { CollectionEntry } from 'astro:content';
+import type { Localized } from '../i18n/content';
+import { getLang, l, useT } from '../i18n';
 import { Image } from 'astro:assets';
 import RouteMap from './RouteMap.astro';
-import { modelViews } from '../data/model';
-interface Props { entry: CollectionEntry<'destinations'>; level?: 2 | 3 }
+import { modelView } from '../data/model';
+interface Props { entry: Localized<'destinations'>; level?: 2 | 3 }
 const { entry, level = 3 } = Astro.props;
 const H = `h${level}` as 'h2' | 'h3';
 const d = entry.data;
-const view = modelViews[entry.id];
+const lang = getLang(Astro);
+const t = useT(lang);
+const view = modelView(t, entry.slug);
 ---
 <article class="card card--stretched dcard">
   <div class="dcard-img">
@@ -19,10 +22,10 @@ const view = modelViews[entry.id];
       ? <Image src={view.src} alt={view.alt} widths={[420, 640, 840]} sizes="(min-width: 1200px) 340px, (min-width: 700px) 45vw, 100vw" class="zoom" loading="lazy" decoding="async" />
       : <RouteMap id={d.map} class="zoom" />}
   </div>
-  <H class="card-title dcard-t"><a href={`/destinations/${entry.id}`} class="stretch">{d.name}</a></H>
+  <H class="card-title dcard-t"><a href={l(lang, `/destinations/${entry.slug}`)} class="stretch">{d.name}</a></H>
   <p class="card-eyebrow dcard-e">{d.eyebrow}</p>
   <p class="card-text">{d.cardText}</p>
-  <a href="/design-my-trip" class="lnk dcard-add">Add to my trip</a>
+  <a href={l(lang, '/design-my-trip')} class="lnk dcard-add">{t.common.cards.addToTrip}</a>
 </article>
 <style>
   .dcard-img { position: relative; aspect-ratio: 7 / 5; border-radius: 12px; overflow: hidden; background: #fff; }

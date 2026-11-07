@@ -15,11 +15,12 @@ Goal: be the answer when someone searches for, or asks an AI assistant about, a 
 ## 2. Classic on-page SEO
 
 - One `<h1>` per page answering the visitor's intent; descending heading levels; landmarks; skip link.
-- Unique `<title>` (brand suffix only while ≤ 62 characters) and meta description per page; canonical on every page; self-referencing `hreflang` + `x-default` (ready for more languages).
+- Unique `<title>` (brand suffix only while ≤ 62 characters) and meta description per page; canonical on every page (pointing at that language's URL); reciprocal `hreflang` for en, ru, ka and lv plus `x-default` (English) on every indexable page, and `og:locale` + `og:locale:alternate`.
 - Disambiguation: copy and metadata say "Georgia (the country)" / Caucasus where it matters so the site is not confused with the US state.
 - **Information architecture** follows the design's brief: one action ("Design my trip") reachable everywhere; destination, journey and guide pages answer questions and feed that action. Added one page beyond the brief, `/destinations/kutaisi-imereti`: Kutaisi is a major arrival hub and a stop on the sample route, and had no page.
 - Internal linking: header, footer, cards, breadcrumbs (visible + `BreadcrumbList`), contextual links inside every body text, "nearby" and "read next" blocks.
-- `sitemap.xml`: `lastmod`, hreflang alternates and image entries (with licence). Private pages are never listed.
+- `sitemap.xml`: every page in every language, each with `lastmod`, the full set of hreflang alternates and image entries (localized captions, with licence). Private pages are never listed.
+- Languages: real translations per URL (`/ru`, `/ka`, `/lv`), never a machine overlay or an IP/`Accept-Language` redirect (crawlers mostly come from the US and must see every version). Visitors choose with the header switcher; see [I18N.md](I18N.md).
 - `robots.txt`: open crawling, explicit sitemap, private areas disallowed. Private pages are also `noindex` on-page and via `X-Robots-Tag`.
 - OG/Twitter images generated at build for every page (`/og/<slug>.png`, 1200×630).
 

@@ -227,7 +227,7 @@ export function mountWorld(canvas, opts) {
         });
         o.castShadow = false; o.receiveShadow = false; o.renderOrder = -1;
       }
-      else if (n === 'Sea' || n === 'Frame' || n === 'BorderLine' || /_(Roads|Lanes|Paths|River)$/.test(n)) o.castShadow = false;
+      else if (n === 'Sea' || n === 'Frame' || n === 'BorderLine' || /_(Roads|Lanes|Paths|River|Fx)$/.test(n)) o.castShadow = false;
       else if (/^Cloud/.test(n)) o.receiveShadow = false;
     });
     ground = heightField(land);
@@ -297,6 +297,7 @@ export function mountWorld(canvas, opts) {
     }
     size(); fitOverview(); camPos.copy(O.pos); camTgt.copy(O.tgt);
     st.ready = true;
+    if (st.plan) setPlan(st.plan);
     if (/[?&]debug3d\b/.test(location.search)) window.__world = { scene, camera, regions, stops, curve, U, TL, byName };
     const go = () => { if (st.dead) return; start(); if (opts.onReady) opts.onReady(); };
     if (renderer.compileAsync) renderer.compileAsync(scene, camera).then(go, go); else go();
@@ -346,15 +347,40 @@ export function mountWorld(canvas, opts) {
   window.addEventListener('pointercancel', onUp);
 
   // ---- frame loop ----
-  let raf = 0, visible = true, last = 0, time = 0;
+  let raf = 0, visible = true, last = 0, time = 0, springAcc = 0;
+
+  // ---- the visitor's route: an arc over the land between each pair of picked regions, in travel order ----
+  const ARC_SEGS = 48;
+  let arcs = [], dying = [];
+  const arcMat = () => new THREE.MeshBasicMaterial({ color: RED, transparent: true, opacity: 0, depthWrite: false });
+  function setPlan(ids) {
+    const pts = ids.map((id) => regions.find((g) => g.id === id)).filter(Boolean);
+    const keep = new Set();
+    const next = [];
+    for (let i = 0; i < pts.length - 1; i++) {
+      const A = pts[i], B = pts[i + 1], key = A.id + '>' + B.id;
+      keep.add(key);
+      const had = arcs.find((a) => a.key === key);
+      if (had) { next.push(had); continue; }
+      const a = A.ground.clone().add(v1.set(0, 0.02, 0)), b = B.ground.clone().add(v1.set(0, 0.02, 0));
+      const lift = Math.max(0.18, a.distanceTo(b) * 0.38);
+      const mid = a.clone().lerp(b, 0.5).add(v1.set(0, lift, 0));
+      const mesh = new THREE.Mesh(new THREE.TubeGeometry(new THREE.QuadraticBezierCurve3(a, mid, b), ARC_SEGS, 0.013, 6, false), arcMat());
+      mesh.renderOrder = 3; mesh.geometry.setDrawRange(0, 0); scene.add(mesh);
+      next.push({ key, mesh, grow: 0 });
+    }
+    arcs.forEach((a) => { if (!keep.has(a.key)) dying.push(a); });
+    arcs = next;
+    start();
+  }
   function frame(now) {
     raf = 0;
     if (!st.ready || st.dead) return;
     const dt = Math.min(0.05, (now - (last || now)) / 1000); last = now; time += dt;
     if (mixer) mixer.update(dt);
-    // the drive follows the scroll with a little lag, so a flick of the wheel becomes a glide, not a jump
-    st.q = reduce ? st.p : st.q + (st.p - st.q) * (1 - Math.exp(-dt * 2.6));
-    if (Math.abs(st.p - st.q) < 1e-5) st.q = st.p;
+    // progress comes from a timed player (src/scripts/home-world.ts) that is already eased, so the scene follows it as is
+    st.q = st.p;
+    const ease = (rate) => (reduce ? 1 : 1 - Math.exp(-dt * rate));
     const explore = st.q <= 0.0005, f = st.framing;
 
     if (explore) {
@@ -371,15 +397,15 @@ export function mountWorld(canvas, opts) {
       drivePose(st.q, want);
       dragYaw *= 0.9; dragPitch *= 0.9;
     }
-    const k = reduce ? 1 : 1 - Math.exp(-dt * (explore ? 5 : 4));
+    const k = ease(explore ? 5 : 9);
     camPos.lerp(want.pos, k); camTgt.lerp(want.tgt, k);
     camera.position.copy(camPos); camera.lookAt(camTgt);
     // frame off-centre so the model sits clear of the copy: the offset eases between modes
     // the finish frames the model like the opening, beside the closing card
     const lc = locate(TL, st.q), wide = explore || (lc.seg.kind === 'out' && lc.t > 0.3) || (lc.seg.kind === 'in' && lc.t < 0.3);
     const tx = wide ? f.sx : f.driveSx, ty = wide ? f.sy : f.driveSy;
-    st.vx = st.vx === undefined ? tx : st.vx + (tx - st.vx) * (reduce ? 1 : 0.08);
-    st.vy = st.vy === undefined ? ty : st.vy + (ty - st.vy) * (reduce ? 1 : 0.08);
+    st.vx = st.vx === undefined ? tx : st.vx + (tx - st.vx) * ease(4);
+    st.vy = st.vy === undefined ? ty : st.vy + (ty - st.vy) * ease(4);
     const cw = canvas.clientWidth || 600, ch = canvas.clientHeight || 400;
     if (Math.abs(st.vx) > 1e-4 || Math.abs(st.vy) > 1e-4) camera.setViewOffset(cw, ch, -st.vx * cw, -st.vy * ch, cw, ch); else camera.clearViewOffset();
     camera.updateMatrixWorld();
@@ -393,7 +419,7 @@ export function mountWorld(canvas, opts) {
       routeWide.material.opacity = clamp((camPos.distanceTo(camTgt) - 5) / 5, 0, 0.95);
       routeWide.visible = !explore && routeWide.material.opacity > 0.01;
     }
-    if (ghostMesh) { const m = ghostMesh.material, o = explore ? 0 : 0.6; m.opacity += (o - m.opacity) * (reduce ? 1 : 0.1); ghostMesh.visible = m.opacity > 0.01; }
+    if (ghostMesh) { const m = ghostMesh.material, o = explore ? 0 : 0.6; m.opacity += (o - m.opacity) * ease(6); ghostMesh.visible = m.opacity > 0.01; }
     if (van && curve) {
       const show = !explore && st.q < 0.995;
       van.visible = show;
@@ -406,16 +432,28 @@ export function mountWorld(canvas, opts) {
     }
     // flags pop up on a spring and wave; picked regions glow on the ground
     const flagScale = clamp(camera.position.distanceTo(camTgt) / 5.2, 0.8, 3.2);
+    springAcc += dt * 60; const steps = Math.min(6, Math.floor(springAcc)); springAcc -= steps;
     regions.forEach((g, i) => {
       const target = g.on ? 1 : 0;
-      if (reduce) g.k = target; else { g.vel += (target - g.k) * 0.18; g.vel *= 0.72; g.k += g.vel; }
+      // the spring steps at 60 Hz whatever the screen's refresh rate, so it feels the same on every display
+      if (reduce) g.k = target; else for (let n = steps; n > 0; n--) { g.vel += (target - g.k) * 0.18; g.vel *= 0.72; g.k += g.vel; }
       g.flag.visible = g.k > 0.01;
       g.flag.scale.setScalar(Math.max(0.0001, g.k) * flagScale);
       if (!reduce) g.flag.userData.pen.rotation.y = Math.sin(time * 2.4 + i * 1.3) * 0.28;
       // the label rides on top of the flag as it springs up
       g.pin.set(g.ground.x, g.ground.y + 0.05 + Math.max(0, g.k) * 0.13 * flagScale, g.ground.z);
-      if (g.hl) { const m = g.hl.material, o = explore && (g.on || g.hover) ? 0.9 : 0; m.opacity += (o - m.opacity) * (reduce ? 1 : 0.1); g.hl.visible = m.opacity > 0.01; }
+      if (g.hl) { const m = g.hl.material, o = explore && (g.on || g.hover) ? 0.9 : 0; m.opacity += (o - m.opacity) * ease(6); g.hl.visible = m.opacity > 0.01; }
     });
+    // the visitor's own route: arcs grow from flag to flag, and fade while the sample drive plays
+    const planO = explore ? 0.92 : 0;
+    arcs.forEach((a) => {
+      a.grow = reduce ? 1 : Math.min(1, a.grow + dt * 1.8);
+      const e = 1 - Math.pow(1 - a.grow, 3);
+      a.mesh.geometry.setDrawRange(0, Math.floor(e * ARC_SEGS) * 6 * 6);
+      const m = a.mesh.material; m.opacity += (planO - m.opacity) * ease(6); a.mesh.visible = m.opacity > 0.01;
+    });
+    dying.forEach((a) => { const m = a.mesh.material; m.opacity -= dt * 3; if (m.opacity <= 0) { scene.remove(a.mesh); a.mesh.geometry.dispose(); m.dispose(); a.dead = true; } });
+    if (dying.some((a) => a.dead)) dying = dying.filter((a) => !a.dead);
     renderer.render(scene, camera);
     if (opts.onFrame) opts.onFrame();
     if (visible) raf = requestAnimationFrame(frame);
@@ -432,9 +470,11 @@ export function mountWorld(canvas, opts) {
   }
 
   return {
-    /** 0 = explore the whole model; above 0 = the drive, to 1 = pulled back over the finished route. */
+    /** 0 = explore the whole model; above 0 = the sample drive, to 1 = pulled back over the finished route. Driven by a timed player. */
     setProgress(p) { st.p = clamp(p, 0, 1); start(); },
     setSelected(ids) { st.sel = ids.slice(); regions.forEach((g) => { g.on = st.sel.includes(g.id); }); start(); },
+    /** The visitor's picks in travel order: joined by arcs on the model. */
+    setPlan(ids) { st.plan = ids.slice(); if (st.ready) setPlan(st.plan); },
     setHover(id) { regions.forEach((g) => { g.hover = g.id === id; }); start(); },
     setFraming(f) { Object.assign(st.framing, f); if (st.ready) fitOverview(); start(); },
     regionScreen(id) { const g = regions.find((r) => r.id === id); return g ? project(g.pin) : null; },

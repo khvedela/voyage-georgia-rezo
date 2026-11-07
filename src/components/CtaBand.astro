@@ -1,17 +1,20 @@
 ---
+import { getLang, l, useT } from '../i18n';
 interface Props { title?: string; text?: string; sample?: string }
-const { title = 'Tell Rezo what you imagine.', text = 'Free, about three minutes, and nothing is booked. He reads every request himself and plans the real trip with you.', sample } = Astro.props;
-const href = sample ? `/design-my-trip?sample=${sample}` : '/design-my-trip';
+const lang = getLang(Astro);
+const t = useT(lang);
+const { title = t.common.cta.title, text = t.common.cta.text, sample } = Astro.props;
+const href = l(lang, sample ? `/design-my-trip?sample=${sample}` : '/design-my-trip');
 ---
-<section class="section section--ink cta-band" aria-label="Start planning">
+<section class="section section--ink cta-band" aria-label={t.common.cta.label}>
   <div class="wrap" style="display:flex;flex-wrap:wrap;gap:24px 56px;align-items:center;justify-content:space-between">
     <div style="flex:1 1 420px">
       <h2 class="h-lg" style="color:#fff;margin-bottom:14px">{title}</h2>
       <p style="margin:0;max-width:520px;font-size:18px;color:#cfcac3">{text}</p>
     </div>
     <div style="display:flex;flex-wrap:wrap;gap:12px">
-      <a href={href} class="btn btn--primary">Design my trip</a>
-      <a href="/contact" class="btn btn--ghost-light" style="min-height:56px">Message Rezo</a>
+      <a href={href} class="btn btn--primary">{t.common.cta.designTrip}</a>
+      <a href={l(lang, '/contact')} class="btn btn--ghost-light" style="min-height:56px">{t.common.cta.message}</a>
     </div>
   </div>
 </section>

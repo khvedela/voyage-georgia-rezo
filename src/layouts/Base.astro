@@ -5,15 +5,21 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import SmoothScroll from '../components/SmoothScroll.astro';
 import { site, absoluteUrl } from '../config/site';
-import { baseGraph } from '../lib/schema';
+import { baseGraph, ogPath } from '../lib/schema';
+import { alternates, defaultLocale, getLang, l, localeMeta, locales, useT } from '../i18n';
 import bodyLatin from '@fontsource-variable/piazzolla/files/piazzolla-latin-opsz-normal.woff2?url';
 import displayLatin from '@fontsource-variable/instrument-sans/files/instrument-sans-latin-wght-normal.woff2?url';
+import bodyLatinExt from '@fontsource-variable/piazzolla/files/piazzolla-latin-ext-opsz-normal.woff2?url';
+import bodyCyrillic from '@fontsource-variable/piazzolla/files/piazzolla-cyrillic-opsz-normal.woff2?url';
+import uiCyrillic from '@fontsource-variable/inter/files/inter-cyrillic-wght-normal.woff2?url';
+import uiGeorgian from '@fontsource-variable/noto-sans-georgian/files/noto-sans-georgian-georgian-wght-normal.woff2?url';
+import serifGeorgian from '@fontsource-variable/noto-serif-georgian/files/noto-serif-georgian-georgian-wght-normal.woff2?url';
 
 export interface Props {
   /** Page title without the site suffix. */
   title: string;
   description: string;
-  /** Canonical path, e.g. "/destinations/kazbegi". */
+  /** Language-neutral path, e.g. "/destinations/kazbegi". The layout adds the language prefix itself. */
   path: string;
   /** Slug of a generated Open Graph image (/og/<slug>.png). */
   ogSlug?: string;
@@ -36,19 +42,31 @@ const {
   published, modified, bare = false, preloadImage,
 } = Astro.props;
 
+const lang = getLang(Astro);
+const t = useT(lang);
+const meta = localeMeta[lang];
 const isHome = path === '/';
 // Brand suffix only while the whole title stays under ~62 characters (Google truncates around 600 px).
 const branded = `${title} | ${site.name}`;
 const fullTitle = isHome || title.includes(site.name) || branded.length > 62 ? title : branded;
-const canonical = absoluteUrl(path);
-const ogImage = absoluteUrl(`/og/${ogSlug}.png`);
+const canonical = absoluteUrl(l(lang, path));
+const alts = alternates(path).map((a) => ({ ...a, tag: localeMeta[a.lang].tag, href: absoluteUrl(a.href) }));
+const ogImage = absoluteUrl(ogPath(lang, ogSlug));
+// Preload only the font files this language actually needs above the fold.
+const preloads = {
+  en: [bodyLatin, displayLatin],
+  ru: [bodyCyrillic, uiCyrillic],
+  ka: [uiGeorgian, serifGeorgian],
+  lv: [bodyLatin, bodyLatinExt, displayLatin],
+}[lang];
+const feed = l(lang, '/rss.xml');
 const robots = noindex
   ? 'noindex, nofollow, noarchive, nosnippet'
   : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
-const ld = JSON.stringify({ '@context': 'https://schema.org', '@graph': [...baseGraph(), ...graph] }).replace(/</g, '\\u003c');
+const ld = JSON.stringify({ '@context': 'https://schema.org', '@graph': [...baseGraph(lang), ...graph] }).replace(/</g, '\\u003c');
 ---
 <!doctype html>
-<html lang={site.locale} dir="ltr">
+<html lang={meta.tag} dir="ltr">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -56,11 +74,12 @@ const ld = JSON.stringify({ '@context': 'https://schema.org', '@graph': [...base
     <meta name="description" content={description} />
     <meta name="robots" content={robots} />
     <link rel="canonical" href={canonical} />
-    {!noindex && <link rel="alternate" hreflang="en" href={canonical} />}
-    {!noindex && <link rel="alternate" hreflang="x-default" href={canonical} />}
+    {!noindex && alts.map((a) => <link rel="alternate" hreflang={a.tag} href={a.href} />)}
+    {!noindex && <link rel="alternate" hreflang="x-default" href={alts.find((a) => a.lang === defaultLocale)!.href} />}
 
     <meta property="og:site_name" content={site.name} />
-    <meta property="og:locale" content="en_GB" />
+    <meta property="og:locale" content={meta.og} />
+    {locales.filter((x) => x !== lang).map((x) => <meta property="og:locale:alternate" content={localeMeta[x].og} />)}
     <meta property="og:type" content={type} />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
@@ -84,18 +103,17 @@ const ld = JSON.stringify({ '@context': 'https://schema.org', '@graph': [...base
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
-    <link rel="alternate" type="application/rss+xml" title="Georgia travel guides" href="/rss.xml" />
-    <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM-readable site summary" />
+    <link rel="alternate" type="application/rss+xml" title={t.common.a11y.feedTitle} href={feed} />
+    <link rel="alternate" type="text/plain" href="/llms.txt" title={t.common.a11y.llmsTitle} />
 
-    <link rel="preload" href={bodyLatin} as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href={displayLatin} as="font" type="font/woff2" crossorigin />
+    {preloads.map((href) => <link rel="preload" href={href} as="font" type="font/woff2" crossorigin />)}
     {preloadImage && <link rel="preload" as="image" href={preloadImage} fetchpriority="high" />}
 
     <script type="application/ld+json" set:html={ld} is:inline></script>
     <slot name="head" />
   </head>
   <body>
-    <a class="skip-link" href="#main">Skip to content</a>
+    <a class="skip-link" href="#main">{t.common.a11y.skip}</a>
     {!bare && <Header />}
     <main id="main">
       <slot />

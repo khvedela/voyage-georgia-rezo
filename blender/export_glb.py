@@ -24,7 +24,7 @@ for d in ('tbilisi', 'kakheti', 'svaneti', 'tusheti', 'batumi'):  # exported vis
 
 kw = dict(filepath=out, export_format='GLB', use_selection=True, export_apply=True, export_yup=True,
           export_cameras=True, export_lights=False, export_materials='EXPORT', export_vertex_color='MATERIAL',
-          export_animations=True, export_animation_mode='SCENE', export_force_sampling=False, export_optimize_animation_size=True,
+          export_animations=True, export_animation_mode=opts.get('mode', 'ACTIONS'), export_force_sampling=opts.get('sample', '0') == '1', export_optimize_animation_size=True,
           export_frame_range=True, export_morph=True, export_morph_normal=False, export_skins=False,
           export_image_format='AUTO', export_texcoords=True, export_normals=False)  # the site shades every face flat, so normals are not needed
 try:

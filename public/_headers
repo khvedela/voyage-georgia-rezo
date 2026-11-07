@@ -37,6 +37,10 @@
   Cache-Control: public, max-age=3600
 /robots.txt
   Cache-Control: public, max-age=3600
+/rss.xml
+  Cache-Control: public, max-age=3600
+/*/rss.xml
+  Cache-Control: public, max-age=3600
 
 # Private areas: never indexed (robots.txt also disallows crawling).
 /studio
@@ -44,5 +48,27 @@
 /studio/*
   X-Robots-Tag: noindex, nofollow, noarchive, nosnippet
 /trip/*
+  X-Robots-Tag: noindex, nofollow, noarchive, nosnippet
+  Cache-Control: private, no-store
+# The same private pages in the other languages (src/i18n/config.ts).
+/ru/studio
+  X-Robots-Tag: noindex, nofollow, noarchive, nosnippet
+/ru/studio/*
+  X-Robots-Tag: noindex, nofollow, noarchive, nosnippet
+/ru/trip/*
+  X-Robots-Tag: noindex, nofollow, noarchive, nosnippet
+  Cache-Control: private, no-store
+/ka/studio
+  X-Robots-Tag: noindex, nofollow, noarchive, nosnippet
+/ka/studio/*
+  X-Robots-Tag: noindex, nofollow, noarchive, nosnippet
+/ka/trip/*
+  X-Robots-Tag: noindex, nofollow, noarchive, nosnippet
+  Cache-Control: private, no-store
+/lv/studio
+  X-Robots-Tag: noindex, nofollow, noarchive, nosnippet
+/lv/studio/*
+  X-Robots-Tag: noindex, nofollow, noarchive, nosnippet
+/lv/trip/*
   X-Robots-Tag: noindex, nofollow, noarchive, nosnippet
   Cache-Control: private, no-store

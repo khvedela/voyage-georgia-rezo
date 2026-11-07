@@ -9,9 +9,9 @@ import numpy as np
 from mathutils import Vector
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT = os.path.join(ROOT, 'blender', 'renders'); os.makedirs(OUT, exist_ok=True)
 args = list(globals().get('ARGS', []))
 opts = dict(a.split('=') for a in args if '=' in a)
+OUT = opts.get('out', os.path.join(ROOT, 'blender', 'renders')); os.makedirs(OUT, exist_ok=True)
 which = [a for a in args if '=' not in a] or ['overview']
 scene = bpy.context.scene
 DESTS = ['tbilisi', 'kakheti', 'svaneti', 'tusheti', 'batumi']
@@ -75,7 +75,10 @@ for w in which:
     for d in DESTS:
         h = bpy.data.objects.get('Highlight_' + d)
         if h: h.hide_render = not (opts.get('hl') and d == w)
-    if w in EXTRA: EXTRA[w]()
+    if w.startswith('site:'):   # any of the other sights: site:<Name>[:yaw[:elev[:dist]]]
+        q = w.split(':') + [None] * 3
+        scenery(q[1], 0.0, 0.0, float(q[2] or -0.5), float(q[3] or 40), float(q[4] or 1.5)); w = 'site_' + q[1]
+    elif w in EXTRA: EXTRA[w]()
     else:
         scene.camera = bpy.data.objects['Cam_' + w]
         scene.render.resolution_x, scene.render.resolution_y = (1600, 1000) if w == 'overview' else (1400, 1000)

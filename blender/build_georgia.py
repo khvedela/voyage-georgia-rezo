@@ -106,11 +106,13 @@ def dist_poly(px, py, poly):
 SP = np.array([G['places'][p] for _, p in STOPS], float)
 SCENERY = ['Kutaisi', 'Stepantsminda', 'Vardzia', 'Uplistsikhe']
 SP2 = np.array([G['places'][p] for p in SCENERY], float)
+SP3 = np.zeros((0, 2)); SITE_R = 30   # the other sights (blender/places.py fills these in)
 def step_of(px, py):
     px = np.atleast_1d(px); py = np.atleast_1d(py)
     d = np.min(np.hypot(px[:, None] - SP[None, :, 0], py[:, None] - SP[None, :, 1]), axis=1)
     d2 = np.min(np.hypot(px[:, None] - SP2[None, :, 0], py[:, None] - SP2[None, :, 1]), axis=1)
-    return np.where(d < 50 * LMK, FINE, np.where((d < 88 * LMK) | (d2 < 40), MID, COARSE))
+    d3 = np.min(np.hypot(px[:, None] - SP3[None, :, 0], py[:, None] - SP3[None, :, 1]), axis=1) if len(SP3) else np.full(len(px), 1e9)
+    return np.where(d < 50 * LMK, FINE, np.where((d < 88 * LMK) | (d2 < 40) | (d3 < SITE_R), MID, COARSE))
 
 # ------------------------------------------------------------------------------------------------ scene reset
 for ob in list(bpy.data.objects): bpy.data.objects.remove(ob, do_unlink=True)
@@ -273,6 +275,16 @@ def shelf(X, Y, H):
         elif kind == 'ridge':
             (x0, y0), (x1, y1) = loc(place, a[0], a[1]), loc(place, a[2], a[3]); ex, ey = x1 - x0, y1 - y0; L2 = ex * ex + ey * ey
             t = np.clip(((X - x0) * ex + (Y - y0) * ey) / L2, 0, 1); d = np.hypot(X - x0 - t * ex, Y - y0 - t * ey) / (a[4] * k)
+        elif kind == 'lake':   # (dx, dz, rx, rz, rim, angle): a basin dug (or filled) flat, its water level read off the shore round it
+            qx, qy = loc(place, a[0], a[1]); ca, sa = math.cos(a[5]), math.sin(a[5])
+            u = (X - qx) * ca + (Y - qy) * sa; v = -(X - qx) * sa + (Y - qy) * ca
+            e = np.hypot(u / (a[2] * k), v / (a[3] * k)); rim = a[4] / min(a[2], a[3])
+            ring = (e > 1.0) & (e < 1.0 + rim)
+            lvl = float(np.percentile(H[ring], 12)) if ring.any() else float(H[e < 1].mean())
+            LAKE_LEVEL[(place, a[0], a[1])] = lvl
+            w = 1 - _smooth01((e - 1.0) / rim)
+            H = np.where(e < 1, lvl - dh, H * (1 - w) + np.minimum(H, lvl - dh) * w)
+            continue
         elif kind == 'flat':
             qx, qy = loc(place, a[0], a[1]); d0 = np.hypot(X - qx, Y - qy)
             near = d0 < a[2] * k
@@ -315,6 +327,13 @@ URBAN = [('Tbilisi', -0.02, -0.03, 0.12, 0.24, 0.55), ('Telavi', -0.01, 0.03, 0.
          ('Kutaisi', 0.05, 0.0, 0.06, 0.14, 0.45), ('Batumi', 0.05, 0.0, 0.06, 0.12, 0.55), ('Mestia', 0.0, -0.03, 0.04, 0.09, 0.25),
          ('Stepantsminda', 0.05, 0.0, 0.03, 0.07, 0.3), ('Uplistsikhe', -0.2, -0.06, 0.04, 0.1, 0.35)]
 RIPARIAN, FOREST, FORESTD = np.array(srgb(0x5f8f3d)), np.array(srgb(0x43703a)), np.array(srgb(0x35592f))
+SNOW_C = np.array(srgb(0xf1f3f6))
+SNOWFIELDS = []   # (place, dx, dz, r0, r1, strength): ski areas under snow
+LAKE_LEVEL = {}   # the water level (metres) each 'lake' landform settled on, for its builder
+SITE_BUILDERS = []; SITE_CLAIMS = []
+# the other sights of every region: anchors, landforms, roads, snow, town tints (and, later, their builders)
+_PP = os.path.join(ROOT, 'blender', 'places.py')
+exec(compile(open(_PP).read(), _PP, 'exec'), globals())
 
 def veg_fields(x, y, h):
     """climate and vegetation at map points: dryness 0..1, two noise fields, a ragged height, and the forest mask 0..1"""
@@ -344,6 +363,10 @@ def land_colors(h, slope, x, y, drv=None):
         qx, qy = loc(pl, ux, uz); u = (1 - _smooth01((np.hypot(x - qx, y - qy) - r0 * LM / S) / ((r1 - r0) * LM / S))) * k
         u = u * (0.75 + 0.5 * n2)
         c = c * (1 - u[:, None]) + URBAN_C * u[:, None]
+    for (pl, ux, uz, r0, r1, k) in SNOWFIELDS:   # ski areas: snow on everything but the steepest rock
+        qx, qy = loc(pl, ux, uz); u = (1 - _smooth01((np.hypot(x - qx, y - qy) - r0 * LM / S) / ((r1 - r0) * LM / S))) * k
+        u = np.clip(u * (0.85 + 0.3 * n1) * (1 - 0.6 * _smooth01((slope - 0.45) / 0.3)), 0, 1)
+        c = c * (1 - u[:, None]) + SNOW_C * u[:, None]
     if drv is not None:  # riverbanks: willows and poplars, greener
         r = (1 - _smooth01((np.asarray(drv) - 0.5) / 2.5)) * _smooth01((1600 - h) / 300) * 0.45
         c = c * (1 - r[:, None]) + RIPARIAN * r[:, None]
@@ -492,6 +515,8 @@ _PXX = TR['minx'] + np.arange(HW) / (HW - 1) * (TR['maxx'] - TR['minx'])
 _PYY = TR['miny'] + np.arange(HH) / (HH - 1) * (TR['maxy'] - TR['miny'])
 def _cell_xy(c): return _PXX[c % HW], _PYY[c // HW]
 _ALLC = np.vstack((SP, SP2))
+_OWNC = np.vstack((SP, SP2, SP3)) if len(SP3) else _ALLC   # whose ground is it (forests stay on their own sight's land)
+_SITE_MODE = False
 def near_stop(x, y, r):
     """0..1, 1 at a stop or scenery centre, 0 beyond r map units"""
     x = np.atleast_1d(x); y = np.atleast_1d(y)
@@ -504,6 +529,7 @@ _cx, _cy = _cell_xy(_cand)
 # main river, mountain stops want their torrents)
 STOP_RIVERS = {'Tbilisi': 6000, 'Telavi': 2500, 'Omalo': 140, 'Mestia': 140, 'Batumi': 1500, 'Kutaisi': 4000,
                'Stepantsminda': 250, 'Vardzia': 4000, 'Uplistsikhe': 4000}
+STOP_RIVERS.update(SITE_RIVERS)
 _thr = np.full(len(_cand), 420.0)
 for _nm, _t in STOP_RIVERS.items():
     _p = G['places'][_nm]; _d = np.hypot(_cx - _p[0], _cy - _p[1])
@@ -972,6 +998,15 @@ def _leaf(L, w):
 _VP = os.path.join(ROOT, 'blender', 'vehicles.py')
 exec(compile(open(_VP).read(), _VP, 'exec'), globals())
 for _k, (_h, _r) in VEHICLE_MATS.items(): make_mat(_k, _h, rough=_r, metal=0.2 if _k == 'delG' else 0.0)
+_PR = os.path.join(ROOT, 'blender', 'props.py')   # lifts, skiers, paragliders, trains, the port, beach craft, traffic, flocks
+exec(compile(open(_PR).read(), _PR, 'exec'), globals())
+for _k, (_h, _r) in PROP_MATS.items():
+    if _k not in MATS: make_mat(_k, _h, rough=_r, metal=0.3 if _k == 'gold2' else 0.0)
+for _k, _e in (('snowF', 0.5), ('glint', 6.0), ('sunC', 1.3), ('sunR', 1.1)):   # these glow
+    _b = MATS[_k].node_tree.nodes['Principled BSDF']; _b.inputs['Emission Color'].default_value = _b.inputs['Base Color'].default_value; _b.inputs['Emission Strength'].default_value = _e
+make_mat('sunGlow', 0xffd77a, rough=1.0, emit=0.8)   # the sun's halo: faint, see-through
+for _k, _a in (('sunGlow', 0.1),):
+    MATS[_k].node_tree.nodes['Principled BSDF'].inputs['Alpha'].default_value = _a; MATS[_k].surface_render_method = 'BLENDED'
 
 # ------------------------------------------------------------------------------------------------ emitting into region groups
 C4 = np.array([[1, 0, 0, 0], [0, 0, -1, 0], [0, 1, 0, 0], [0, 0, 0, 1.0]]); C4i = C4.T
@@ -1057,9 +1092,10 @@ def anim_empty(name, Mb, group, parent=None):
 
 # animation helpers (all loop over LOOP frames)
 def k_spin(ob, axis, turns=1.0):
-    base = ob.rotation_euler[axis]
-    ob.keyframe_insert('rotation_euler', index=axis, frame=0)
-    ob.rotation_euler[axis] = base + 2 * PI * turns; ob.keyframe_insert('rotation_euler', index=axis, frame=LOOP)
+    """a steady turn, keyed every 45 degrees: the glTF stores rotations as quaternions, which can't tell 0 from 360"""
+    base = ob.rotation_euler[axis]; n = max(2, int(math.ceil(abs(turns) * 8)))
+    for k in range(n + 1):
+        ob.rotation_euler[axis] = base + 2 * PI * turns * k / n; ob.keyframe_insert('rotation_euler', index=axis, frame=LOOP * k / n)
     ob.rotation_euler[axis] = base
 
 def k_wave(ob, path, axis, amp, cycles=1, phase=0.0, step=8):
@@ -1410,14 +1446,15 @@ def houses(group, X0, Z0, n, make, area, key, mind=0.03, ry0=0.0, ryj=0.6, foot=
 def forest(group, X0, Z0, rad, dens=1.0, sp=0.0125, ox=0.0, oz=0.0, scatter=0.06, kinds=None, min_h=0.024, max_h=0.04, avoid=None):
     """trees where the land's colour says forest (the same mask), a few scattered elsewhere; species by height and climate"""
     n = int(2 * rad / sp)
-    own = int(np.argmin(np.hypot(_ALLC[:, 0] - (X0 / S + cx), _ALLC[:, 1] - (Z0 / S + cy))))
+    OWN = _OWNC if _SITE_MODE else _ALLC   # a sight's forest keeps to its own ground; the stops' forests are as they were
+    own = int(np.argmin(np.hypot(OWN[:, 0] - (X0 / S + cx), OWN[:, 1] - (Z0 / S + cy))))
     for i in range(n):
         for j in range(n):
             dx = ox - rad + (i + 0.5 + (rng.random() - 0.5) * 0.9) * sp; dz = oz - rad + (j + 0.5 + (rng.random() - 0.5) * 0.9) * sp
             if dx * dx + dz * dz > rad * rad * (0.85 + 0.3 * rng.random()): continue
             X, Z = X0 + dx * LM, Z0 + dz * LM; mx, my = X / S + cx, Z / S + cy
             if not inside_map(mx, my): continue
-            if int(np.argmin(np.hypot(_ALLC[:, 0] - mx, _ALLC[:, 1] - my))) != own: continue   # another stop's ground
+            if int(np.argmin(np.hypot(OWN[:, 0] - mx, OWN[:, 1] - my))) != own: continue   # another stop's ground
             gy = ground3(X, Z); hm = (gy - BASE) / MPU
             dry, n1, n2, hj, fm = (float(v[0]) for v in veg_fields(mx, my, hm))
             p = fm * dens + scatter * (1 - dry * 0.6)
@@ -2337,8 +2374,17 @@ def build_batumi():
         bird(g, 'Batumi_Gull%d' % (k + 1), (wx(276 + k * 5), 0, wz(392 + k * 5)), 0.05 + k * 0.03, SEA_Y + 0.2 + k * 0.05, col='white', size=0.9, turns=(1 if k % 2 else -1) * (1 + k % 2), phase=k * 2.0, flap=3)
     dest_hooks(g, X, Z, 0.06, -0.03, 0.17, 0.16, (-0.01, 0.06, 0.0, -1.3, 38, 1.9))
 
+for (_pl, _dx, _dz, _r) in SITE_CLAIMS:   # the sights' ground, kept clear of the stops' trees and houses
+    _q = loc(_pl, _dx, _dz); OCC.append((wx(_q[0]), wz(_q[1]), _r * LM))
 for fn in (build_tbilisi, build_kakheti, build_tusheti, build_kutaisi, build_kazbegi, build_vardzia, build_uplistsikhe, build_svaneti, build_batumi):
     fn(); print('  ', fn.__name__, round(time.time() - t_start, 1), 's')
+if 'probe' in _opts: probe_sites([n for n in _opts['probe'].split(',') if n] or None)
+_SITE_MODE = True
+for fn in SITE_BUILDERS:   # the other sights (blender/places.py), each with its own random stream
+    _rng_stops = rng; rng = random.Random(fn.__name__)
+    fn(); rng = _rng_stops
+    if 'verbose' in _opts: print('  ', fn.__name__, round(time.time() - t_start, 1), 's')
+print('   sights', round(time.time() - t_start, 1), 's')
 
 # the rivers and roads that were cut into the land: ribbons on their levelled beds
 def emit_channels():
@@ -2404,6 +2450,15 @@ def contact_shadow():
 contact_shadow()
 
 _prefs.keyframe_new_interpolation_type = _old_interp
+def _fcurves(act):
+    if hasattr(act, 'layers') and len(act.layers):
+        for ly in act.layers:
+            for st in ly.strips:
+                for cb in st.channelbags: yield from cb.fcurves
+    elif hasattr(act, 'fcurves'): yield from act.fcurves
+for _a in bpy.data.actions:   # every key linear, so the glTF stores the keys as they are instead of resampling or curving them
+    for _fc in _fcurves(_a):
+        for _kp in _fc.keyframe_points: _kp.interpolation = 'LINEAR'
 for ob in COLL.objects:  # every face flat: the low-poly look
     if ob.type == 'MESH':
         for p in ob.data.polygons: p.use_smooth = False

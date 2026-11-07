@@ -1,0 +1,10 @@
+---
+/**
+ * Renders its children and prefixes every internal link with the page's language, so Markdown content (and any
+ * other trusted HTML) keeps language-neutral targets like `[Tbilisi](/destinations/tbilisi)` in every translation.
+ *   <Localized><Content /></Localized>
+ */
+import { getLang, localizeHtml } from '../i18n';
+const html = await Astro.slots.render('default');
+---
+<Fragment set:html={localizeHtml(getLang(Astro), html)} />

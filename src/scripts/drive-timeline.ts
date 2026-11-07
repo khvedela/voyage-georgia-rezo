@@ -1,13 +1,14 @@
 /**
  * The sample drive as one timeline from 0 to 1, shared by the 3D scene (camera, van, route) and the page (captions,
  * route bar), so both always agree on where the drive is. The camera dives in, rests at each stop, travels each leg
- * (longer legs take a little longer), then pulls back out over the whole route.
+ * (longer legs take a little longer), then pulls back out over the whole route. The page plays it on a clock
+ * (see PLAY_SECONDS in home-world.ts), so the weights are shares of that time: a rest is long enough to read its card.
  */
 export type SegKind = 'in' | 'dwell' | 'travel' | 'out';
 export interface Seg { kind: SegKind; i: number; a: number; b: number }
 
 const W_IN = 0.9;
-const W_DWELL = 1.6;
+const W_DWELL = 2.4;
 const W_TRAVEL = [1.1, 1.3, 1.6, 1.4, 1.4];
 const W_OUT = 0.9;
 

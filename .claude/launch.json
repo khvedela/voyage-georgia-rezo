@@ -16,6 +16,18 @@
       "port": 4321
     },
     {
+      "name": "dist-preview",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "--yes",
+        "serve@14",
+        "dist",
+        "-l",
+        "tcp://127.0.0.1:4323"
+      ],
+      "port": 4323
+    },
+    {
       "name": "cf-local",
       "runtimeExecutable": "npx",
       "runtimeArgs": [
@@ -28,6 +40,22 @@
         "127.0.0.1"
       ],
       "port": 8788
+    },
+    {
+      "name": "admin-worker",
+      "runtimeExecutable": "/Users/khvedela/Desktop/voyage-georgia-rezo/.claude/worktrees/admin-panel/node_modules/.bin/wrangler",
+      "runtimeArgs": [
+        "dev",
+        "-c",
+        "/Users/khvedela/Desktop/voyage-georgia-rezo/.claude/worktrees/admin-panel/wrangler.jsonc",
+        "--persist-to",
+        "/Users/khvedela/Desktop/voyage-georgia-rezo/.claude/worktrees/admin-panel/.wrangler/state",
+        "--port",
+        "8789",
+        "--ip",
+        "127.0.0.1"
+      ],
+      "port": 8789
     }
   ]
 }

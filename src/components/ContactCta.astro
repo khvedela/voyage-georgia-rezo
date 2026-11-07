@@ -1,24 +1,27 @@
 ---
 import ContactChannels from './ContactChannels.astro';
 import { site, whatsappLink, mailtoLink } from '../config/site';
+import { getLang, l, useT } from '../i18n';
+const lang = getLang(Astro);
+const c = useT(lang).common.contactCta;
 const hasChannels = Boolean(whatsappLink() || mailtoLink() || site.contact.messenger);
 ---
 <section id="contact" class="section section--ink">
   <div class="wrap" style="display:flex;flex-wrap:wrap;gap:40px clamp(32px,6vw,96px);align-items:flex-start">
     <div style="flex:1 1 380px">
-      <h2 class="h-xl" style="color:#fff;margin-bottom:20px;max-width:9ch">Start with a sentence.</h2>
-      <p style="margin:0;max-width:430px;font-size:var(--t-md);line-height:1.5;color:#cfcac3">Tell Rezo what you imagine. He’ll take it from there.</p>
+      <h2 class="h-xl" style="color:#fff;margin-bottom:20px;max-width:9ch">{c.title}</h2>
+      <p style="margin:0;max-width:430px;font-size:var(--t-md);line-height:1.5;color:#cfcac3">{c.text}</p>
     </div>
     <div style="flex:1 1 440px;min-width:0">
-      <form action="/design-my-trip" method="get" data-idea-form>
-        <label for="idea" style="display:block;margin-bottom:10px;font:600 15px var(--font-ui)">Describe your ideal trip</label>
-        <textarea id="idea" rows="4" class="field idea" placeholder="We have ten days in September. We’d love mountains, wine, old churches and a little sea — without exhausting travel days."></textarea>
+      <form action={l(lang, '/design-my-trip')} method="get" data-idea-form>
+        <label for="idea" style="display:block;margin-bottom:10px;font:600 15px var(--font-ui)">{c.label}</label>
+        <textarea id="idea" rows="4" class="field idea" placeholder={c.placeholder}></textarea>
         <div style="margin-top:16px;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center">
-          <button type="submit" class="btn btn--primary">Continue</button>
-          <span style="font:400 15px var(--font-ui);color:#cfcac3">Then a few quick, visual questions.</span>
+          <button type="submit" class="btn btn--primary">{c.submit}</button>
+          <span style="font:400 15px var(--font-ui);color:#cfcac3">{c.then}</span>
         </div>
       </form>
-      {hasChannels && <p style="margin:34px 0 10px;font:600 15px var(--font-ui)">Prefer to talk?</p>}
+      {hasChannels && <p style="margin:34px 0 10px;font:600 15px var(--font-ui)">{c.preferTalk}</p>}
       <ContactChannels dark />
     </div>
   </div>

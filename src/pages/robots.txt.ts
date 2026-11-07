@@ -1,8 +1,10 @@
 import type { APIRoute } from 'astro';
 import { site } from '../config/site';
+import { locales, l } from '../i18n';
 
 // Private areas: kept out of crawling AND marked noindex on-page + via X-Robots-Tag (see public/_headers).
-const PRIVATE = ['/studio', '/trip/', '/api/'];
+// Every language has its own copy of the private pages (/ru/studio …).
+const PRIVATE = [...new Set(locales.flatMap((x) => [l(x, '/studio'), l(x, '/trip') + '/']))].concat('/api/');
 
 // Search/answer engines and AI assistants. Each group repeats the private rules because a more specific
 // User-agent group replaces (does not extend) the "*" group.

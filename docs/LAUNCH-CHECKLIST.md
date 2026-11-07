@@ -32,7 +32,9 @@ Any static host works. `public/_headers` is written for Cloudflare Pages / Netli
 - [ ] Re-run Lighthouse on the live URL; watch Core Web Vitals in Search Console after a few weeks.
 - [ ] Ask each real traveller for a Google review once trips are delivered; add `Review` markup only for genuine, published reviews.
 - [ ] Publish a new first-hand guide from Rezo roughly monthly (road conditions, seasons, what he is seeing now), and bump `updated` when facts change.
-- [ ] If more languages are added, use real translations per URL (`/ru`, `/de`...) with reciprocal `hreflang`, not machine overlays.
+- [ ] Russian, Georgian and Latvian were drafted with AI assistance: have a native speaker of each review `src/i18n/<lang>/` and `src/content/*/<lang>/` (especially titles, descriptions and the FAQ) before launch. Terms to keep consistent are in `docs/I18N-GLOSSARY.md`.
+- [ ] In Google Search Console, check the International Targeting / hreflang report shows no errors for `/ru`, `/ka`, `/lv`.
+- [ ] If more languages are added, follow "A new language" in `docs/I18N.md` (real translations per URL with reciprocal `hreflang`, not machine overlays).
 
 ## 5. Production work not in this repo
 

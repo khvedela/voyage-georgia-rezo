@@ -1,16 +1,22 @@
-import { getCollection } from 'astro:content';
-import { corePages } from '../data/pages';
-import { faqs } from '../data/faqs';
-import { vehicles } from '../data/vehicles';
+/**
+ * llms.txt / llms-full.txt are written for language models, in English (the site's default language); a
+ * "Languages" section points to the Russian, Georgian and Latvian versions of the site.
+ */
+import { corePages as corePagesFor } from '../data/pages';
+import { faqText } from '../data/faqs';
+import { vehicles as vehiclesFor } from '../data/vehicles';
 import { absoluteUrl, site } from '../config/site';
+import { l, localeMeta, locales, useT } from '../i18n';
+import { getLocalized } from '../i18n/content';
+
+const t = useT('en');
+const corePages = corePagesFor(t);
+const faqs = faqText(t);
+const vehicles = vehiclesFor(t);
 
 export async function loadSite() {
-  const [dest, guides, journeys] = await Promise.all([getCollection('destinations'), getCollection('guides'), getCollection('journeys')]);
-  return {
-    dest: dest.sort((a, b) => a.data.order - b.data.order),
-    guides: guides.sort((a, b) => a.data.order - b.data.order),
-    journeys: journeys.sort((a, b) => a.data.order - b.data.order),
-  };
+  const [dest, guides, journeys] = await Promise.all([getLocalized('destinations', 'en'), getLocalized('guides', 'en'), getLocalized('journeys', 'en')]);
+  return { dest, guides, journeys };
 }
 
 const facts = [
@@ -30,21 +36,21 @@ export async function llmsTxt(): Promise<string> {
   return [
     `# ${site.name}`,
     '',
-    `> ${site.description} ${site.tagline}`,
+    `> ${t.common.site.description} ${t.common.site.tagline}`,
     '',
     ...facts.map((f) => `- ${f}`),
     '',
     '## Plan a trip',
     link('Design my trip', '/design-my-trip', core('/design-my-trip').description),
     link('Example journeys', '/journeys', core('/journeys').description),
-    ...journeys.map((j) => link(`${j.data.title} (${j.data.meta})`, `/journeys/${j.id}`, j.data.summary)),
+    ...journeys.map((j) => link(`${j.data.title} (${j.data.meta})`, `/journeys/${j.slug}`, j.data.summary)),
     '',
     '## Destinations',
     link('All destinations and distances', '/destinations', core('/destinations').description),
-    ...dest.map((d) => link(d.data.name, `/destinations/${d.id}`, d.data.summary)),
+    ...dest.map((d) => link(d.data.name, `/destinations/${d.slug}`, d.data.summary)),
     '',
     '## Guides',
-    ...guides.map((g) => link(g.data.title, `/guides/${g.id}`, g.data.summary)),
+    ...guides.map((g) => link(g.data.title, `/guides/${g.slug}`, g.data.summary)),
     '',
     '## About and services',
     link('Meet Rezo', '/rezo', core('/rezo').description),
@@ -53,6 +59,10 @@ export async function llmsTxt(): Promise<string> {
     link('4×4 adventure', '/adventure-4x4', core('/adventure-4x4').description),
     link('FAQ', '/faq', core('/faq').description),
     link('Contact', '/contact', core('/contact').description),
+    '',
+    '## Languages',
+    'Every page exists in each language at the same path behind a language prefix (English has none).',
+    ...locales.map((x) => `- [${localeMeta[x].label} (${localeMeta[x].tag})](${absoluteUrl(l(x, '/'))})`),
     '',
     '## Optional',
     `- [Full text of this site for language models](${absoluteUrl('/llms-full.txt')})`,
@@ -63,7 +73,7 @@ export async function llmsTxt(): Promise<string> {
 
 export async function llmsFullTxt(): Promise<string> {
   const { dest, guides, journeys } = await loadSite();
-  const parts: string[] = [`# ${site.name}: full site text`, '', `> ${site.description}`, '', ...facts.map((f) => `- ${f}`), ''];
+  const parts: string[] = [`# ${site.name}: full site text`, '', `> ${t.common.site.description}`, '', ...facts.map((f) => `- ${f}`), ''];
   const section = (title: string, url: string, summary: string, body?: string, extraFaqs: { q: string; a: string }[] = []) => {
     parts.push('---', '', `## ${title}`, '', `URL: ${url}`, '', summary, '');
     if (body) parts.push(body.trim(), '');
@@ -74,13 +84,13 @@ export async function llmsFullTxt(): Promise<string> {
   };
   for (const j of journeys) {
     const stops = j.data.stops.map((s) => `- ${s.name} (${s.nights}): ${s.note}`).join('\n');
-    section(`${j.data.title}: ${j.data.meta}`, absoluteUrl(`/journeys/${j.id}`), j.data.summary, `Best months: ${j.data.bestMonths}\n\nWhere the nights go:\n${stops}\n\n${j.body ?? ''}`, j.data.faqs);
+    section(`${j.data.title}: ${j.data.meta}`, absoluteUrl(`/journeys/${j.slug}`), j.data.summary, `Best months: ${j.data.bestMonths}\n\nWhere the nights go:\n${stops}\n\n${j.body ?? ''}`, j.data.faqs);
   }
   for (const d of dest) {
     const f = d.data.facts.map((x) => `- ${x.label}: ${x.value}${x.note ? ` (${x.note})` : ''}`).join('\n');
-    section(d.data.title, absoluteUrl(`/destinations/${d.id}`), d.data.summary, `${f}\n\n${d.body ?? ''}`, d.data.faqs);
+    section(d.data.title, absoluteUrl(`/destinations/${d.slug}`), d.data.summary, `${f}\n\n${d.body ?? ''}`, d.data.faqs);
   }
-  for (const g of guides) section(g.data.title, absoluteUrl(`/guides/${g.id}`), g.data.summary, g.body, g.data.faqs);
+  for (const g of guides) section(g.data.title, absoluteUrl(`/guides/${g.slug}`), g.data.summary, g.body, g.data.faqs);
   section('Vehicles', absoluteUrl('/vehicles'), corePages.find((c) => c.path === '/vehicles')!.description, vehicles.map((v) => `- ${v.name}${v.count ? ` × ${v.count}` : ''}: ${v.text}`).join('\n'));
   section('Frequently asked questions', absoluteUrl('/faq'), corePages.find((c) => c.path === '/faq')!.description, undefined, faqs);
   return parts.join('\n');

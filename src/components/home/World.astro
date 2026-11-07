@@ -1,34 +1,52 @@
 ---
 /**
- * The homepage is built around the model. One sticky stage holds the canvas and three layers:
- *   pick   the whole model; tap regions to plant flags, and a tray collects them for Rezo
- *   drive  scrolling scrubs a sample route: the road draws itself behind a van; one card names the stop or the leg
+ * The homepage is built around the model. One screen-high stage holds the canvas and three layers:
+ *   pick   the whole model; tap regions to plant flags: the picks are joined into a route, the tray reads it out
+ *          with a rough length and hands it to Rezo
+ *   drive  a play button runs a sample route on a clock: the road draws itself behind a van; one card names the stop
+ *          or the leg; a bar pauses it, jumps to a stop or leaves. The page around it scrolls normally.
  *   outro  pulled back over the finished route, with the way to plan your own
  * All copy is server-rendered. Without WebGL the stage shows a still render of the model, the picker still works
  * as a row of chips, and the drive becomes an ordinary list (see .world.is-flat).
  */
 import { Image } from 'astro:assets';
-import { regions, stops, legs } from '../../data/drive';
-import { modelViews, overviewView } from '../../data/model';
-const stopImg = (key: string) => modelViews[key === 'kutaisi' ? 'kutaisi-imereti' : key === 'batumi' ? 'batumi-adjara' : key];
+import { localizeDrive } from '../../data/drive';
+import { modelView, overviewView } from '../../data/model';
+import { fmt, getLang, l, useT } from '../../i18n';
+const lang = getLang(Astro);
+const t = useT(lang);
+const w = t.pages.home.world;
+const { regions, stops, legs } = localizeDrive(t);
+const overview = overviewView(t);
+const stopImg = (key: string) => modelView(t, key === 'kutaisi' ? 'kutaisi-imereti' : key === 'batumi' ? 'batumi-adjara' : key)!;
+// Strings the client script (src/scripts/home-world.ts) needs, in this page's language.
+const i18n = JSON.stringify({
+  lang, trayEmpty: w.trayEmpty, goOne: w.trayGoOne, goMany: w.trayGoMany, go: t.common.nav.designTrip, idea: w.idea,
+  days: t.common.units.days, about: w.trayDays, pause: w.pause, resume: w.resume,
+});
+const playIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5Z"/></svg>';
 ---
-<section class="world" id="model" aria-label="Georgia on a model: pick your places, then scroll through a sample route" data-phase="pick">
+<section class="world" id="model" aria-label={w.label} data-phase="pick" data-i18n={i18n}>
   <div class="w-stage">
     <div class="w-still" aria-hidden="true">
-      <Image src={overviewView.src} alt="" widths={[640, 960]} sizes="(min-width: 900px) 70vw, 100vw" loading="eager" fetchpriority="high" />
+      <Image src={overview.src} alt="" widths={[640, 960]} sizes="(min-width: 900px) 70vw, 100vw" loading="eager" fetchpriority="high" />
     </div>
-    <canvas id="world3d" role="img" aria-label="A three-dimensional model of Georgia. Regions you pick are marked with red flags; scrolling drives a sample route across it."></canvas>
+    <canvas id="world3d" role="img" aria-label={w.canvas}></canvas>
 
     <!-- pick: the opening -->
     <div class="w-pick">
       <div class="w-intro">
-        <h1 class="w-h1">Your Georgia, designed by Rezo.</h1>
-        <p class="w-lead">Tap the places that call to you and plant a flag. Rezo, a private guide with twenty years on these roads, plans the days between them himself.</p>
+        <h1 class="w-h1">{w.h1}</h1>
+        <p class="w-lead">{w.lead}</p>
+        <button type="button" class="w-play" data-play>
+          <span class="w-play-ico" set:html={playIcon} />
+          <span class="w-play-txt"><span class="w-play-t">{w.play}</span><span class="w-play-s">{w.playMeta}</span></span>
+        </button>
       </div>
 
-      <div class="w-labels" role="group" aria-label="Regions on the model">
+      <div class="w-labels" role="group" aria-label={w.regionsLabel}>
         {regions.map((r) => (
-          <button type="button" class="w-label" data-region={r.id} aria-pressed="false">
+          <button type="button" class="w-label" data-region={r.id} data-name={r.name} data-phrase={r.phrase} aria-pressed="false">
             <span class="w-label-in">
               <span class="w-tick" aria-hidden="true"></span>
               <span class="w-name">{r.name}</span>
@@ -39,14 +57,13 @@ const stopImg = (key: string) => modelViews[key === 'kutaisi' ? 'kutaisi-imereti
 
       <div class="w-tray" aria-live="polite">
         <div class="w-tray-txt">
-          <p class="w-tray-k">Your trip</p>
-          <p class="w-tray-v" data-tray-list>Nothing picked yet. Tap a region on the model.</p>
+          <p class="w-tray-k">{w.trayKicker}</p>
+          <p class="w-tray-v" data-tray-list>{w.trayEmpty}</p>
         </div>
-        <a href="/design-my-trip" class="btn btn--primary" data-tray-go>Design my trip</a>
+        <a href={l(lang, '/design-my-trip')} class="btn btn--primary" data-tray-go>{t.common.nav.designTrip}</a>
       </div>
 
-      <p class="w-cue"><span class="w-cue-ico" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6" /></svg></span>Scroll to follow a sample route</p>
-      <p class="w-hint" aria-hidden="true">Drag to turn the model</p>
+      <p class="w-hint" aria-hidden="true">{w.hint}</p>
     </div>
 
     <!-- drive: one card at a time -->
@@ -57,40 +74,50 @@ const stopImg = (key: string) => modelViews[key === 'kutaisi' ? 'kutaisi-imereti
             <div class="w-card-img">
               <Image src={stopImg(s.key).src} alt={stopImg(s.key).alt} widths={[480, 720]} sizes="(min-width: 900px) 400px, 100vw" loading="lazy" decoding="async" />
             </div>
-            <p class="w-card-place"><span class="w-num" aria-hidden="true">{i + 1}</span>{s.name}<span class="sr-only">, stop {i + 1} of {stops.length}</span></p>
+            <p class="w-card-place"><span class="w-num" aria-hidden="true">{i + 1}</span>{s.name}<span class="sr-only">{fmt(w.stopOf, { i: i + 1, n: stops.length })}</span></p>
             <h2 class="w-card-h">{s.title}</h2>
             <p class="w-card-p">{s.line}</p>
             <dl class="w-facts">{s.facts.map(([v, k]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
-            <a href={s.href} class="lnk">More about {s.name}</a>
+            <a href={l(lang, s.href)} class="lnk">{fmt(w.moreAbout, { name: s.name })}</a>
           </li>
         ))}
         {legs.map((l, i) => (
           <li class="w-card w-leg" data-card={`l${i}`}>
-            <p class="w-leg-route"><span>{stops[i].name}</span><span class="w-leg-line" aria-hidden="true"></span><span class="sr-only"> to </span><span>{stops[i + 1].name}</span></p>
+            <p class="w-leg-route"><span>{stops[i].name}</span><span class="w-leg-line" aria-hidden="true"></span><span class="sr-only">{w.to}</span><span>{stops[i + 1].name}</span></p>
             <p class="w-leg-d"><strong>{l.dist}</strong> {l.time}</p>
             <p class="w-leg-v">{l.via}</p>
           </li>
         ))}
       </ol>
 
-      <nav class="w-bar" aria-label="Stops on the sample route">
-        <div class="w-bar-track" aria-hidden="true"><i data-bar-fill></i></div>
-        <ol>
-          {stops.map((s, i) => (
-            <li><button type="button" class="w-dot" data-stop={i} aria-current="false"><span class="w-dot-n">{i + 1}</span><span class="w-dot-t">{s.name}</span></button></li>
-          ))}
-        </ol>
+      <nav class="w-bar" aria-label={w.barLabel}>
+        <button type="button" class="w-ctl w-ctl--pause" data-pause aria-label={w.pause}>
+          <svg class="i-pause" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4.5" width="4" height="15" rx="1.2" /><rect x="14" y="4.5" width="4" height="15" rx="1.2" /></svg>
+          <span class="i-play" set:html={playIcon} />
+        </button>
+        <div class="w-steps">
+          <div class="w-bar-track" aria-hidden="true"><i data-bar-fill></i></div>
+          <ol>
+            {stops.map((s, i) => (
+              <li><button type="button" class="w-dot" data-stop={i} aria-current="false"><span class="w-dot-n">{i + 1}</span><span class="w-dot-t">{s.name}</span></button></li>
+            ))}
+          </ol>
+        </div>
+        <button type="button" class="w-ctl" data-exit aria-label={w.exit}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+        </button>
       </nav>
     </div>
 
     <!-- outro -->
     <div class="w-outro">
       <div class="w-outro-card plinth">
-        <h2 class="w-outro-h">That was one route. Yours will be different.</h2>
-        <p>Add a week in the mountains, drop the sea, stay longer at the table. Rezo builds the route around you, schedules every day and prices it himself.</p>
+        <h2 class="w-outro-h">{w.outroTitle}</h2>
+        <p>{w.outroText}</p>
         <div class="w-outro-cta">
-          <a href="/design-my-trip" class="btn btn--primary">Design my trip</a>
-          <a href="#model" class="btn btn--secondary" data-back-to-pick>Pick places on the model</a>
+          <a href={l(lang, '/design-my-trip')} class="btn btn--primary">{t.common.nav.designTrip}</a>
+          <button type="button" class="btn btn--secondary" data-back-to-pick>{w.outroPick}</button>
+          <button type="button" class="w-again" data-replay><span set:html={playIcon} />{w.replay}</button>
         </div>
       </div>
     </div>
@@ -99,8 +126,8 @@ const stopImg = (key: string) => modelViews[key === 'kutaisi' ? 'kutaisi-imereti
 
 <style is:global>
   /* ---------- the stage ---------- */
-  .world { --stage-h: calc(100svh - var(--header-h)); position: relative; height: calc(var(--stage-h) + 2000vh); background: var(--paper); }
-  .w-stage { position: sticky; top: var(--header-h); height: var(--stage-h); min-height: 520px; overflow: hidden; isolation: isolate; background: var(--paper); }
+  .world { --stage-h: calc(100svh - var(--header-h)); position: relative; background: var(--paper); }
+  .w-stage { position: relative; height: var(--stage-h); min-height: 520px; overflow: hidden; isolation: isolate; background: var(--paper); }
   /* the pool of light on the table */
   .w-stage::before { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
     background: radial-gradient(70% 62% at 52% 60%, #fbfaf8 0%, rgba(251,250,248,.55) 45%, rgba(251,250,248,0) 78%); }
@@ -150,9 +177,19 @@ const stopImg = (key: string) => modelViews[key === 'kutaisi' ? 'kutaisi-imereti
   .w-tray-k { margin: 0; font: 600 13.5px/1.2 var(--font-ui); color: var(--muted); }
   .w-tray-v { margin: 4px 0 0; font-size: 17px; line-height: 1.35; color: var(--slate-2); }
   .w-tray-v b { color: var(--ink); font-weight: 600; }
-  .w-cue { position: absolute; right: var(--edge); bottom: clamp(28px, 4.6vh, 48px); margin: 0; display: flex; align-items: center; gap: 12px; font: 600 15px var(--font-ui); }
-  .w-cue-ico { display: inline-flex; width: 42px; height: 42px; border-radius: 13px; background: var(--surface); box-shadow: 0 3px 0 var(--plaster-d); color: var(--red); align-items: center; justify-content: center; animation: wNudge 2.4s ease-in-out infinite; }
-  @keyframes wNudge { 0%, 60%, 100% { transform: none; } 30% { transform: translateY(4px); } }
+  /* the sample route: a quiet second way in, under the lead */
+  .w-play { margin-top: 22px; display: inline-flex; align-items: center; gap: 12px; padding: 6px 18px 6px 6px; border: 0; border-radius: 16px; background: var(--surface);
+    box-shadow: var(--plinth-sm); color: var(--ink); text-align: left; cursor: pointer; pointer-events: auto; transition: transform .2s ease, box-shadow .2s ease; }
+  .w-play:hover { transform: translateY(-1px); }
+  .w-play:active { transform: translateY(1px); }
+  .w-play-ico { position: relative; display: inline-flex; flex: none; width: 42px; height: 42px; border-radius: 12px; background: var(--red); color: #fff; align-items: center; justify-content: center; box-shadow: 0 3px 0 var(--red-deep); }
+  .w-play-ico svg { margin-left: 2px; }
+  .w-play-ico::after { content: ''; position: absolute; inset: 0; border-radius: inherit; box-shadow: 0 0 0 0 rgba(214, 40, 57, .45); animation: wPulse 2.6s ease-out infinite; }
+  @keyframes wPulse { 0% { box-shadow: 0 0 0 0 rgba(214, 40, 57, .45); } 70%, 100% { box-shadow: 0 0 0 12px rgba(214, 40, 57, 0); } }
+  .w-play-txt { display: flex; flex-direction: column; gap: 2px; }
+  .w-play-t { font: 600 16px/1.2 var(--font-ui); }
+  .w-play-s { font: 500 13.5px/1.25 var(--font-ui); color: var(--muted); }
+  .w-tray-days { display: block; margin-top: 2px; font: 500 14.5px var(--font-ui); color: var(--muted); }
   .w-hint { position: absolute; right: var(--edge); top: clamp(24px, 4vh, 40px); margin: 0; font: 500 13.5px var(--font-ui); color: var(--muted); }
   .world:not(.is-live) .w-hint { display: none; }
 
@@ -184,9 +221,18 @@ const stopImg = (key: string) => modelViews[key === 'kutaisi' ? 'kutaisi-imereti
   .w-leg-d strong { margin-right: 6px; font: 600 17px var(--font-ui); color: #fff; }
   .w-leg-v { margin: 4px 0 0; font: italic 400 17px/1.4 var(--font-serif); color: #cfcac3; }
 
-  .w-bar { position: absolute; left: 50%; bottom: clamp(18px, 3vh, 30px); transform: translateX(-50%); width: min(760px, calc(100% - 2 * var(--gutter)));
-    padding: 8px 10px 6px; background: var(--surface); border-radius: 16px; box-shadow: var(--plinth-sm); }
-  .w-bar-track { position: absolute; left: calc(10px + (100% - 20px) / 12); right: calc(10px + (100% - 20px) / 12); top: 25px; height: 4px; border-radius: 2px; background: var(--line); overflow: hidden; }
+  .w-bar { position: absolute; left: 50%; bottom: clamp(18px, 3vh, 30px); transform: translateX(-50%); width: min(820px, calc(100% - 2 * var(--gutter)));
+    display: flex; align-items: center; gap: 6px; padding: 8px 10px 6px; background: var(--surface); border-radius: 16px; box-shadow: var(--plinth-sm); }
+  .w-steps { position: relative; flex: 1; min-width: 0; }
+  .w-ctl { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 0; border-radius: 12px; background: none; color: var(--slate); cursor: pointer; }
+  .w-ctl:hover { background: var(--paper); color: var(--ink); }
+  .w-ctl--pause { background: var(--ink); color: #fff; }
+  .w-ctl--pause:hover { background: var(--ink); color: #fff; opacity: .88; }
+  .w-ctl--pause .i-play { display: none; }
+  .w-ctl--pause .i-play svg { margin-left: 2px; display: block; }
+  .world:not([data-playing="true"]) .w-ctl--pause .i-pause { display: none; }
+  .world:not([data-playing="true"]) .w-ctl--pause .i-play { display: inline-flex; }
+  .w-bar-track { position: absolute; left: calc(100% / 12); right: calc(100% / 12); top: 17px; height: 4px; border-radius: 2px; background: var(--line); overflow: hidden; }
   .w-bar-track i { display: block; height: 100%; background: var(--red); transform-origin: left; transform: scaleX(var(--fill, 0)); }
   .w-bar ol { position: relative; list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, 1fr); }
   .w-dot { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 4px 0; border: 0; background: none; cursor: pointer; font: 600 13px/1 var(--font-ui); color: var(--slate); min-height: 44px; }
@@ -200,17 +246,31 @@ const stopImg = (key: string) => modelViews[key === 'kutaisi' ? 'kutaisi-imereti
   .w-outro-card { position: absolute; left: var(--edge); top: 50%; transform: translateY(-50%); width: min(520px, calc(100% - 2 * var(--gutter))); padding: 28px 30px 30px; }
   .w-outro-h { font-size: clamp(32px, 3.2vw, 48px); line-height: 1.06; letter-spacing: -.02em; font-weight: 520; text-wrap: balance; }
   .w-outro-card p { margin: 16px 0 0; font-size: 18px; line-height: 1.55; color: var(--slate-2); }
-  .w-outro-cta { margin-top: 24px; display: flex; flex-wrap: wrap; gap: 12px; }
+  .w-outro-cta { margin-top: 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; }
+  .w-again { display: inline-flex; align-items: center; gap: 8px; padding: 8px 2px; border: 0; background: none; font: 600 15px var(--font-ui); color: var(--slate); cursor: pointer; }
+  .w-again:hover { color: var(--ink); }
+  .w-again svg { color: var(--red); }
+
+  /* Russian, Latvian and Georgian headlines have longer words than English: give them room instead of a 11ch measure. */
+  :is(:lang(ru), :lang(lv), :lang(ka)) .w-h1 { max-width: 14ch; font-size: clamp(40px, 4.6vw, 70px); }
+  :lang(ka) .w-h1 { letter-spacing: 0; }
 
   /* ---------- phones ---------- */
   @media (max-width: 760px) {
+    :is(:lang(ru), :lang(lv), :lang(ka)) .w-h1 { max-width: none; font-size: clamp(30px, 8.4vw, 42px); }
+    :is(:lang(ru), :lang(lv), :lang(ka)) .w-tray { flex-wrap: wrap; }
+    :is(:lang(ru), :lang(lv), :lang(ka)) .w-tray-txt { flex: 1 1 150px; }
     .w-intro { top: 18px; max-width: none; right: var(--gutter); }
     .w-h1 { font-size: clamp(36px, 10.5vw, 48px); max-width: 11ch; }
     .w-lead { margin-top: 10px; font-size: 16px; max-width: 34ch; }
     .w-hint { display: none; }
-    .w-cue { display: none; }
+    .w-play { margin-top: 14px; padding: 4px 14px 4px 4px; gap: 10px; }
+    .w-play-ico { width: 36px; height: 36px; border-radius: 10px; }
+    .w-play-t { font-size: 15px; }
+    .w-play-s { display: none; }
+    .w-ctl { width: 38px; height: 40px; }
     /* labels become a row of chips above the tray */
-    .w-labels { position: absolute; inset: auto 0 calc(clamp(20px, 4vh, 40px) + 96px) 0; display: flex; gap: 8px; overflow-x: auto; padding: 4px var(--gutter) 10px; scrollbar-width: none; }
+    .w-labels { position: absolute; inset: auto 0 calc(clamp(20px, 4vh, 40px) + var(--tray-h, 84px) + 8px) 0; display: flex; gap: 8px; overflow-x: auto; padding: 4px var(--gutter) 10px; scrollbar-width: none; }
     .w-labels::-webkit-scrollbar { display: none; }
     .w-label { position: static; transform: none !important; flex: none; }
     .world .w-label, .w-label.is-off { visibility: visible; }
@@ -221,6 +281,8 @@ const stopImg = (key: string) => modelViews[key === 'kutaisi' ? 'kutaisi-imereti
     .w-tray { left: var(--gutter); right: var(--gutter); max-width: none; padding: 12px 12px 12px 16px; }
     .w-tray .btn { min-height: 46px; padding: 0 16px; font-size: 16px; }
     .w-tray-v { font-size: 15px; }
+    .w-tray-days { display: inline; margin: 0; font-size: 13.5px; }
+    .w-tray-days::before { content: ' · '; }
     .w-card { left: var(--gutter); right: var(--gutter); width: auto; bottom: 92px; padding: 8px 8px 14px; }
     .w-card-img { display: none; }
     .w-card-place { margin-top: 10px; }
@@ -228,7 +290,7 @@ const stopImg = (key: string) => modelViews[key === 'kutaisi' ? 'kutaisi-imereti
     .w-card-h { font-size: 23px; }
     .w-bar { padding: 6px 4px 4px; }
     .w-dot-t { display: none; }
-    .w-bar-track { top: 21px; }
+    .w-bar-track { top: 17px; }
     .w-dot { min-height: 40px; }
     .w-outro-card { top: auto; bottom: 20px; transform: none; left: var(--gutter); padding: 22px 20px 22px; }
     .w-still { padding: 30% 0 40%; }
@@ -237,7 +299,7 @@ const stopImg = (key: string) => modelViews[key === 'kutaisi' ? 'kutaisi-imereti
   /* ---------- no WebGL: a still render, chips, and the drive as a plain list ---------- */
   .world.is-flat { height: auto; }
   .world.is-flat .w-stage { position: relative; top: 0; height: auto; min-height: 0; overflow: visible; padding: 0 0 40px; }
-  .world.is-flat .w-stage > canvas, .world.is-flat .w-hint, .world.is-flat .w-cue, .world.is-flat .w-bar { display: none; }
+  .world.is-flat .w-stage > canvas, .world.is-flat .w-hint, .world.is-flat .w-play, .world.is-flat .w-bar, .world.is-flat .w-again { display: none; }
   .world.is-flat .w-still { position: relative; inset: auto; padding: 0 var(--gutter); height: min(60vh, 560px); }
   .world.is-flat .w-pick, .world.is-flat .w-drive, .world.is-flat .w-outro { position: relative; inset: auto; opacity: 1; visibility: visible; pointer-events: auto; }
   .world.is-flat .w-intro { position: relative; left: auto; top: auto; padding: 32px var(--edge) 0; max-width: none; }
@@ -253,7 +315,7 @@ const stopImg = (key: string) => modelViews[key === 'kutaisi' ? 'kutaisi-imereti
   .world.is-flat .w-outro [data-back-to-pick] { display: none; }
 
   @media (prefers-reduced-motion: reduce) {
-    .w-cue-ico { animation: none; }
+    .w-play-ico::after { animation: none; }
     .is-live .w-labels.is-ready .w-label-in { animation: none; }
   }
 </style>

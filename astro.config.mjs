@@ -12,6 +12,7 @@ export default defineConfig({
   compressHTML: true,
   prefetch: { prefetchAll: true, defaultStrategy: 'hover' },
   integrations: [preact()],
+  // Languages are routed by src/pages/[...lang]/ (see src/i18n/config.ts and docs/I18N.md).
   image: { layout: 'constrained' },
   devToolbar: { enabled: false },
 });

@@ -1,11 +1,14 @@
 ---
 import { maps, type MapId } from '../data/maps';
 import { roads as roadPaths, MAP } from '../data/routes';
+import { getLang, useT } from '../i18n';
 
 /** `scale` < 1 shrinks strokes, pins and labels for maps shown larger than card size. */
 interface Props { id: MapId; class?: string; scale?: number }
 const { id, class: cls, scale = 1 } = Astro.props;
 const m = maps[id];
+const t = useT(getLang(Astro));
+const place = (name: string) => t.common.places[name as keyof typeof t.common.places] ?? name;
 const uid = `rm-${id}`;
 ---
 <svg
@@ -13,7 +16,7 @@ const uid = `rm-${id}`;
   preserveAspectRatio={m.slice ? 'xMidYMid slice' : undefined}
   class={cls}
   role="img"
-  aria-label={m.label}
+  aria-label={t.data.maps[id]}
 >
   <image class="rm-base" data-href={m.slice ? MAP.src : MAP.srcWide} x="0" y="0" width={MAP.w} height={MAP.h} />
   {m.roads.length > 0 && (
@@ -25,10 +28,10 @@ const uid = `rm-${id}`;
     {m.pins.map((p) => <circle cx={p.x} cy={p.y} r={(p.r ?? m.pinR) * scale} />)}
   </g>
   <g font-family="Atkinson Hyperlegible Next Variable, system-ui, sans-serif" font-size={m.fontSize * scale} font-weight="600" fill="#1D2A35" paint-order="stroke" stroke="#F8FAFB" stroke-width={m.textStrokeW * scale} stroke-linejoin="round">
-    {m.labels.map((l) => <text x={l.x} y={l.y} text-anchor={l.anchor}>{l.text}</text>)}
+    {m.labels.map((l) => <text x={l.x} y={l.y} text-anchor={l.anchor}>{place(l.text)}</text>)}
   </g>
   {m.extra?.map((e) => (
-    <text x={e.x} y={e.y} font-family="Atkinson Hyperlegible Next Variable, system-ui, sans-serif" font-size={e.size * scale} letter-spacing={e.spacing} fill="#8B99A3">{e.text}</text>
+    <text x={e.x} y={e.y} font-family="Atkinson Hyperlegible Next Variable, system-ui, sans-serif" font-size={e.size * scale} letter-spacing={e.spacing} fill="#8B99A3">{place(e.text)}</text>
   ))}
 </svg>
 

@@ -16,7 +16,7 @@ if 'Geo' not in globals():   # standalone (showroom): borrow the kit from the bu
     _here = os.path.dirname(os.path.abspath(__file__))
     _src = open(os.path.join(_here, 'build_georgia.py')).read()
     _kit = _src[_src.index('# ------------------------------------------------------------------------------------------------ geometry kit'):
-                _src.index('# ------------------------------------------------------------------------------------------------ emitting into region groups')]
+                _src.index('# vehicles, boats and birds: blender/vehicles.py')]
     PI, SQ2 = math.pi, math.sqrt(2)
     exec(_kit, globals())
     SHOWROOM = True
@@ -347,15 +347,17 @@ VEHICLE_MATS = dict(delW=(0xf2f1ec, 0.45), delD=(0x3b3f45, 0.7), delG=(0x22303c,
 
 
 # ------------------------------------------------------------------------------------------------ showroom
-if SHOWROOM:
-    import bpy, os
+def showroom(SHOW, extra_mats=None, sub='vehicles'):
+    """build a "Workshop" scene with each (name, parts) 40 m apart and render two close-ups of each to blender/renders/<sub>/
+    (only the names given as ARGS, if any)"""
+    import bpy, os, bmesh
     from mathutils import Vector
-    out_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'blender', 'renders', 'vehicles')
+    out_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'blender', 'renders', sub)
     os.makedirs(out_dir, exist_ok=True)
     def _srgb(h): c = [((h >> 16) & 255) / 255, ((h >> 8) & 255) / 255, (h & 255) / 255]; return [x / 12.92 if x <= 0.04045 else ((x + 0.055) / 1.055) ** 2.4 for x in c]
     BASE_MATS = dict(white=0xf8f6f1, ink=0x2a2d33, steel=0xc9cdd3, tyre=0x1b1d22, lamp=0xfff1b8, red=0xD62839, tractor=0xD62839, glassD=0x6f9fbe,
                      wood=0x7a5233, grape=0x5a2b5c, hull=0x1f3a5f, deck=0xc89b62, sail=0xfbfaf6, blue=0x2f6db5, yellow=0xf2c14e)
-    allm = {k: (v, 0.7) for k, v in BASE_MATS.items()}; allm.update(VEHICLE_MATS)
+    allm = {k: (v, 0.7) for k, v in BASE_MATS.items()}; allm.update(VEHICLE_MATS); allm.update(extra_mats or {})
     sc = bpy.data.scenes.get('Workshop') or bpy.data.scenes.new('Workshop')
     for o in list(sc.objects): bpy.data.objects.remove(o, do_unlink=True)
     def mat(name):
@@ -370,29 +372,26 @@ if SHOWROOM:
         for g, m in parts:
             if m not in mats: mats.append(m)
             Vs.append(np.column_stack((g.V[:, 0], -g.V[:, 2], g.V[:, 1]))); Fs += [tuple(i + off for i in f) for f in g.F]; mi += [mats.index(m)] * len(g.F); off += len(g.V)
+        me = bpy.data.meshes.get(name)
+        if me: bpy.data.meshes.remove(me)
         me = bpy.data.meshes.new(name); me.from_pydata((np.vstack(Vs) / M_).tolist(), [], Fs)
         for m in mats: me.materials.append(mat(m))
         me.polygons.foreach_set('material_index', mi)
-        import bmesh
         bm = bmesh.new(); bm.from_mesh(me); bmesh.ops.recalc_face_normals(bm, faces=bm.faces); bm.to_mesh(me); bm.free()
         for p in me.polygons: p.use_smooth = False
         me.update(); ob = bpy.data.objects.new(name, me); sc.collection.objects.link(ob); ob.location = loc
         return ob, len(me.vertices)
-    SHOW = [('delica', delica()), ('land_cruiser', land_cruiser()), ('uaz', uaz_bukhanka()), ('tractor', mtz_tractor()),
-            ('yacht', yacht()), ('ferry', ferry()), ('fishing', fishing_boat()),
-            ('eagle', eagle_body() + eagle_wing(1) + eagle_wing(-1)), ('gull', gull_body() + gull_wing(1) + gull_wing(-1))]
+    which = [a for a in globals().get('ARGS', []) if '=' not in a] or [n for n, _ in SHOW]
     stats = {}
     for k, (nm, parts) in enumerate(SHOW):
-        ob, nv = make('ws_' + nm, parts, (k * 40.0, 0, 0)); stats[nm] = nv
+        if nm in which: ob, nv = make('ws_' + nm, parts, (k * 200.0, 0, 0)); stats[nm] = nv
     sun = bpy.data.objects.new('ws_sun', bpy.data.lights.new('ws_sun', 'SUN')); sun.data.energy = 4; sc.collection.objects.link(sun)
     sun.rotation_euler = (-Vector((-4.2, -3.4, 6.5))).to_track_quat('-Z', 'Y').to_euler()
     sc.world = bpy.data.worlds.get('World') or bpy.data.worlds.new('World')
     sc.render.engine = 'BLENDER_EEVEE'; sc.render.film_transparent = False; sc.view_settings.view_transform = 'Standard'
     sc.render.resolution_x, sc.render.resolution_y, sc.render.resolution_percentage = 900, 600, 100
-    cd = bpy.data.cameras.new('ws_cam'); cd.lens = 50; cam = bpy.data.objects.new('ws_cam', cd); sc.collection.objects.link(cam); sc.camera = cam
-    which = [a for a in globals().get('ARGS', []) if '=' not in a] or [n for n, _ in SHOW]
-    for k, (nm, parts) in enumerate(SHOW):
-        if nm not in which: continue
+    cd = bpy.data.cameras.new('ws_cam'); cd.lens = 50; cd.clip_end = 2000; cam = bpy.data.objects.new('ws_cam', cd); sc.collection.objects.link(cam); sc.camera = cam
+    for nm in stats:
         ob = bpy.data.objects['ws_' + nm]
         bb = [ob.location + Vector(c) for c in ob.bound_box]; c = sum(bb, Vector()) / 8; r = max((p - c).length for p in bb)
         for view, (yaw, el) in (('a', (0.75, 18)), ('b', (-2.4, 22))):
@@ -401,3 +400,10 @@ if SHOWROOM:
             sc.render.filepath = os.path.join(out_dir, '%s_%s.png' % (nm, view))
             bpy.ops.render.render(write_still=True, scene=sc.name)
     print('showroom verts', stats)
+
+
+if SHOWROOM and not globals().get('_VEH_NO_SHOW'):
+    SHOW = [('delica', delica()), ('land_cruiser', land_cruiser()), ('uaz', uaz_bukhanka()), ('tractor', mtz_tractor()),
+            ('yacht', yacht()), ('ferry', ferry()), ('fishing', fishing_boat()),
+            ('eagle', eagle_body() + eagle_wing(1) + eagle_wing(-1)), ('gull', gull_body() + gull_wing(1) + gull_wing(-1))]
+    showroom(SHOW)

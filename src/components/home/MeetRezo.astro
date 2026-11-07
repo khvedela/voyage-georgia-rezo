@@ -2,6 +2,9 @@
 import PhotoSlot from '../PhotoSlot.astro';
 import Todo from '../Todo.astro';
 import { site } from '../../config/site';
+import { getLang, l, useT } from '../../i18n';
+const lang = getLang(Astro);
+const m = useT(lang).common.meetRezo;
 interface Props { heading?: 'h1' | 'h2'; link?: boolean }
 const { heading = 'h2', link = true } = Astro.props;
 const H = heading;
@@ -9,18 +12,18 @@ const H = heading;
 <section id="rezo" class="section section--mist" aria-labelledby="rezo-h">
   <div class="wrap" style="display:flex;flex-wrap:wrap;gap:48px clamp(32px,6vw,96px);align-items:center">
     <div style="flex:1 1 320px;max-width:460px">
-      <div class="plinth" style="padding:12px"><PhotoSlot label="Portrait photo of Rezo goes here, ideally on the road, in daylight." ratio="4 / 5" size={40} style="border-radius:12px;padding:24px" /></div>
+      <div class="plinth" style="padding:12px"><PhotoSlot label={m.photo} ratio="4 / 5" size={40} style="border-radius:12px;padding:24px" /></div>
     </div>
     <div style="flex:1 1 440px;min-width:0">
-            <H id="rezo-h" class="h-md" style="margin-bottom:24px;font-size:clamp(34px,4.2vw,58px);line-height:1">The person who plans your journey is the person you message.</H>
-      <p style="margin:0 0 16px;font-size:19px;color:var(--slate-2);max-width:620px">Rezo owns and personally runs Voyage Georgia Rezo. He has worked in Georgian tourism for more than twenty years and is an experienced private tour guide. Drivers he works with help deliver your tours and transfers.</p>
-      <p style="margin:0 0 32px;font-size:16px;color:var(--slate);max-width:620px"><Todo>Rezo’s own words about why he does this — to be written with him.</Todo></p>
+            <H id="rezo-h" class="h-md" style="margin-bottom:24px;font-size:clamp(34px,4.2vw,58px);line-height:1">{m.title}</H>
+      <p style="margin:0 0 16px;font-size:19px;color:var(--slate-2);max-width:620px">{m.text}</p>
+      <p style="margin:0 0 32px;font-size:16px;color:var(--slate);max-width:620px"><Todo>{m.wordsTodo}</Todo></p>
       <dl class="stat-grid">
-        <div><dt>20+ years</dt><dd>in Georgian tourism</dd></div>
-        <div><dt>Hand-built</dt><dd>routes, schedules and prices</dd></div>
-        {site.showPlaceholders && <div><dt><Todo>Licence</Todo></dt><dd>guide credentials — to verify</dd></div>}
+        <div><dt>{m.years}</dt><dd>{m.yearsNote}</dd></div>
+        <div><dt>{m.handBuilt}</dt><dd>{m.handBuiltNote}</dd></div>
+        {site.showPlaceholders && <div><dt><Todo>{m.licenceTodo}</Todo></dt><dd>{m.licenceNote}</dd></div>}
       </dl>
-      {link && <p style="margin:28px 0 0"><a href="/rezo" class="lnk">More about Rezo</a></p>}
+      {link && <p style="margin:28px 0 0"><a href={l(lang, '/rezo')} class="lnk">{m.more}</a></p>}
     </div>
   </div>
 </section>

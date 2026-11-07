@@ -24,8 +24,9 @@
   --red-wash: #fbeaeb;
   --white: #ffffff;
 
-  --font-serif: 'Piazzolla Variable', 'Piazzolla', Georgia, 'Times New Roman', serif;
-  --font-ui: 'Instrument Sans Variable', 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* Each stack covers every site language: Latin (en, lv), Cyrillic (ru) and Georgian (ka); see fonts.css. */
+  --font-serif: 'Piazzolla Variable', 'Noto Serif Georgian Variable', 'Piazzolla', Georgia, 'Times New Roman', serif;
+  --font-ui: 'Instrument Sans Variable', 'UI Cyrillic', 'Noto Sans Georgian Variable', 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-ka: 'Noto Serif Georgian Variable', 'Noto Serif Georgian', serif;
   --font-display: var(--font-serif);
   --font-body: var(--font-serif);
@@ -206,17 +207,19 @@ h1, h2, h3, h4 { margin: 0; font-family: var(--font-serif); font-weight: 560; co
 .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--ink); min-height: 44px; }
 .brand-name { font-family: var(--font-serif); font-weight: 600; font-size: 21px; letter-spacing: -.012em; white-space: nowrap; }
 .nav {
-  flex: 1 1 440px; display: flex; gap: 2px; justify-content: center; overflow-x: auto; white-space: nowrap;
+  flex: 1 1 0; min-width: 0; display: flex; gap: 2px; justify-content: safe center; overflow-x: auto; white-space: nowrap;
   font: 500 15.5px var(--font-ui); order: 2; scrollbar-width: none;
 }
 .nav::-webkit-scrollbar { display: none; }
 .nav a { color: var(--slate); text-decoration: none; padding: 9px 13px; border-radius: 10px; transition: color .2s, background .2s; }
 .nav a:hover { color: var(--ink); background: rgba(255, 255, 255, .7); }
 .nav a[aria-current] { color: var(--ink); background: var(--surface); box-shadow: 0 2px 0 var(--plaster-d); }
-.site-hd .btn { order: 3; }
-@media (max-width: 900px) {
+.hd-end { order: 3; display: flex; align-items: center; gap: 6px; }
+/* Below 1240px (and always when the labels are long, as in Russian or Latvian) the nav gets its own scrollable row,
+   so the brand, the language switcher and the main button never wrap. */
+@media (max-width: 1240px) {
   .site-hd { position: relative; }
-  .site-hd .btn { order: 2; margin-left: auto; }
+  .hd-end { order: 2; margin-left: auto; }
   .nav { order: 3; flex-basis: 100%; justify-content: flex-start; margin: 0 calc(var(--gutter) * -1); padding: 2px calc(var(--gutter) - 13px) 4px; }
 }
 
@@ -296,8 +299,21 @@ textarea.field { padding: 14px 16px; line-height: 1.5; resize: vertical; font-fa
   .site-hd { gap: 0 14px; }
   .site-hd .btn { padding: 0 13px; font-size: 14.5px; min-height: 42px; }
 }
+/* Phones: the brand and the main button share the first row; the language switcher sits at the end of the nav row. */
+@media (max-width: 600px) {
+  .hd-end { display: contents; }
+  .hd-end .btn { order: 2; margin-left: auto; }
+  .hd-end .lang-sw { order: 4; }
+  .nav { flex: 1 1 calc(100% - 96px); margin-right: 0; padding-right: 0; }
+}
 @media (max-width: 380px) { .brand-name { font-size: 16.5px; } .brand svg { width: 26px; height: 26px; } .brand { gap: 7px; } }
-@media (max-width: 1240px) and (min-width: 901px) { .nav { gap: 0; font-size: 15px; } .nav a { padding: 9px 9px; } .site-hd { gap: 6px 16px; } }
+@media (max-width: 1240px) and (min-width: 901px) { .nav { justify-content: safe center; } }
+/* Russian, Latvian and Georgian nav labels are longer: they move to their own row up to a wider screen. */
+@media (max-width: 1480px) and (min-width: 1241px) {
+  :is(:lang(ru), :lang(lv), :lang(ka)) .site-hd { position: relative; }
+  :is(:lang(ru), :lang(lv), :lang(ka)) .hd-end { order: 2; margin-left: auto; }
+  :is(:lang(ru), :lang(lv), :lang(ka)) .nav { order: 3; flex-basis: 100%; }
+}
 
 /* ---------- Smooth scrolling (Lenis) ---------- */
 html.lenis, html.lenis body { height: auto; }
@@ -312,3 +328,9 @@ html.lenis { scroll-behavior: auto; }
 :where(.rv-up:not(.rv-in)) { opacity: 0; transform: translate3d(0, -18px, 0); }
 /* Only while settling does the reveal own the transition; afterwards the card's own hover lift works as normal. */
 .rv-up.rv-in:not(.rv-done) { transition: opacity .5s ease var(--rv-delay, 0ms), transform .8s var(--rv-ease) var(--rv-delay, 0ms); }
+
+/* ---------- languages ---------- */
+/* Georgian has no capitals and is set without the tight Latin tracking; very long Russian, Latvian and Georgian words
+   may break rather than overflow on phones (no automatic hyphens: they split place names). */
+:lang(ka) h1, :lang(ka) h2, :lang(ka) h3, :lang(ka) h4, :lang(ka) .h-xl, :lang(ka) .h-lg, :lang(ka) .h-md, :lang(ka) .h-sm, :lang(ka) .disp { letter-spacing: 0; }
+:lang(ru) h1, :lang(ru) h2, :lang(ru) h3, :lang(lv) h1, :lang(lv) h2, :lang(lv) h3, :lang(ka) h1, :lang(ka) h2, :lang(ka) h3 { overflow-wrap: break-word; }

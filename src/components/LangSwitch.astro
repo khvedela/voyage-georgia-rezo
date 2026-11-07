@@ -1,0 +1,46 @@
+---
+/**
+ * Language switcher: links to this same page in every language. Works without JavaScript (<details>); the small
+ * script only closes it on an outside click or Escape. Each option is written in its own language.
+ */
+import { alternates, currentPath, fmt, getLang, localeMeta, useT } from '../i18n';
+const lang = getLang(Astro);
+const t = useT(lang);
+const here = currentPath(Astro);
+const options = alternates(here.endsWith('/404') ? '/' : here);
+---
+<details class="lang-sw" data-lang-sw>
+  <summary aria-label={fmt(t.common.lang.current, { name: localeMeta[lang].label })}>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c2.6 2.6 3.8 5.6 3.8 9s-1.2 6.4-3.8 9c-2.6-2.6-3.8-5.6-3.8-9S9.4 5.6 12 3z" /></svg>
+    <span>{localeMeta[lang].short}</span>
+  </summary>
+  <ul aria-label={t.common.lang.label}>
+    {options.map((o) => (
+      <li>
+        <a href={o.href} hreflang={localeMeta[o.lang].tag} lang={localeMeta[o.lang].tag} aria-current={o.lang === lang ? 'true' : undefined}>
+          <span class="lang-sw-code" aria-hidden="true">{localeMeta[o.lang].short}</span>{localeMeta[o.lang].label}
+        </a>
+      </li>
+    ))}
+  </ul>
+</details>
+<style>
+  .lang-sw { position: relative; font: 600 14.5px/1 var(--font-ui); }
+  .lang-sw summary { list-style: none; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 10px; border-radius: 12px; cursor: pointer; color: var(--slate); }
+  .lang-sw summary::-webkit-details-marker { display: none; }
+  .lang-sw summary:hover, .lang-sw[open] summary { color: var(--ink); background: rgba(255, 255, 255, .7); }
+  .lang-sw summary:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
+  .lang-sw ul { position: absolute; right: 0; top: calc(100% + 6px); z-index: 20; margin: 0; padding: 6px; list-style: none; min-width: 190px;
+    background: var(--surface); border-radius: 14px; box-shadow: var(--plinth-sm); }
+  .lang-sw a { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 12px; border-radius: 9px; color: var(--ink); text-decoration: none; font-weight: 500; font-size: 15.5px; }
+  .lang-sw a:hover { background: var(--paper); }
+  .lang-sw a[aria-current] { font-weight: 600; }
+  .lang-sw a[aria-current] .lang-sw-code { background: var(--red); color: #fff; box-shadow: none; }
+  .lang-sw-code { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 24px; border-radius: 7px; font-size: 12px; font-weight: 600; color: var(--slate); box-shadow: inset 0 0 0 1.5px var(--line-3); }
+</style>
+<script>
+  document.querySelectorAll<HTMLDetailsElement>('[data-lang-sw]').forEach((d) => {
+    document.addEventListener('click', (e) => { if (d.open && !d.contains(e.target as Node)) d.open = false; });
+    d.addEventListener('keydown', (e) => { if (e.key === 'Escape' && d.open) { d.open = false; d.querySelector('summary')?.focus(); } });
+  });
+</script>

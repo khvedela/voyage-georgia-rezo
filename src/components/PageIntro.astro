@@ -1,6 +1,7 @@
 ---
 import Breadcrumbs from './Breadcrumbs.astro';
 import type { Crumb } from '../lib/schema';
+import { fmt, formatDate, getLang, useT } from '../i18n';
 interface Props {
   eyebrow?: string;
   title: string;
@@ -13,7 +14,10 @@ interface Props {
 const { eyebrow, title, summary, crumbs, updated, byline = true } = Astro.props;
 const d = updated ? new Date(updated) : undefined;
 const hasAside = Astro.slots.has('aside');
-const fmt = d?.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+const lang = getLang(Astro);
+const t = useT(lang);
+const date = d && formatDate(lang, d);
+const [updBefore, updAfter = ''] = t.common.intro.updated.split('{date}');
 ---
 <Breadcrumbs items={crumbs} />
 <header class:list={['intro', hasAside && 'intro--aside']}>
@@ -24,9 +28,9 @@ const fmt = d?.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year
     <p class="answer">{summary}</p>
     {(byline || d) && (
       <p class="meta intro-meta">
-        {byline && <span>By {`Voyage Georgia Rezo`}</span>}
+        {byline && <span>{fmt(t.common.intro.by, { name: 'Voyage Georgia Rezo' })}</span>}
         {byline && d && <span aria-hidden="true"> · </span>}
-        {d && <span>Last updated <time datetime={d.toISOString().slice(0, 10)}>{fmt}</time></span>}
+        {d && <span>{updBefore}<time datetime={d.toISOString().slice(0, 10)}>{date}</time>{updAfter}</span>}
       </p>
     )}
     <slot />

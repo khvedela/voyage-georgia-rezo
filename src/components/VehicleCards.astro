@@ -3,14 +3,16 @@ import PhotoSlot from './PhotoSlot.astro';
 import Todo from './Todo.astro';
 import { vehicles } from '../data/vehicles';
 import { site } from '../config/site';
+import { getLang, useT } from '../i18n';
+const t = useT(getLang(Astro));
 interface Props { headingLevel?: 2 | 3 }
 const { headingLevel = 3 } = Astro.props;
 const H = `h${headingLevel}` as 'h2' | 'h3';
 ---
 <div class="grid-auto" style="--min:260px">
-  {vehicles.map((v) => (
+  {vehicles(t).map((v) => (
     <article class="card">
-      <PhotoSlot label="Photo of this vehicle" />
+      <PhotoSlot label={t.common.cards.vehiclePhoto} />
       <H class="disp" style="margin:18px 10px 8px;font-size:23px;line-height:1.2;font-weight:560">
         {v.name}{v.count && <span style="color:var(--muted);font-weight:400"> × {v.count}</span>}
       </H>
@@ -18,7 +20,7 @@ const H = `h${headingLevel}` as 'h2' | 'h3';
         {v.tags.map((t) => <span class:list={['tag', t.red && 'tag--red']}>{t.label}</span>)}
       </div>
       <p style="margin:0 10px 12px;font-size:16.5px;line-height:1.5;color:var(--slate-2)">{v.text}</p>
-      {site.showPlaceholders && <p style="margin:auto 10px 0;font-size:13.5px;color:var(--slate);border-top:1px solid var(--line);padding-top:10px">{v.detailLabel}: <Todo>to be verified</Todo></p>}
+      {site.showPlaceholders && <p style="margin:auto 10px 0;font-size:13.5px;color:var(--slate);border-top:1px solid var(--line);padding-top:10px">{v.detailLabel}: <Todo>{t.common.cards.toVerify}</Todo></p>}
     </article>
   ))}
 </div>

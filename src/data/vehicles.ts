@@ -1,15 +1,19 @@
-export interface Vehicle {
-  id: string;
-  name: string;
-  count?: number;
-  tags: { label: string; red?: boolean }[];
-  text: string;
-  detailLabel: string;
-}
+import type { Dict } from '../i18n/dictionaries';
 
-export const vehicles: Vehicle[] = [
-  { id: 'sprinter-long', name: 'Mercedes Sprinter — long', tags: [{ label: 'Long wheelbase' }, { label: 'Groups' }], text: 'Private tours and group transport over longer touring days.', detailLabel: 'Seats & luggage' },
-  { id: 'sprinter-accessible', name: 'Mercedes Sprinter — short, wheelchair-accessible', tags: [{ label: 'Wheelchair-accessible', red: true }, { label: 'Short wheelbase' }], text: 'For travellers who use a wheelchair. Rezo confirms access at every stop before you commit.', detailLabel: 'Adaptation details' },
-  { id: 'sprinter-4x4', name: 'Mercedes Sprinter — short, 4×4 off-road', tags: [{ label: '4×4', red: true }, { label: 'Mountain roads' }], text: 'For mountain valleys and rough tracks that ordinary vans avoid.', detailLabel: 'Seats & luggage' },
-  { id: 'delica', name: 'Mitsubishi Delica', count: 2, tags: [{ label: 'Couples & families' }, { label: 'Small groups' }], text: 'Smaller vans for couples, families and small groups.', detailLabel: 'Seats & luggage' },
+export type VehicleId = keyof Dict['data']['vehicles'];
+
+/** The fleet. Structure here; names, tags and text in src/i18n/<lang>/data.ts (`vehicles`). */
+const fleet: { id: VehicleId; count?: number; red: boolean[] }[] = [
+  { id: 'sprinter-long', red: [false, false] },
+  { id: 'sprinter-accessible', red: [true, false] },
+  { id: 'sprinter-4x4', red: [true, false] },
+  { id: 'delica', count: 2, red: [false, false] },
 ];
+
+export interface Vehicle { id: VehicleId; name: string; count?: number; tags: { label: string; red?: boolean }[]; text: string; detailLabel: string }
+
+export const vehicles = (t: Dict): Vehicle[] =>
+  fleet.map((v) => {
+    const w = t.data.vehicles[v.id];
+    return { id: v.id, count: v.count, name: w.name, text: w.text, detailLabel: w.detailLabel, tags: w.tags.map((label, i) => ({ label, red: v.red[i] })) };
+  });

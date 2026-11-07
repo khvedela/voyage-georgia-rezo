@@ -13,15 +13,10 @@ export const site = {
   shortName: 'Voyage Georgia',
   // `site` in astro.config.mjs, without trailing slash.
   url: String(env.SITE ?? 'https://voyagegeorgiarezo.com').replace(/\/$/, ''),
-  locale: 'en',
-  tagline: 'Your Georgia, designed by Rezo.',
-  titleTagline: 'Your Georgia. Personally designed by Rezo.',
-  description:
-    'Private tours of Georgia planned by Rezo, a guide with more than twenty years in Georgian tourism. Tell him what you imagine and he designs the route, the days and the price himself.',
+  // Tagline, description and the founder's job title are copy: see `common.site` in src/i18n/<lang>/common.ts.
   themeColor: '#D62839',
   founder: {
     name: 'Rezo',
-    jobTitle: 'Private tour guide and founder',
     experienceYears: 20,
   },
   contact: {

@@ -1,13 +1,15 @@
 ---
 import { site, whatsappLink, mailtoLink } from '../config/site';
+import { fmt, getLang, useT } from '../i18n';
 interface Props { dark?: boolean }
 const { dark = false } = Astro.props;
+const t = useT(getLang(Astro));
 const wa = whatsappLink();
-const mail = mailtoLink('Trip to Georgia');
+const mail = mailtoLink(t.common.channels.mailSubject);
 const items = [
-  wa && { href: wa, label: 'WhatsApp' },
-  site.contact.messenger && { href: site.contact.messenger, label: 'Messenger' },
-  mail && { href: mail, label: `Email ${site.contact.email}` },
+  wa && { href: wa, label: t.common.channels.whatsapp },
+  site.contact.messenger && { href: site.contact.messenger, label: t.common.channels.messenger },
+  mail && { href: mail, label: fmt(t.common.channels.email, { address: site.contact.email ?? '' }) },
 ].filter(Boolean) as { href: string; label: string }[];
 ---
 {items.length > 0 && (

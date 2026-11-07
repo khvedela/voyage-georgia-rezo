@@ -1,6 +1,10 @@
 ---
 import Todo from './Todo.astro';
 import { site, whatsappLink, mailtoLink } from '../config/site';
+import { getLang, l, useT } from '../i18n';
+const lang = getLang(Astro);
+const t = useT(lang);
+const f = t.common.footer;
 const wa = whatsappLink();
 const mail = mailtoLink();
 const year = new Date().getFullYear();
@@ -9,35 +13,35 @@ const year = new Date().getFullYear();
   <div class="ft-cols">
     <div class="ft-col" style="flex-basis:300px;max-width:420px">
       <div class="disp" style="font-weight:520;font-size:30px;letter-spacing:-.015em;color:#fff">Voyage Georgia Rezo</div>
-      <p style="margin:12px 0 0">A family-owned private tour agency in Georgia. Planned remotely, delivered in person: there is no walk-in office, just Rezo and a message away.</p>
+      <p style="margin:12px 0 0">{f.about}</p>
     </div>
-    <nav class="ft-col" aria-label="Plan your trip">
-      <p class="ft-h">Plan</p>
-      <a href="/design-my-trip">Design my trip</a>
-      <a href="/journeys">Example journeys</a>
-      <a href="/destinations">Destinations</a>
-      <a href="/vehicles">Vehicles</a>
+    <nav class="ft-col" aria-label={f.planLabel}>
+      <p class="ft-h">{f.plan}</p>
+      <a href={l(lang, '/design-my-trip')}>{f.designTrip}</a>
+      <a href={l(lang, '/journeys')}>{f.journeys}</a>
+      <a href={l(lang, '/destinations')}>{f.destinations}</a>
+      <a href={l(lang, '/vehicles')}>{f.vehicles}</a>
     </nav>
-    <nav class="ft-col" aria-label="Learn">
-      <p class="ft-h">Learn</p>
-      <a href="/guides">Travel guides</a>
-      <a href="/accessible-travel">Accessible travel</a>
-      <a href="/adventure-4x4">4×4 adventure</a>
-      <a href="/faq">Questions</a>
+    <nav class="ft-col" aria-label={f.learn}>
+      <p class="ft-h">{f.learn}</p>
+      <a href={l(lang, '/guides')}>{f.guides}</a>
+      <a href={l(lang, '/accessible-travel')}>{f.accessible}</a>
+      <a href={l(lang, '/adventure-4x4')}>{f.adventure}</a>
+      <a href={l(lang, '/faq')}>{f.faq}</a>
     </nav>
     <div class="ft-col">
-      <p class="ft-h">Talk to Rezo</p>
-      <a href="/rezo">About Rezo</a>
-      <a href="/contact">Contact</a>
-      {wa && <a href={wa} rel="noopener">WhatsApp</a>}
+      <p class="ft-h">{f.talk}</p>
+      <a href={l(lang, '/rezo')}>{f.aboutRezo}</a>
+      <a href={l(lang, '/contact')}>{f.contact}</a>
+      {wa && <a href={wa} rel="noopener">{t.common.channels.whatsapp}</a>}
       {mail && <a href={mail}>{site.contact.email}</a>}
       {site.contact.facebook && <a href={site.contact.facebook} rel="me noopener">Facebook</a>}
-      {site.contact.messenger && <a href={site.contact.messenger} rel="noopener">Messenger</a>}
+      {site.contact.messenger && <a href={site.contact.messenger} rel="noopener">{t.common.channels.messenger}</a>}
       {site.contact.instagram && <a href={site.contact.instagram} rel="me noopener">Instagram</a>}
     </div>
   </div>
   <p class="ft-ka" lang="ka" aria-hidden="true">საქართველო</p>
   <p class="ft-legal">
-    © {year} {site.name}. <Todo>Business registration details — to add</Todo> Maps: borders from Natural Earth; elevation from SRTM (NASA), GMTED2010 (USGS) and ETOPO1 (NOAA), all public domain. Photo credits sit beside each photograph. Photo areas marked as slots are placeholders for Rezo’s own pictures.
+    © {year} {site.name}. <Todo>{f.registrationTodo}</Todo> {f.credits}
   </p>
 </footer>

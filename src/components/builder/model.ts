@@ -1,42 +1,56 @@
-/** Data and pure logic for the trip builder: no UI, so it is easy to test and to keep in sync with the design. */
+/**
+ * Data and pure logic for the trip builder: no UI, so it is easy to test and to keep in sync with the design.
+ * Structure only (ids, coordinates, scores, photo ids): every visible word comes from the builder dictionary
+ * (src/i18n/<lang>/builder.ts), passed in by the functions that produce text.
+ */
+import type { Locale } from '../../i18n/config';
+import type { Dict } from '../../i18n/dictionaries';
+import { fmt, listFormat, plural } from '../../i18n/utils';
 
 export type Id = string;
+export type BuilderDict = Dict['builder'];
+export type Places = Dict['common']['places'];
 
-export interface Interest { id: Id; label: string; photo?: 'svaneti' | 'kakheti' | 'kutaisi' | 'tbilisi' | 'tusheti' | 'batumi' }
+/** Look up a dictionary entry by an id that comes from state (falls back to undefined for unknown ids). */
+const pick = <T extends object>(o: T, k: string): T[keyof T] | undefined => (o as Record<string, T[keyof T]>)[k];
+
+/** Localized place name, keyed by its English name; unknown names are shown as they are. */
+export const placeName = (places: Places, n: string) => pick(places, n) ?? n;
+
+export interface Interest { id: Id; photo?: 'svaneti' | 'kakheti' | 'kutaisi' | 'tbilisi' | 'tusheti' | 'batumi' }
 
 export const TILES: Interest[] = [
-  { id: 'mountains', label: 'High mountains', photo: 'svaneti' },
-  { id: 'wine', label: 'Wine & vineyards', photo: 'kakheti' },
-  { id: 'churches', label: 'Monasteries & frescoes', photo: 'kutaisi' },
-  { id: 'history', label: 'Old towns & cities', photo: 'tbilisi' },
-  { id: 'adventure', label: 'Remote valleys by 4×4', photo: 'tusheti' },
-  { id: 'sea', label: 'The Black Sea', photo: 'batumi' },
+  { id: 'mountains', photo: 'svaneti' },
+  { id: 'wine', photo: 'kakheti' },
+  { id: 'churches', photo: 'kutaisi' },
+  { id: 'history', photo: 'tbilisi' },
+  { id: 'adventure', photo: 'tusheti' },
+  { id: 'sea', photo: 'batumi' },
 ];
-export const MORE: Interest[] = [
-  { id: 'food', label: 'Food & supra feasts' }, { id: 'hiking', label: 'Walking & hiking' },
-  { id: 'villages', label: 'Villages & local life' }, { id: 'nature', label: 'Canyons & caves' },
-];
+export const MORE: Interest[] = [{ id: 'food' }, { id: 'hiking' }, { id: 'villages' }, { id: 'nature' }];
 export const ALL = [...TILES, ...MORE];
-export const labelOf = (id: Id) => ALL.find((i) => i.id === id)?.label ?? id;
+export const labelOf = (t: BuilderDict, id: Id) => pick(t.interests.labels, id) ?? id;
 
+/** Month values kept in state, the URL and the payload (language-neutral). Display names come from t.dates.months. */
 export const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] as const;
-
-const SEASON: Record<number, [string, string]> = {
-  1: ['Winter', 'Snow in the mountains and skiing at Gudauri and Bakuriani. Cities, wine cellars and food are at their cosiest. High roads can close after snowfall, and Tusheti is cut off until summer.'],
-  3: ['Early spring', 'The lowlands turn green and orchards blossom. Tbilisi, Kakheti and the west are pleasant; high mountains are still under snow.'],
-  5: ['Late spring', 'Green, fresh and mostly uncrowded. Good for nearly everything; the Tusheti road usually opens in June.'],
-  7: ['Summer', 'The best time for high mountains, Svaneti and hiking. Tbilisi and the lowlands get hot, and the coast is at its busiest.'],
-  9: ['Autumn', 'Harvest time in Kakheti and clear mountain views. One of the most popular seasons. Tusheti’s road usually closes during October.'],
-  11: ['Late autumn', 'Quiet and good value. Lovely for Tbilisi, wine and food; mountain weather turns and some high roads close.'],
+export const monthName = (t: BuilderDict, month: string) => {
+  const i = MONTHS.indexOf(month as (typeof MONTHS)[number]);
+  return i === -1 ? month : t.dates.months[i] ?? month;
 };
 
-export function season(month: string) {
+const SEASON: Record<number, keyof BuilderDict['dates']['seasons']> = {
+  1: 'winter', 3: 'earlySpring', 5: 'lateSpring', 7: 'summer', 9: 'autumn', 11: 'lateAutumn',
+};
+
+export function season(t: BuilderDict, month: string) {
   const mi = MONTHS.indexOf(month as (typeof MONTHS)[number]) + 1;
   if (mi === 0) return { key: 0, name: '', text: '', tushetiOpen: true };
   const key = mi <= 2 || mi === 12 ? 1 : mi <= 4 ? 3 : mi <= 6 ? 5 : mi <= 8 ? 7 : mi <= 10 ? 9 : 11;
-  return { key, name: `${SEASON[key][0]} · ${month}`, text: SEASON[key][1], tushetiOpen: mi >= 6 && mi <= 10 };
+  const se = t.dates.seasons[SEASON[key]];
+  return { key, name: fmt(t.dates.seasonLabel, { season: se.name, month: monthName(t, month) }), text: se.text, tushetiOpen: mi >= 6 && mi <= 10 };
 }
 
+/** `n` is the English place name: the key into common.places and a stable id. */
 export interface Region { n: string; x: number; y: number; e?: 1; left?: 1; t: Record<string, number>; summer?: boolean }
 export const TBILISI = { n: 'Tbilisi', x: 681, y: 387 };
 export const REG: Region[] = [
@@ -51,21 +65,23 @@ export const REG: Region[] = [
   { n: 'Batumi', x: 283, y: 405, t: { sea: 3, food: 1 } },
 ];
 
-export const MOBS = [
-  { id: 'none', label: 'Nothing special' }, { id: 'wheel', label: 'Someone uses a wheelchair' },
-  { id: 'walk', label: 'Limited walking or stairs' }, { id: 'other', label: 'Something else' },
-];
+/** Access needs (labels in t.group.access). */
+export const MOBS: Id[] = ['none', 'wheel', 'walk', 'other'];
+/** Paces (labels and notes in t.pace.options); xs are the dots of the little pace diagram. */
 export const PACES = [
-  { id: 'slow', label: 'Slow & spacious', note: 'Short drives, long lunches and time to linger. Rest days included.', xs: [12, 60, 108] },
-  { id: 'balanced', label: 'Balanced', note: 'A mix of fuller days and easy ones. The most popular choice.', xs: [10, 35, 60, 85, 110] },
-  { id: 'full', label: 'Full & active', note: 'See as much as possible. Early starts are fine.', xs: [8, 23, 38, 53, 68, 83, 98, 112] },
+  { id: 'slow', xs: [12, 60, 108] },
+  { id: 'balanced', xs: [10, 35, 60, 85, 110] },
+  { id: 'full', xs: [8, 23, 38, 53, 68, 83, 98, 112] },
 ];
-export const BUDGETS = [
-  { id: 'simple', label: 'Simple and good value' }, { id: 'comfort', label: 'Comfortable' },
-  { id: 'treat', label: 'Treat ourselves' }, { id: 'advise', label: 'Not sure, advise me' },
-];
+/** Budget feelings (labels in t.pace.budgets). */
+export const BUDGETS: Id[] = ['simple', 'comfort', 'treat', 'advise'];
 export const CHANNELS = ['WhatsApp', 'Messenger', 'Email'] as const;
 export type Channel = (typeof CHANNELS)[number];
+
+export const paceLabel = (t: BuilderDict, id: Id) => pick(t.pace.options, id)?.label;
+export const paceNote = (t: BuilderDict, id: Id) => pick(t.pace.options, id)?.note;
+export const budgetLabel = (t: BuilderDict, id: Id) => pick(t.pace.budgets, id);
+export const accessLabel = (t: BuilderDict, id: Id) => pick(t.group.access, id) ?? id;
 
 export interface State {
   step: number; from: number; text: string; picks: Id[]; surprise: boolean; month: string; flex: boolean;
@@ -77,10 +93,11 @@ export const INITIAL: State = {
   mob: ['none'], pace: 'balanced', budget: '', extra: '', name: '', contact: '', channel: 'WhatsApp', sample: '', mode: 'guided',
 };
 
-export const SAMPLES: { id: 'classic' | 'wild' | 'first'; title: string; meta: string; route: string; photo: Interest['photo']; set: Partial<State> }[] = [
-  { id: 'classic', title: 'Mountains, wine and a little sea', meta: '10 days · balanced', route: 'High mountains, Kakheti’s vineyards, old monasteries and a few days by the Black Sea', photo: 'svaneti', set: { picks: ['mountains', 'wine', 'churches', 'sea'], days: 10, pace: 'balanced', month: 'Sep' } },
-  { id: 'wild', title: 'Wine valleys to high villages', meta: '8 days · adventurous', route: 'Kakheti’s cellars, then a 4×4 over the Abano Pass into Tusheti’s villages', photo: 'tusheti', set: { picks: ['wine', 'adventure', 'villages', 'hiking'], days: 8, pace: 'full', month: 'Jul' } },
-  { id: 'first', title: 'A first taste of Georgia', meta: '6 days · slow', route: 'Tbilisi’s old town, Mtskheta and a day among Kakheti’s vines', photo: 'tbilisi', set: { picks: ['history', 'churches', 'wine', 'food'], days: 6, pace: 'slow', month: '' } },
+/** Sample trips (title, meta and route in t.samples.items). */
+export const SAMPLES: { id: 'classic' | 'wild' | 'first'; photo: Interest['photo']; set: Partial<State> }[] = [
+  { id: 'classic', photo: 'svaneti', set: { picks: ['mountains', 'wine', 'churches', 'sea'], days: 10, pace: 'balanced', month: 'Sep' } },
+  { id: 'wild', photo: 'tusheti', set: { picks: ['wine', 'adventure', 'villages', 'hiking'], days: 8, pace: 'full', month: 'Jul' } },
+  { id: 'first', photo: 'tbilisi', set: { picks: ['history', 'churches', 'wine', 'food'], days: 6, pace: 'slow', month: '' } },
 ];
 
 export function applySample(id: string): Partial<State> | null {
@@ -89,26 +106,14 @@ export function applySample(id: string): Partial<State> | null {
   return { sample: x.id, mode: 'guided', surprise: false, flex: !x.set.month, daysOpen: false, step: 5, from: 9, ...x.set };
 }
 
-export const EXAMPLES = [
-  'Ten days in September: mountains, wine, old churches and a little sea, without long drives every day.',
-  'A slow week for two: good food, small villages and a couple of nights in the mountains.',
-  'Four of us, one uses a wheelchair. We love history and long lunches.',
-];
-
-export const TIPS: Record<number, string> = {
-  0: 'You can’t get this wrong. Even a single line is enough for Rezo to start, and he’ll ask about anything he needs.',
-  9: 'Every sample can be stretched, shortened or mixed. Pick the one that feels closest, not perfect.',
-  8: 'Mention what you’d rather avoid too, like long drives or early starts. It helps as much as what you want.',
-  1: 'Mountains and the sea are a long way apart. If you want both, a few more days keeps the driving comfortable.',
-  3: 'Travelling with older parents or small children? Slower days and fewer hotel changes make a big difference.',
-  4: 'A slow pace usually means staying two or three nights in each place, so you unpack less and see more.',
-  5: 'After you send this, Rezo replies personally. Nothing is booked and nothing is charged until you both agree.',
-  6: 'While you wait, have a look at a sample itinerary to see how Rezo lays out each day.',
+/** Which "Good to know" tip each screen shows (step 2 picks its own, see the component). */
+export const TIPS: Record<number, keyof BuilderDict['tips']> = {
+  0: 'start', 9: 'samples', 8: 'write', 1: 'interests', 3: 'group', 4: 'pace', 5: 'send', 6: 'done',
 };
 
-export function derive(s: State) {
+export function derive(s: State, lang: Locale, t: BuilderDict, places: Places) {
   const picks = s.surprise ? ['wine', 'mountains', 'churches', 'food', 'history'] : s.picks;
-  const se = season(s.month);
+  const se = season(t, s.month);
   const blockedT = !se.tushetiOpen && picks.includes('adventure');
   const scored = REG.map((r, i) => ({ r, i, sc: picks.reduce((a, p) => a + (r.t[p] || 0), 0) }));
   let eligible = scored.filter((x) => x.sc > 0 && !(x.r.summer && !se.tushetiOpen));
@@ -125,22 +130,24 @@ export function derive(s: State) {
   const hasSketch = chosen.length > 0;
   const nights = Math.max(1, days - 1);
   const perStop = nights / route.length;
+  const [lo, hi] = perStop < 1.6 ? [1, 2] : perStop < 2.6 ? [2, 3] : [3, 4];
   const nightsText = hasSketch
-    ? `About ${perStop < 1.6 ? '1–2' : perStop < 2.6 ? '2–3' : '3–4'} nights in each place over ${days} days. Rezo sets the real order, roads and timing.`
+    ? fmt(t.aside.nightsEach, { nights: plural(lang, hi, t.units.nightsRange, { from: lo }), days: plural(lang, days, t.units.days) })
     : '';
   const recN = Math.max(1, Math.min(5, eligible.length));
   const lenTip = picks.length
-    ? `For what you’ve picked, about ${recN * 2 + 1}–${recN * 3 + 1} days lets you enjoy it without rushing. Fewer days is fine too: Rezo simply chooses fewer places.`
-    : 'Most first trips are 7 to 12 days. Shorter works well if you focus on one or two regions.';
+    ? plural(lang, recN * 3 + 1, t.dates.lenTipPicked, { from: recN * 2 + 1 })
+    : t.dates.lenTipNone;
 
   const pins = [TBILISI as { n: string; x: number; y: number; left?: 1 }, ...REG].map((p) => {
     const idx = route.map((r) => r.n).indexOf(p.n);
     const hit = p.n === 'Tbilisi' ? true : scored.some((x) => x.r.n === p.n && x.sc > 0);
     const inR = idx > -1 && (hasSketch || p.n !== 'Tbilisi');
-    const lw = p.n.length * 9.4 + 18;
+    const label = placeName(places, p.n);
+    const lw = label.length * 9.4 + 18;
     const left = p.x > 820 || !!p.left;
     return {
-      x: p.x, y: p.y, n: p.n, r: inR ? 13 : hit ? 7 : 5, fill: inR ? '#D62839' : '#FFFFFF',
+      x: p.x, y: p.y, n: p.n, label, r: inR ? 13 : hit ? 7 : 5, fill: inR ? '#D62839' : '#FFFFFF',
       stroke: inR ? '#FFFFFF' : hit ? '#1D2A35' : '#8B99A3', num: inR ? String(idx + 1) : '', ny: p.y + 5.5,
       op: inR || hit ? 1 : 0.55, lop: inR || hit ? 1 : 0, lw, lx: left ? p.x - 20 - lw : p.x + 18, ly: p.y - 13,
       tx: left ? p.x - 20 - lw + 9 : p.x + 27, ty: p.y + 5.5,
@@ -150,27 +157,41 @@ export function derive(s: State) {
   return {
     picks, days, blockedT, hasSketch, route, pins, nightsText, lenTip,
     sketchPts: route.map((p) => `${p.x},${p.y}`).join(' '),
-    sketchText: route.map((p) => p.n).join(' → '),
+    sketchText: route.map((p) => placeName(places, p.n)).join(' → '),
   };
 }
 
-export function texts(s: State) {
-  const travellers = `${s.adults} ${s.adults === 1 ? 'adult' : 'adults'}${s.kids ? `, ${s.kids} ${s.kids === 1 ? 'child' : 'children'}` : ''}`;
-  const access = s.mob.includes('none') ? 'Nothing special' : s.mob.map((m) => MOBS.find((o) => o.id === m)?.label).join(', ');
-  const interests = s.surprise ? 'Rezo’s favourites' : s.picks.length ? s.picks.map(labelOf).join(', ') : 'Not chosen yet';
-  const when = s.flex ? 'Not decided yet' : s.month || 'Not chosen yet';
-  const length = s.daysOpen ? 'Rezo suggests' : `${s.days} days`;
-  const pace = PACES.find((p) => p.id === s.pace)?.label ?? 'Not chosen';
-  const budget = BUDGETS.find((b) => b.id === s.budget)?.label ?? 'Rezo will suggest';
-  return { travellers, access, interests, when, length, pace, budget };
+export function texts(s: State, lang: Locale, t: BuilderDict) {
+  const a = t.answers;
+  const adults = plural(lang, s.adults, t.units.adults);
+  const travellers = s.kids ? fmt(a.travellersWithKids, { adults, children: plural(lang, s.kids, t.units.children) }) : adults;
+  const hasAccess = !s.mob.includes('none');
+  const access = hasAccess ? listFormat(lang, s.mob.map((m) => accessLabel(t, m))) : t.group.access.none;
+  const interests = s.surprise ? a.favourites : s.picks.length ? listFormat(lang, s.picks.map((id) => labelOf(t, id))) : a.notChosenYet;
+  const when = s.flex ? a.notDecided : s.month ? monthName(t, s.month) : a.notChosenYet;
+  const length = s.daysOpen ? a.rezoSuggests : plural(lang, s.days, t.units.days);
+  const pace = paceLabel(t, s.pace) ?? a.notChosen;
+  const budget = budgetLabel(t, s.budget) ?? a.rezoWillSuggest;
+  return { travellers, access, hasAccess, interests, when, length, pace, budget };
 }
 
-/** Plain-text summary used for the WhatsApp / email hand-off and the JSON payload. */
-export function summaryText(s: State): string {
-  const t = texts(s);
+/** Plain-text summary used for the WhatsApp / email hand-off and the JSON payload, in the visitor's language. */
+export function summaryText(s: State, lang: Locale, t: BuilderDict): string {
+  const x = texts(s, lang, t);
+  const m = t.message;
   const lines = s.mode === 'write'
-    ? [`In my words: ${s.text || '(nothing written)'}`]
-    : [`Drawn to: ${t.interests}`, `When: ${t.when} · ${t.length}`, `Who: ${t.travellers}`, `Access: ${t.access}`, `Pace: ${t.pace}`, `Budget feeling: ${t.budget}`];
-  if (s.extra.trim()) lines.push(`Anything else: ${s.extra.trim()}`);
-  return [`Hello Rezo, I’m ${s.name.trim() || 'a traveller'}. I’d like to plan a trip to Georgia.`, '', ...lines, '', `Please reply on ${s.channel}.`].join('\n');
+    ? [fmt(m.words, { text: s.text || m.nothingWritten })]
+    : [
+      fmt(m.drawnTo, { value: x.interests }),
+      fmt(m.when, { when: x.when, length: x.length }),
+      fmt(m.who, { value: x.travellers }),
+      fmt(m.access, { value: x.access }),
+      fmt(m.pace, { value: x.pace }),
+      fmt(m.budget, { value: x.budget }),
+    ];
+  if (s.extra.trim()) lines.push(fmt(m.extra, { value: s.extra.trim() }));
+  return [
+    fmt(m.hello, { name: s.name.trim() || m.anonymous }), '', ...lines, '',
+    fmt(m.replyOn, { channel: t.send.channels[s.channel] }),
+  ].join('\n');
 }

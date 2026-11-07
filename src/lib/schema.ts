@@ -4,6 +4,13 @@
  * and AI answer engines use to resolve "who is this business").
  */
 import { site, sameAs, absoluteUrl } from '../config/site';
+import { l, useT, localeMeta, locales, type Locale } from '../i18n';
+
+/*
+ * Language: entity @ids are language-neutral (one Organization, one Person across all languages); names,
+ * descriptions and URLs follow the page's language. Callers pass language-neutral paths ('/faq') plus `lang`;
+ * the builders localize them, exactly like the Base layout does.
+ */
 
 type Node = Record<string, unknown>;
 
@@ -23,15 +30,16 @@ const clean = <T extends Node>(n: T): T => {
   return n;
 };
 
-export const georgia: Node = {
+export const georgia = (lang: Locale): Node => ({
   '@type': 'Country',
   '@id': ids.georgia,
-  name: 'Georgia',
+  name: useT(lang).schema.country,
   alternateName: 'Sakartvelo',
   sameAs: ['https://www.wikidata.org/wiki/Q230', 'https://en.wikipedia.org/wiki/Georgia_(country)'],
-};
+});
 
-export function organization(): Node {
+export function organization(lang: Locale): Node {
+  const t = useT(lang);
   const contact = site.contact;
   const contactPoint = [
     contact.whatsapp && { '@type': 'ContactPoint', contactType: 'customer service', url: `https://wa.me/${contact.whatsapp}` },
@@ -42,72 +50,79 @@ export function organization(): Node {
     '@id': ids.org,
     name: site.name,
     alternateName: site.shortName,
-    url: `${site.url}/`,
+    url: url(lang, '/'),
     logo: { '@type': 'ImageObject', '@id': ids.logo, url: absoluteUrl('/icon-512.png'), width: 512, height: 512 },
-    image: absoluteUrl('/og/home.png'),
-    description: site.description,
-    slogan: site.tagline,
+    image: absoluteUrl(ogPath(lang, 'home')),
+    description: t.common.site.description,
+    slogan: t.common.site.tagline,
     founder: { '@id': ids.rezo },
     areaServed: { '@id': ids.georgia },
-    serviceType: ['Private tours', 'Custom itinerary design', 'Wine tours', 'Accessible tours', '4x4 mountain tours'],
-    knowsAbout: [
-      'Private tours in Georgia', 'Custom Georgia itineraries', 'Kakheti wine tourism and qvevri winemaking',
-      'Georgian Military Highway and Kazbegi', 'Upper Svaneti', 'Tusheti and the Abano Pass',
-      'Wheelchair-accessible travel in Georgia', 'Batumi and the Black Sea coast', 'Tbilisi',
-    ],
+    serviceType: t.schema.serviceType,
+    knowsAbout: t.schema.orgKnowsAbout,
+    knowsLanguage: locales.map((x) => localeMeta[x].tag),
     contactPoint,
     sameAs,
     hasOfferCatalog: {
       '@type': 'OfferCatalog',
-      name: 'Private tours in Georgia',
+      name: t.schema.catalogName,
       itemListElement: [
-        { '@type': 'Service', name: 'Custom private tour of Georgia', description: 'A multi-day private journey with a route, daily schedule, vehicle and price designed by Rezo for each traveller.', url: absoluteUrl('/design-my-trip') },
-        { '@type': 'Service', name: 'Wheelchair-accessible private tour', url: absoluteUrl('/accessible-travel') },
-        { '@type': 'Service', name: '4x4 mountain tour to Tusheti, Svaneti and Kazbegi', url: absoluteUrl('/adventure-4x4') },
+        { '@type': 'Service', name: t.schema.services.custom.name, description: t.schema.services.custom.description, url: absoluteUrl(l(lang, '/design-my-trip')) },
+        { '@type': 'Service', name: t.schema.services.accessible.name, url: absoluteUrl(l(lang, '/accessible-travel')) },
+        { '@type': 'Service', name: t.schema.services.adventure.name, url: absoluteUrl(l(lang, '/adventure-4x4')) },
       ],
     },
   });
 }
 
-export function person(): Node {
+export function person(lang: Locale): Node {
+  const t = useT(lang);
   return clean({
     '@type': 'Person',
     '@id': ids.rezo,
     name: site.founder.name,
-    jobTitle: site.founder.jobTitle,
-    description: 'Owner of Voyage Georgia Rezo. More than twenty years in Georgian tourism and an experienced private tour guide who plans every itinerary himself.',
-    url: absoluteUrl('/rezo'),
+    jobTitle: t.common.site.founderJobTitle,
+    description: t.schema.personDescription,
+    url: absoluteUrl(l(lang, '/rezo')),
     worksFor: { '@id': ids.org },
-    knowsAbout: ['Georgian tourism', 'Private tour guiding', 'Kakheti wine', 'Mountain roads in Georgia', 'Accessible travel'],
+    knowsAbout: t.schema.personKnowsAbout,
     sameAs,
   });
 }
 
-export function website(): Node {
+export function website(lang: Locale): Node {
+  const t = useT(lang);
   return {
     '@type': 'WebSite',
     '@id': ids.site,
     url: `${site.url}/`,
     name: site.name,
-    description: site.description,
-    inLanguage: site.locale,
+    description: t.common.site.description,
+    inLanguage: locales.map((x) => localeMeta[x].tag),
     publisher: { '@id': ids.org },
   };
 }
 
+/** Open Graph image path for a page slug in a language: /og/home.png, /og/ru/home.png. */
+export const ogPath = (lang: Locale, slug: string) => (lang === 'en' ? `/og/${slug}.png` : `/og/${lang}/${slug}.png`);
+
 export interface Crumb { name: string; path: string }
 
-export function breadcrumbs(items: Crumb[]): Node {
+/** Absolute URL of a language-neutral path in `lang`. */
+const url = (lang: Locale, path: string) => absoluteUrl(l(lang, path));
+
+export function breadcrumbs(lang: Locale, items: Crumb[]): Node {
   return {
     '@type': 'BreadcrumbList',
     itemListElement: items.map((c, i) => ({
-      '@type': 'ListItem', position: i + 1, name: c.name, item: absoluteUrl(c.path),
+      '@type': 'ListItem', position: i + 1, name: c.name, item: url(lang, c.path),
     })),
   };
 }
 
 export interface PageOpts {
+  /** Language-neutral path, e.g. '/faq'. */
   path: string;
+  lang: Locale;
   name: string;
   description: string;
   type?: string | string[];
@@ -121,50 +136,50 @@ export interface PageOpts {
 }
 
 export function webPage(o: PageOpts): Node {
-  const url = absoluteUrl(o.path);
+  const u = url(o.lang, o.path);
   return clean({
     '@type': o.type ?? 'WebPage',
-    '@id': `${url}#webpage`,
-    url,
+    '@id': `${u}#webpage`,
+    url: u,
     name: o.name,
     description: o.description,
-    inLanguage: site.locale,
+    inLanguage: localeMeta[o.lang].tag,
     isPartOf: { '@id': ids.site },
     about: o.about ?? { '@id': ids.org },
     mentions: o.mentions,
     primaryImageOfPage: o.image ? { '@type': 'ImageObject', url: o.image } : undefined,
     datePublished: o.datePublished,
     dateModified: o.dateModified,
-    breadcrumb: o.crumbs ? { '@id': `${url}#breadcrumb` } : undefined,
+    breadcrumb: o.crumbs ? { '@id': `${u}#breadcrumb` } : undefined,
     mainEntity: o.mainEntity,
   });
 }
 
-export function breadcrumbWithId(path: string, items: Crumb[]): Node {
-  return { '@id': `${absoluteUrl(path)}#breadcrumb`, ...breadcrumbs(items) };
+export function breadcrumbWithId(lang: Locale, path: string, items: Crumb[]): Node {
+  return { '@id': `${url(lang, path)}#breadcrumb`, ...breadcrumbs(lang, items) };
 }
 
 export interface Faq { q: string; a: string }
 
-export function faqPage(path: string, faqs: Faq[]): Node {
+export function faqPage(lang: Locale, path: string, faqs: Faq[]): Node {
   return {
     '@type': 'FAQPage',
-    '@id': `${absoluteUrl(path)}#faq`,
+    '@id': `${url(lang, path)}#faq`,
     mainEntity: faqs.map((f) => ({
       '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a },
     })),
   };
 }
 
-export interface Dest { name: string; description: string; path: string; lat: number; lng: number; image?: string; touristType?: string[] }
+export interface Dest { lang: Locale; name: string; description: string; path: string; lat: number; lng: number; image?: string; touristType?: string[] }
 
 export function destination(d: Dest): Node {
   return clean({
     '@type': 'TouristDestination',
-    '@id': `${absoluteUrl(d.path)}#destination`,
+    '@id': `${url(d.lang, d.path)}#destination`,
     name: d.name,
     description: d.description,
-    url: absoluteUrl(d.path),
+    url: url(d.lang, d.path),
     image: d.image,
     touristType: d.touristType,
     containedInPlace: { '@id': ids.georgia },
@@ -173,7 +188,7 @@ export function destination(d: Dest): Node {
 }
 
 export interface Trip {
-  path: string; name: string; description: string; days: number; image?: string;
+  lang: Locale; path: string; name: string; description: string; days: number; image?: string;
   stops: { name: string; description?: string; path?: string }[];
   touristType?: string[];
 }
@@ -181,10 +196,10 @@ export interface Trip {
 export function touristTrip(t: Trip): Node {
   return clean({
     '@type': 'TouristTrip',
-    '@id': `${absoluteUrl(t.path)}#trip`,
+    '@id': `${url(t.lang, t.path)}#trip`,
     name: t.name,
     description: t.description,
-    url: absoluteUrl(t.path),
+    url: url(t.lang, t.path),
     image: t.image,
     touristType: t.touristType,
     itinerary: {
@@ -192,26 +207,26 @@ export function touristTrip(t: Trip): Node {
       numberOfItems: t.stops.length,
       itemListElement: t.stops.map((s, i) => ({
         '@type': 'ListItem', position: i + 1,
-        item: clean({ '@type': 'TouristDestination', name: s.name, description: s.description, url: s.path ? absoluteUrl(s.path) : undefined }),
+        item: clean({ '@type': 'TouristDestination', name: s.name, description: s.description, url: s.path ? url(t.lang, s.path) : undefined }),
       })),
     },
   });
 }
 
-export interface Article { path: string; headline: string; description: string; image?: string; published: string; modified: string; keywords?: string[] }
+export interface Article { lang: Locale; path: string; headline: string; description: string; image?: string; published: string; modified: string; keywords?: string[] }
 
 export function article(a: Article): Node {
   return clean({
     '@type': 'Article',
-    '@id': `${absoluteUrl(a.path)}#article`,
+    '@id': `${url(a.lang, a.path)}#article`,
     headline: a.headline,
     description: a.description,
-    url: absoluteUrl(a.path),
-    mainEntityOfPage: { '@id': `${absoluteUrl(a.path)}#webpage` },
+    url: url(a.lang, a.path),
+    mainEntityOfPage: { '@id': `${url(a.lang, a.path)}#webpage` },
     image: a.image,
     datePublished: a.published,
     dateModified: a.modified,
-    inLanguage: site.locale,
+    inLanguage: localeMeta[a.lang].tag,
     keywords: a.keywords?.join(', '),
     author: { '@id': ids.org },
     publisher: { '@id': ids.org },
@@ -219,12 +234,12 @@ export function article(a: Article): Node {
   });
 }
 
-export function itemList(name: string, items: { name: string; path: string }[]): Node {
+export function itemList(lang: Locale, name: string, items: { name: string; path: string }[]): Node {
   return {
     '@type': 'ItemList',
     name,
     numberOfItems: items.length,
-    itemListElement: items.map((it, i) => ({ '@type': 'ListItem', position: i + 1, name: it.name, url: absoluteUrl(it.path) })),
+    itemListElement: items.map((it, i) => ({ '@type': 'ListItem', position: i + 1, name: it.name, url: url(lang, it.path) })),
   };
 }
 
@@ -242,6 +257,6 @@ export function imageObject(o: { url: string; alt: string; author?: string; lice
 }
 
 /** Site-wide nodes included on every page. */
-export function baseGraph(): Node[] {
-  return [organization(), person(), website(), georgia];
+export function baseGraph(lang: Locale): Node[] {
+  return [organization(lang), person(lang), website(lang), georgia(lang)];
 }

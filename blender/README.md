@@ -8,22 +8,26 @@ model lines up with the site's routes, pins and camera.
 
 | File | What it is |
 | --- | --- |
-| `build_georgia.py` | Builds the whole scene from scratch (terrain, rivers, roads, sea, frame, five destinations and four scenery stops, animations, cameras). ~15 s. |
+| `build_georgia.py` | Builds the whole scene from scratch (terrain, rivers, roads, sea, frame, five destinations and four scenery stops, animations, cameras). ~30 s. |
+| `places.py` | The rest of Georgia: 33 more sights across every region, plus the weather (snowfall, the sun), each a small animated diorama (see below). Exec'd by the build before the land is made (anchors, landforms, lakes, roads, snow, town ground) and its builders run after the stops. |
+| `props.py` | The moving props the sights use: gondola cabins, chairlifts with riders, lift towers and stations, skiers and snowboarders, tandem paragliders, the Stadler double-deck train and the Kukushka narrow-gauge train, ship-to-shore cranes and their trolleys, a container ship, a tug, kitesurfers, a parasail, jet skis, canyon rafts, rowboats, saloons, marshrutkas, lorries, walkers, a horseman, a monk, a flock with its shepherd and dog. Run on its own it renders a showroom to `renders/props/`. Also the animation helpers `k_track` (keys only where linear interpolation needs them) and `anim_inst` (identical props share one mesh). |
 | `vehicles.py` | The vehicles, boats and birds (Mitsubishi Delica Space Gear, Land Cruiser 76, UAZ-452, MTZ-80 tractor, sloop, fishing boat, passenger ferry, golden eagle, yellow-legged gull). Loaded by the build; run on its own it builds a "Workshop" showroom scene and renders close-ups to `renders/vehicles/`. |
 | `export_glb.py` | Writes `public/models/georgia.glb` (Draco) and prints what the bytes went on. |
 | `render.py` | Eevee preview renders into `renders/` using the scene's own cameras. |
 | `bl.py` | Tiny client for Blender's MCP add-on socket (127.0.0.1:9876, null-byte-delimited JSON): runs a script inside the open Blender. |
 | `georgia-lowpoly.blend` | The last build, saved. |
-| `renders/` | Previews: `overview`, one per destination, `edge`, `coast`. |
+| `renders/` | Previews: `overview`, one per destination, `edge`, `coast`; `sites/` one per sight; `vehicles/`, `props/` showrooms. |
 
 ```bash
 python3 blender/bl.py blender/build_georgia.py          # rebuild in the open Blender
 python3 blender/bl.py blender/render.py all frame=60    # previews (res=60 for quick ones, hl=1 to show the highlights)
+python3 blender/bl.py blender/render.py site:GudauriSite:-0.5:38:0.9 out=/tmp/x   # any sight: site:<Name>[:yaw[:elev[:dist]]]
 python3 blender/bl.py blender/export_glb.py               # the site's model
 ```
 
 Build options (after the script name): `dump=/path/channels.json` writes the traced rivers and roads, `verbose=1` reports
-house placements that came up short.
+house placements that came up short, `probe=Name,Name` prints the ground (metres), rivers and roads round places,
+`only=gudauri,borjomi` builds just those sights, `nosites=1` builds without them.
 
 ## Coordinates
 
@@ -102,10 +106,46 @@ Fountain and the theatre, the White Bridge, Gelati, Motsameta), `Scenery_Kazbegi
 Stepantsminda and Gergeti villages, the Military Highway in `Scenery_Kazbegi_Roads`), `Scenery_Vardzia` (the cave monastery
 cliff) and `Scenery_Uplistsikhe` (the rock-cut town and its basilica, Gori castle). Each has a `_Static` mesh.
 
+## The other sights (`places.py`)
+
+Each is an empty `Scenery_<Name>` with a `_Static` mesh (plus `_Roads`, `_River`, `_Pistes`, `_Rail`, ... where it has them)
+and its own animated objects. Anchors are the real positions, nudged apart where the oversized dioramas would collide
+(the coast and the Military Highway are crowded). All of it is scenery: no pick area, highlight or camera.
+
+| Region | Sight (`Scenery_…`) | What moves |
+| --- | --- | --- |
+| Adjara | `Gonio` (the Roman fort's walls and towers), `BotanicalGarden` (terraces, bamboo, palms, Japanese pond and red bridge, glasshouse, the coastal railway), `Makhuntseti` (Queen Tamar's arched bridge, the waterfall, Adjarian houses), `Goderdzi` (ski resort) | the Tbilisi-Batumi double-decker (`Coast_Train1..3`) along the shore to Kobuleti, walkers, gulls; the waterfall, a marshrutka and a car; gondolas, a chairlift, skiers |
+| Adjara / Guria coast | `Kobuleti` (pebble beach, promenade, hotels, pine park, Petra fortress), `Ureki` (black magnetic sand, Shekvetili's pines and Tsitsinatela fun park) | a parasail, jet skis, walkers; the big wheel, a carousel, a kitesurfer, a jet ski |
+| Guria | `Bakhmaro` (cottages on stilts on the 2000 m meadow) | horses grazing, walkers |
+| Samegrelo | `PotiPort` (quays, breakwaters, three ship-to-shore cranes, container yard, the 1864 lighthouse, the Hagia Sophia-style cathedral), `Anaklia` (the footbridge with its lamps over the Enguri mouth, beach, fort ruins, hotels), `ZugdidiPalace` (Dadiani palaces, the church, the botanic garden, the boulevard), `MartviliCanyon` (the canyon, Chkondidi monastery), `Enguri` (the arch dam and the Jvari reservoir) | crane trolleys, a container ship and tug, the lighthouse beam, lorries; kitesurfers, people on the bridge, a fishing boat; traffic; rafts in the canyon, waterfall; the dam's spillway, eagles |
+| Svaneti | `Hatsvali` (chairlift and pistes above Mestia) | chairs with riders, skiers |
+| Imereti | `Tskaltubo` (Prometheus Cave, Okatse's hanging walkway, Kinchkha falls, the spa's sanatorium and round bathhouse), `Chiatura` (the rope roads, khrushchyovka blocks, Mgvimevi, the Katskhi pillar) | visitors on the walkway, the falls, a minibus; ropeway cabins, a monk climbing the pillar's ladder, traffic |
+| Racha | `Racha` (Nikortsminda, Ambrolauri, Khvanchkara vineyards, Shaori lake) | rowboats, an eagle |
+| Samtskhe-Javakheti | `BorjomiPark` (the town, the spring pavilion, the park ropeway and its wheel, Likani palace, Bakuriani's ski slopes), `Rabati` (the castle, the gilded mosque and minaret, the Jakeli palace, the keep), `Khertvisi` (the fortress on its rock), `Paravani` (the lake, Poka convent, basalt villages) | the ropeway, the wheel, the Kukushka (`Kukushka_1..3`) running up to Bakuriani and backing down, Didveli's gondola, Kokhta's chairlift, skiers; walkers, flags; fishing boats, a flock |
+| Kvemo Kartli | `Dmanisi` (citadel, Sioni basilica, the ruined town, the dig shelter) | a flock and shepherd, walkers, an eagle |
+| Mtskheta-Mtianeti | `MtskhetaSite` (Svetitskhoveli in its walls, Samtavro, Jvari on its hill), `AnanuriSite` (the fortress and its churches, Sheupovari tower, the Zhinvali reservoir), `GudauriSite` (ski slopes, the Friendship Monument, hotels, the highway's hairpins) | traffic, walkers; lorries on the Military Highway, boats on the reservoir; a gondola, two chairlifts, skiers and boarders, three tandem paragliders |
+| Khevsureti | `Shatili` (the fortress-village of slate towers, Mutso) | two horsemen, eagles |
+| Kakheti | `Lavra` (David Gareja: the cave cliff, the monastery, Udabno's caves, the striped hills), `Lagodekhi` (the town, the reserve's forest, Ninoskhevi falls, Machi fortress) | two flocks, vultures, a UAZ on the dirt road; the falls, walkers |
+| Abkhazia | `SukhumiBay` (the palm embankment, the old pier and its pavilion, the fortress ruins, the colonnaded hotel, the town), `NewAthos` (the monastery with St Panteleimon's five green domes and the gate tower, Anakopia on Iverian mountain, the waterfall and swan pond), `Pitsunda` (the 10th-century cathedral, the pine grove, the lighthouse, the resort blocks), `Gagra` (the Colonnade, Gagripsh, the palm park, Abaata's walls), `Ritsa` (the lake, Stalin's dacha, the fir forest) | boats, walkers, gulls; the waterfall, swans; the lighthouse beam, a yacht and a jet ski; yachts; rowboats, eagles |
+| Shida Kartli (Tskhinvali region) | `Ikorta` (the 1172 Archangels church and its bell tower, the village, Tskhinvali's streets, the Liakhvi valley's apple orchards) | a tractor working the orchard rows, a flock, an eagle |
+
+**Weather.** Snow falls over Gudauri, Goderdzi, Bakuriani and Hatsvali and round the peaks of Kazbek, Shkhara and Ushba
+(`<Place>_Snow_Fx`: all seven share one mesh, a column of flakes stacked four times over that slides down three repeats
+per loop, so the wrap can't be seen, and drifts in the wind). The summer sun hangs over the Black Sea (`Scenery_Sun`: a
+flat golden disc, `Sun_Disc_Fx`, with a ring of yellow and orange rays, `Sun_Rays_Fx`, turning and pulsing; both on the
+`Sun_Fx` empty, which turns them to face the overview camera) and glitters on the water off every beach (`Sun_Glint<n>_Fx`).
+Everything named `*_Fx` casts no shadow on the site (`world3d.js` treats the suffix like `_River`).
+
+New landforms: `('lake', place, (dx, dz, rx, rz, rim, angle), depth)` digs a flat basin whose water level is read off the
+shore round it (`LAKE_LEVEL`); `lake_water()` lays the water at that level. `SNOWFIELDS` covers the ski areas in snow.
+
 ## Budget
 
-About 150k vertices; the Draco GLB is ~2.4 MB (mesh ~1.1 MB, animation ~0.7 MB). Most of the animation is per-frame
-keys for the vehicles, flocks and wheels, and could be thinned if the file needs to shrink.
+About 330k vertices, 690 objects, 496 animation clips; the Draco GLB is ~3.9 MB (mesh ~1.7 MB, JSON ~1.2 MB, animation
+~0.7 MB), right at the 4 MB budget: anything more should give something back (fewer glints or skiers, smaller forests). The export writes each object's own action (`export_animation_mode='ACTIONS'`, no resampling) with every key
+linear, so a gondola on a straight rope is a handful of keys rather than 481. Spins are keyed every 45 degrees and
+rotations never change more than ~57 degrees between keys, because glTF stores rotations as quaternions (0 and 360
+degrees look the same). Each clip is 20 s; the site plays them all looping.
 
 ## Not yet done
 

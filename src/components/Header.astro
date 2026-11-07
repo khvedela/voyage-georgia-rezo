@@ -1,23 +1,38 @@
 ---
 import Logo from './Logo.astro';
-const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+import LangSwitch from './LangSwitch.astro';
+import { currentPath, getLang, l, useT } from '../i18n';
+const lang = getLang(Astro);
+const t = useT(lang);
+// Compare language-neutral paths, so "Destinations" is current on /ru/destinations/kazbegi too.
+const path = currentPath(Astro);
 const links = [
-  { href: '/destinations', label: 'Destinations' },
-  { href: '/journeys', label: 'Journeys' },
-  { href: '/vehicles', label: 'Vehicles' },
-  { href: '/guides', label: 'Guides' },
-  { href: '/rezo', label: 'Meet Rezo' },
-  { href: '/faq', label: 'Questions' },
+  { href: '/destinations', label: t.common.nav.destinations },
+  { href: '/journeys', label: t.common.nav.journeys },
+  { href: '/vehicles', label: t.common.nav.vehicles },
+  { href: '/guides', label: t.common.nav.guides },
+  { href: '/rezo', label: t.common.nav.rezo },
+  { href: '/faq', label: t.common.nav.faq },
 ];
 const current = (href: string) => path === href || path.startsWith(`${href}/`);
 ---
 <header class="site-hd">
-  <a href="/" class="brand" aria-label="Voyage Georgia Rezo, home">
+  <a href={l(lang, '/')} class="brand" aria-label={t.common.a11y.homeLink}>
     <Logo />
     <span class="brand-name">Voyage Georgia Rezo</span>
   </a>
-  <nav aria-label="Main" class="nav">
-    {links.map((l) => <a href={l.href} aria-current={current(l.href) ? 'page' : undefined}>{l.label}</a>)}
+  <nav aria-label={t.common.a11y.mainNav} class="nav">
+    {links.map((x) => <a href={l(lang, x.href)} aria-current={current(x.href) ? 'page' : undefined}>{x.label}</a>)}
   </nav>
-  <a href="/design-my-trip" class="btn btn--primary btn--sm">Design my trip</a>
+  <div class="hd-end">
+    <LangSwitch />
+    <a href={l(lang, '/design-my-trip')} class="btn btn--primary btn--sm"><span class="hd-full">{t.common.nav.designTrip}</span><span class="hd-short" aria-hidden="true">{t.common.nav.designTripShort}</span></a>
+  </div>
 </header>
+<style>
+  .hd-short { display: none; }
+  @media (max-width: 600px) {
+    .hd-full { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    .hd-short { display: inline; }
+  }
+</style>

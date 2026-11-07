@@ -7,17 +7,28 @@ import { site } from '../config/site';
 const require = createRequire(import.meta.url);
 const font = (pkg: string, file: string) => readFile(require.resolve(`${pkg}/files/${file}`));
 
-let fonts: Promise<{ name: string; data: Buffer; weight: 400 | 600; style: 'normal' }[]> | undefined;
+type OgFont = { name: string; data: Buffer; weight: 400 | 600; style: 'normal' };
+let fonts: Promise<OgFont[]> | undefined;
+// Every subset the four site languages need (Latin + Latin Extended for Latvian, Cyrillic for Russian, Georgian):
+// satori falls back font by font for glyphs a face does not have.
 const loadFonts = () =>
-  (fonts ??= Promise.all([
-    font('@fontsource/inter-tight', 'inter-tight-latin-600-normal.woff'),
-    font('@fontsource/inter', 'inter-latin-500-normal.woff'),
-    font('@fontsource/inter', 'inter-latin-600-normal.woff'),
-  ]).then(([tight, i500, i600]) => [
-    { name: 'Inter Tight', data: tight, weight: 600 as const, style: 'normal' as const },
-    { name: 'Inter', data: i500, weight: 400 as const, style: 'normal' as const },
-    { name: 'Inter', data: i600, weight: 600 as const, style: 'normal' as const },
-  ]));
+  (fonts ??= Promise.all(
+    (
+      [
+        ['Inter Tight', 600, '@fontsource/inter-tight', 'inter-tight-latin-600-normal.woff'],
+        ['Inter Tight', 600, '@fontsource/inter-tight', 'inter-tight-latin-ext-600-normal.woff'],
+        ['Inter Tight', 600, '@fontsource/inter-tight', 'inter-tight-cyrillic-600-normal.woff'],
+        ['Inter', 400, '@fontsource/inter', 'inter-latin-500-normal.woff'],
+        ['Inter', 400, '@fontsource/inter', 'inter-latin-ext-500-normal.woff'],
+        ['Inter', 400, '@fontsource/inter', 'inter-cyrillic-500-normal.woff'],
+        ['Inter', 600, '@fontsource/inter', 'inter-latin-600-normal.woff'],
+        ['Inter', 600, '@fontsource/inter', 'inter-latin-ext-600-normal.woff'],
+        ['Inter', 600, '@fontsource/inter', 'inter-cyrillic-600-normal.woff'],
+        ['Noto Sans Georgian', 400, '@fontsource/noto-sans-georgian', 'noto-sans-georgian-georgian-400-normal.woff'],
+        ['Noto Sans Georgian', 600, '@fontsource/noto-sans-georgian', 'noto-sans-georgian-georgian-600-normal.woff'],
+      ] as const
+    ).map(async ([name, weight, pkg, file]): Promise<OgFont> => ({ name, weight, style: 'normal', data: await font(pkg, file) })),
+  ));
 
 const mark = `data:image/svg+xml;utf8,${encodeURIComponent(
   '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 34 34" fill="none"><circle cx="17" cy="17" r="16" stroke="#fff" stroke-width="1.5"/><path d="M8 24C12 10 16 26 20 15S25 12 26 9" stroke="#fff" stroke-width="2" stroke-linecap="round"/><circle cx="8" cy="24" r="2.4" fill="#D62839"/><circle cx="26" cy="9" r="2.4" fill="#D62839"/></svg>',
@@ -31,11 +42,11 @@ const h = (type: string, style: Record<string, unknown>, children?: unknown, ext
   type, props: { style: { display: 'flex', ...style }, children, ...extra },
 });
 
-export interface OgInput { eyebrow: string; title: string }
+export interface OgInput { eyebrow: string; title: string; footer: string }
 
-export async function renderOg({ eyebrow, title }: OgInput): Promise<Buffer> {
+export async function renderOg({ eyebrow, title, footer }: OgInput): Promise<Buffer> {
   const size = title.length > 60 ? 54 : title.length > 40 ? 64 : 74;
-  const tree = h('div', { boxSizing: 'border-box', width: '100%', height: '100%', background: '#14161A', color: '#fff', padding: '64px 72px', flexDirection: 'column', justifyContent: 'space-between', fontFamily: 'Inter' }, [
+  const tree = h('div', { boxSizing: 'border-box', width: '100%', height: '100%', background: '#14161A', color: '#fff', padding: '64px 72px', flexDirection: 'column', justifyContent: 'space-between', fontFamily: 'Inter, Noto Sans Georgian' }, [
     h('div', { alignItems: 'center', gap: 18 }, [
       h('img', {}, undefined, { src: mark, width: 56, height: 56 }),
       h('div', { fontFamily: 'Inter Tight', fontWeight: 600, fontSize: 36, letterSpacing: -0.8 }, [
@@ -50,7 +61,7 @@ export async function renderOg({ eyebrow, title }: OgInput): Promise<Buffer> {
       h('img', {}, undefined, { src: route, width: 260, height: 161 }),
     ]),
     h('div', { fontSize: 24, color: '#A1A1AA', justifyContent: 'space-between', width: '100%' }, [
-      h('span', {}, 'Private tours of Georgia, designed by Rezo'),
+      h('span', {}, footer),
       h('span', {}, site.url.replace(/^https?:\/\//, '')),
     ]),
   ]);

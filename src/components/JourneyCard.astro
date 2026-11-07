@@ -1,17 +1,20 @@
 ---
-import type { CollectionEntry } from 'astro:content';
+import type { Localized } from '../i18n/content';
+import { getLang, l, useT } from '../i18n';
 import RouteMap from './RouteMap.astro';
-interface Props { entry: CollectionEntry<'journeys'>; level?: 2 | 3 }
+interface Props { entry: Localized<'journeys'>; level?: 2 | 3 }
 const { entry, level = 3 } = Astro.props;
 const H = `h${level}` as 'h2' | 'h3';
 const d = entry.data;
+const lang = getLang(Astro);
+const t = useT(lang);
 ---
 <article class="card card--stretched">
   <RouteMap id={d.map} class="jmapthumb" />
   <p class="card-eyebrow">{d.meta}</p>
-  <H class="card-title card-title--sm disp"><a href={`/journeys/${entry.id}`} class="stretch" style="text-decoration:none">{d.title}</a></H>
+  <H class="card-title card-title--sm disp"><a href={l(lang, `/journeys/${entry.slug}`)} class="stretch" style="text-decoration:none">{d.title}</a></H>
   <p class="card-text" style="flex:1;margin-bottom:14px">{d.cardText}</p>
-  <span class="lnk">Read this journey</span>
+  <span class="lnk">{t.common.cards.readJourney}</span>
 </article>
 <style>
   .jmapthumb { width: 100%; height: auto; display: block; border-radius: 12px; background: #fff; aspect-ratio: 880 / 490; }
